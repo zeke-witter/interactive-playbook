@@ -19,7 +19,7 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
   if (!play) notFound()
 
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
-  const { step, stepIndex, isFirst, isLast, next, prev } = usePlayStep(play)
+  const { step, stepIndex, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
   const [quizPassed, setQuizPassed] = useState(false)
 
   useEffect(() => {
@@ -43,6 +43,7 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
         isLast={isLast}
         onPrev={prev}
         onNext={next}
+        onChooseBranch={(branch) => goToStep(branch.nextStepId)}
         quiz={quiz}
         quizPassed={quizPassed}
         onQuizAnswered={(correct) => correct && setQuizPassed(true)}

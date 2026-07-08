@@ -3,23 +3,31 @@ import { useState } from 'react'
 import type { Play, PlayStep } from '@/types/play'
 
 export function usePlayStep(play: Play) {
-  const [stepIndex, setStepIndex] = useState(0)
+  const [history, setHistory] = useState<string[]>([play.steps[0].id])
+  const currentStepId = history[history.length - 1]
+  const step = play.steps.find((s) => s.id === currentStepId) as PlayStep
+  const linearIndex = play.steps.findIndex((s) => s.id === currentStepId)
 
-  const step: PlayStep = play.steps[stepIndex]
-  const isFirst = stepIndex === 0
-  const isLast = stepIndex === play.steps.length - 1
+  const isFirst = history.length === 1
+  const isLast = !step.branches?.length && linearIndex === play.steps.length - 1
 
   function next() {
-    setStepIndex((i) => Math.min(i + 1, play.steps.length - 1))
+    if (step.branches?.length) return
+    const nextStep = play.steps[linearIndex + 1]
+    if (nextStep) setHistory((h) => [...h, nextStep.id])
+  }
+
+  function goToStep(stepId: string) {
+    setHistory((h) => [...h, stepId])
   }
 
   function prev() {
-    setStepIndex((i) => Math.max(i - 1, 0))
+    setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h))
   }
 
   function reset() {
-    setStepIndex(0)
+    setHistory([play.steps[0].id])
   }
 
-  return { step, stepIndex, totalSteps: play.steps.length, isFirst, isLast, next, prev, reset }
+  return { step, stepIndex: linearIndex, totalSteps: play.steps.length, isFirst, isLast, next, prev, goToStep, reset }
 }

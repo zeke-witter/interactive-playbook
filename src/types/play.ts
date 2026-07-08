@@ -21,6 +21,12 @@ export type ThrowArc = {
   to: Position
 }
 
+export type PlayBranch = {
+  id: string
+  label: string // e.g. "C1 gets the under look" vs "C1 is covered"
+  nextStepId: string
+}
+
 export type Quiz = {
   question: string
   options: string[]
@@ -38,6 +44,7 @@ export type PlayStep = {
   throw?: ThrowArc
   narrative: Partial<Record<Position, string>>
   quiz?: Partial<Record<Position, Quiz>>
+  branches?: PlayBranch[]
 }
 
 export type Play = {
