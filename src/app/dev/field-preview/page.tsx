@@ -1,5 +1,6 @@
 import { FieldBackground } from '@/components/field/FieldBackground'
 import { PlayerToken } from '@/components/field/PlayerToken'
+import { ForceIndicator } from '@/components/field/ForceIndicator'
 import { FIELD_WIDTH, FIELD_HEIGHT } from '@/lib/field'
 import type { PlayerState } from '@/types/play'
 
@@ -14,6 +15,7 @@ export default function FieldPreviewPage() {
     <div className="p-8 bg-gray-900 min-h-screen flex items-center justify-center">
       <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} width={400} height={480} className="border border-white">
         <FieldBackground />
+        <ForceIndicator force="forehand" />
         {SAMPLE_PLAYERS.map((p, i) => (
           <PlayerToken key={i} player={p} isYou={p.id === 'H1'} dimmed={!!p.isDefense} />
         ))}
