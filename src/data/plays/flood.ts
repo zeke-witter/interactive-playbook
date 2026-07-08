@@ -106,6 +106,14 @@ export const flood: Play = {
         H2: 'Hold your spacing and watch the under develop.',
         H3: 'Hold your spacing and watch the under develop.',
       },
+      quiz: {
+        C1: {
+          question: "You're cutting under. If you don't get the disc here, who's the next under option?",
+          options: ['C2', 'C3', 'C4', 'H2'],
+          correctIndex: 0,
+          explanation: 'C2 is the second under, activating off a reset if C1 is covered.',
+        },
+      },
     },
     {
       id: 'flood-4-continuation',

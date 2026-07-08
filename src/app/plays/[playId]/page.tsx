@@ -1,5 +1,5 @@
 'use client'
-import { use, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import { notFound } from 'next/navigation'
 import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { Sidebar } from '@/components/sidebar/Sidebar'
@@ -18,6 +18,13 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
 
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
   const { step, stepIndex, isFirst, isLast, next, prev } = usePlayStep(play)
+  const [quizPassed, setQuizPassed] = useState(false)
+
+  useEffect(() => {
+    setQuizPassed(false)
+  }, [stepIndex, selectedPosition])
+
+  const quiz = step.quiz?.[selectedPosition]
 
   return (
     <main className="flex flex-col md:flex-row h-screen">
@@ -34,6 +41,9 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
         isLast={isLast}
         onPrev={prev}
         onNext={next}
+        quiz={quiz}
+        quizPassed={quizPassed}
+        onQuizAnswered={(correct) => correct && setQuizPassed(true)}
       />
     </main>
   )
