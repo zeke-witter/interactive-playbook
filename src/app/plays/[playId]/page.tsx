@@ -5,10 +5,12 @@ import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 import { usePlayStep } from '@/hooks/usePlayStep'
 import { flood } from '@/data/plays/flood'
+import { hoStackCenter } from '@/data/plays/ho-stack-center'
 import type { Play, Position } from '@/types/play'
 
 const PLAYS: Record<string, Play> = {
   flood,
+  'ho-stack-center': hoStackCenter,
 }
 
 export default function PlayPage({ params }: { params: Promise<{ playId: string }> }) {

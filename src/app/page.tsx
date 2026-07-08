@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { flood } from '@/data/plays/flood'
+import { hoStackCenter } from '@/data/plays/ho-stack-center'
 import type { Play } from '@/types/play'
 
-const PLAYS: Play[] = [flood]
+const PLAYS: Play[] = [flood, hoStackCenter]
 
 export default function HomePage() {
   return (
