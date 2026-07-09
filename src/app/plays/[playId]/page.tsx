@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 import { usePlayStep } from '@/hooks/usePlayStep'
+import { useProgress } from '@/hooks/useProgress'
 import { PLAYS } from '@/data/plays'
 import type { Position } from '@/types/play'
 
@@ -14,12 +15,17 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
 
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
   const { step, stepIndex, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
+  const { markComplete } = useProgress()
   const [quizPassed, setQuizPassed] = useState(false)
   const [highlightZone, setHighlightZone] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
 
   useEffect(() => {
     setQuizPassed(false)
   }, [stepIndex, selectedPosition])
+
+  useEffect(() => {
+    if (isLast) markComplete(play.id, selectedPosition)
+  }, [isLast, play.id, selectedPosition, markComplete])
 
   const quiz = step.quiz?.[selectedPosition]
 
