@@ -9,7 +9,7 @@ export function usePlayStep(play: Play) {
   const linearIndex = play.steps.findIndex((s) => s.id === currentStepId)
 
   const isFirst = history.length === 1
-  const isLast = !step.branches?.length && linearIndex === play.steps.length - 1
+  const isLast = step.isEnding === true || (!step.branches?.length && linearIndex === play.steps.length - 1)
 
   function next() {
     if (step.branches?.length) return

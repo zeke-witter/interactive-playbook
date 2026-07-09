@@ -115,6 +115,7 @@ export const reverse: Play = {
       id: 'reverse-4-deep-shot',
       label: 'Isolation Deep Shot to C1',
       force: 'none',
+      isEnding: true,
       players: [
         { id: 'H1', x: 0.5, y: 0.62 },
         { id: 'H2', x: 0.32, y: 0.7 },
@@ -149,6 +150,7 @@ export const reverse: Play = {
       id: 'reverse-5-reset-flow',
       label: 'Reset Option (if C1 is Covered)',
       force: 'none',
+      isEnding: true,
       players: [
         { id: 'H1', x: 0.5, y: 0.62, hasDisc: true },
         { id: 'H2', x: 0.32, y: 0.7 },

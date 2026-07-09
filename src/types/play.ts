@@ -45,6 +45,7 @@ export type PlayStep = {
   narrative: Partial<Record<Position, string>>
   quiz?: Partial<Record<Position, Quiz>>
   branches?: PlayBranch[]
+  isEnding?: boolean
 }
 
 export type Play = {
