@@ -15,6 +15,7 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
   const { step, stepIndex, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
   const [quizPassed, setQuizPassed] = useState(false)
+  const [highlightZone, setHighlightZone] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
 
   useEffect(() => {
     setQuizPassed(false)
@@ -25,7 +26,7 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
   return (
     <main className="flex flex-col md:flex-row h-screen">
       <div className="w-full md:w-[65%] h-full">
-        <FieldCanvas step={step} selectedPosition={selectedPosition} playCategory={play.category} />
+        <FieldCanvas step={step} selectedPosition={selectedPosition} playCategory={play.category} highlightZone={highlightZone} />
       </div>
       <Sidebar
         play={play}
@@ -41,6 +42,7 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
         quiz={quiz}
         quizPassed={quizPassed}
         onQuizAnswered={(correct) => correct && setQuizPassed(true)}
+        onHighlightZone={setHighlightZone}
       />
     </main>
   )

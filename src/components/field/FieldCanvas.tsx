@@ -14,9 +14,10 @@ type FieldCanvasProps = {
   selectedPosition: Position
   playCategory: 'offense' | 'defense'
   onThrowComplete?: () => void
+  highlightZone?: { x: number; y: number; width: number; height: number } | null
 }
 
-export function FieldCanvas({ step, selectedPosition, playCategory, onThrowComplete }: FieldCanvasProps) {
+export function FieldCanvas({ step, selectedPosition, playCategory, onThrowComplete, highlightZone }: FieldCanvasProps) {
   return (
     <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} className="w-full h-full" role="img" aria-label={step.label}>
       <FieldBackground />
@@ -26,6 +27,16 @@ export function FieldCanvas({ step, selectedPosition, playCategory, onThrowCompl
       <PlayerTokens players={step.players} selectedPosition={selectedPosition} playCategory={playCategory} />
       <DiscMarker players={step.players} />
       <ThrowArc key={step.id} throwArc={step.throw} players={step.players} onComplete={onThrowComplete} />
+      {highlightZone && (
+        <rect
+          x={highlightZone.x * FIELD_WIDTH}
+          y={highlightZone.y * FIELD_HEIGHT}
+          width={highlightZone.width * FIELD_WIDTH}
+          height={highlightZone.height * FIELD_HEIGHT}
+          fill="yellow"
+          opacity={0.2}
+        />
+      )}
     </svg>
   )
 }

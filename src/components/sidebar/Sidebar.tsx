@@ -20,17 +20,18 @@ type SidebarProps = {
   quiz: Quiz | undefined
   quizPassed: boolean
   onQuizAnswered: (correct: boolean) => void
+  onHighlightZone: (zone: { x: number; y: number; width: number; height: number } | null) => void
 }
 
 export function Sidebar({
   play, step, stepIndex, selectedPosition, onPositionChange,
-  isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered,
+  isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered, onHighlightZone,
 }: SidebarProps) {
   return (
     <aside className="w-full md:w-[35%] flex flex-col gap-4 p-4 border-l border-gray-200">
       <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepIndex} totalSteps={play.steps.length} />
       <PositionSelector value={selectedPosition} onChange={onPositionChange} />
-      <NarrativePanel text={step.narrative[selectedPosition]} />
+      <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} />
       {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} />}
       {step.branches?.length ? (
         <div className="flex flex-col gap-2">
