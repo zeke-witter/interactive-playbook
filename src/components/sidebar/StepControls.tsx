@@ -10,7 +10,7 @@ type StepControlsProps = {
 
 export function StepControls({ stepIndex, totalSteps, isFirst, isLast, nextDisabled, onPrev, onNext }: StepControlsProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 sticky bottom-0 bg-white md:static md:bg-transparent pt-2">
       <div className="flex justify-between">
         <button onClick={onPrev} disabled={isFirst} className="px-3 py-1 rounded border disabled:opacity-30">
           ◀ Prev

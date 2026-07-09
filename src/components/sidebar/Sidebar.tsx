@@ -28,7 +28,7 @@ export function Sidebar({
   isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered, onHighlightZone,
 }: SidebarProps) {
   return (
-    <aside className="w-full md:w-[35%] flex flex-col gap-4 p-4 border-l border-gray-200">
+    <aside className="w-full md:w-[35%] flex flex-col gap-4 p-4 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto">
       <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepIndex} totalSteps={play.steps.length} />
       <PositionSelector value={selectedPosition} onChange={onPositionChange} />
       <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} />
