@@ -76,6 +76,7 @@ export const flood: Play = {
     {
       id: 'flood-3-under-cut',
       label: 'C1 Cuts Across for the Under',
+      stallCount: 3,
       force: 'none',
       players: [
         { id: 'H1', x: 0.5, y: 0.62, hasDisc: true },
