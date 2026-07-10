@@ -5,6 +5,7 @@ import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 import { usePlayStep } from '@/hooks/usePlayStep'
 import { useProgress } from '@/hooks/useProgress'
+import { useRoster } from '@/hooks/useRoster'
 import { PLAYS } from '@/data/plays'
 import type { Position } from '@/types/play'
 
@@ -16,6 +17,7 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
   const { step, stepIndex, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
   const { markComplete } = useProgress()
+  const roster = useRoster()
   const [quizPassed, setQuizPassed] = useState(false)
   const [highlightZone, setHighlightZone] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
 
@@ -33,12 +35,13 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
     <main className="flex flex-col md:flex-row h-screen">
       <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto md:h-full p-4">
         <div className="w-full h-full rounded-xl border border-border bg-surface overflow-hidden">
-          <FieldCanvas step={step} selectedPosition={selectedPosition} playCategory={play.category} highlightZone={highlightZone} />
+          <FieldCanvas step={step} selectedPosition={selectedPosition} playCategory={play.category} roster={roster} highlightZone={highlightZone} />
         </div>
       </div>
       <Sidebar
         play={play}
         step={step}
+        roster={roster}
         stepIndex={stepIndex}
         selectedPosition={selectedPosition}
         onPositionChange={setSelectedPosition}

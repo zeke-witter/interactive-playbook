@@ -9,9 +9,10 @@ type PlayerTokenProps = {
   isYou: boolean
   dimmed: boolean
   enterIndex: number
+  label: string
 }
 
-export function PlayerToken({ player, isYou, dimmed, enterIndex }: PlayerTokenProps) {
+export function PlayerToken({ player, isYou, dimmed, enterIndex, label }: PlayerTokenProps) {
   const { px, py } = toPixel(player.x, player.y)
   const fill = player.isDefense ? '#dc2626' : '#2563eb'
   const [entering, setEntering] = useState(true)
@@ -38,7 +39,7 @@ export function PlayerToken({ player, isYou, dimmed, enterIndex }: PlayerTokenPr
       <circle r={3.2} fill={fill} />
       {isYou && <circle r={4.2} fill="none" stroke="white" strokeWidth={0.6} />}
       <text y={1} fontSize={2.6} fill="white" textAnchor="middle" fontWeight="bold">
-        {player.id}
+        {label}
       </text>
     </motion.g>
   )
