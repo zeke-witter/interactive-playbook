@@ -17,8 +17,8 @@ export function QuizPanel({ quiz, onAnswered }: QuizPanelProps) {
   }
 
   return (
-    <div className="rounded border border-gray-200 p-3 flex flex-col gap-2">
-      <p className="font-medium">{quiz.question}</p>
+    <div className="rounded-xl border border-border bg-surface p-3 flex flex-col gap-2">
+      <p className="font-medium text-text">{quiz.question}</p>
       {quiz.options.map((option, index) => {
         const isSelected = selected === index
         const isCorrect = index === quiz.correctIndex
@@ -29,17 +29,17 @@ export function QuizPanel({ quiz, onAnswered }: QuizPanelProps) {
             key={option}
             onClick={() => handleSelect(index)}
             disabled={selected !== null}
-            className={`text-left rounded border px-3 py-2 ${
-              showResult && isCorrect ? 'border-green-500 bg-green-50' :
-              showResult && isSelected ? 'border-red-500 bg-red-50' :
-              'border-gray-200'
+            className={`text-left rounded-md border px-3 py-2 text-text ${
+              showResult && isCorrect ? 'border-success-border bg-success-bg' :
+              showResult && isSelected ? 'border-danger-border bg-danger-bg' :
+              'border-border bg-surface-raised'
             }`}
           >
             {option}
           </button>
         )
       })}
-      {selected !== null && <p className="text-sm text-gray-600">{quiz.explanation}</p>}
+      {selected !== null && <p className="text-sm text-text-muted">{quiz.explanation}</p>}
     </div>
   )
 }
