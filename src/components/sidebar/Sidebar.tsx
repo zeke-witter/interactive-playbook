@@ -5,6 +5,7 @@ import { NarrativePanel } from './NarrativePanel'
 import { StepControls } from './StepControls'
 import { QuizPanel } from './QuizPanel'
 import { BranchChoice } from './BranchChoice'
+import { PlayPicker } from './PlayPicker'
 
 type SidebarProps = {
   play: Play
@@ -33,6 +34,7 @@ export function Sidebar({
       <PositionSelector value={selectedPosition} onChange={onPositionChange} />
       <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} />
       {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} />}
+      <PlayPicker currentPlay={play} />
       {step.branches?.length ? (
         <div className="flex flex-col gap-2">
           <button onClick={onPrev} disabled={isFirst} className="self-start px-3 py-1 rounded-md border border-border bg-surface text-text hover:bg-surface-raised disabled:opacity-30">
