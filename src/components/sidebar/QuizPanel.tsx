@@ -1,13 +1,15 @@
 'use client'
 import { useState } from 'react'
-import type { Quiz } from '@/types/play'
+import { substituteNames } from '@/lib/names'
+import type { Quiz, Position } from '@/types/play'
 
 type QuizPanelProps = {
   quiz: Quiz
   onAnswered: (correct: boolean) => void
+  roster: Record<Position, string>
 }
 
-export function QuizPanel({ quiz, onAnswered }: QuizPanelProps) {
+export function QuizPanel({ quiz, onAnswered, roster }: QuizPanelProps) {
   const [selected, setSelected] = useState<number | null>(null)
 
   function handleSelect(index: number) {
@@ -18,7 +20,7 @@ export function QuizPanel({ quiz, onAnswered }: QuizPanelProps) {
 
   return (
     <div className="rounded-xl border border-border bg-surface p-3 flex flex-col gap-2">
-      <p className="font-medium text-text">{quiz.question}</p>
+      <p className="font-medium text-text">{substituteNames(quiz.question, roster)}</p>
       {quiz.options.map((option, index) => {
         const isSelected = selected === index
         const isCorrect = index === quiz.correctIndex
@@ -35,11 +37,11 @@ export function QuizPanel({ quiz, onAnswered }: QuizPanelProps) {
               'border-border bg-surface-raised'
             }`}
           >
-            {option}
+            {substituteNames(option, roster)}
           </button>
         )
       })}
-      {selected !== null && <p className="text-sm text-text-muted">{quiz.explanation}</p>}
+      {selected !== null && <p className="text-sm text-text-muted">{substituteNames(quiz.explanation, roster)}</p>}
     </div>
   )
 }
