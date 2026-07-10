@@ -28,14 +28,14 @@ export function Sidebar({
   isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered, onHighlightZone,
 }: SidebarProps) {
   return (
-    <aside className="w-full md:w-[35%] flex flex-col gap-4 p-4 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto">
+    <aside className="w-full md:w-[35%] flex flex-col gap-4 p-4 border-t md:border-t-0 md:border-l border-border overflow-y-auto">
       <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepIndex} totalSteps={play.steps.length} />
       <PositionSelector value={selectedPosition} onChange={onPositionChange} />
       <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} />
       {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} />}
       {step.branches?.length ? (
         <div className="flex flex-col gap-2">
-          <button onClick={onPrev} disabled={isFirst} className="self-start px-3 py-1 rounded border disabled:opacity-30">
+          <button onClick={onPrev} disabled={isFirst} className="self-start px-3 py-1 rounded-md border border-border bg-surface text-text hover:bg-surface-raised disabled:opacity-30">
             ◀ Prev
           </button>
           <BranchChoice branches={step.branches} onChoose={onChooseBranch} />

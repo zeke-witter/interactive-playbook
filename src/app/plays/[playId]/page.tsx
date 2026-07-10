@@ -31,8 +31,10 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
 
   return (
     <main className="flex flex-col md:flex-row h-screen">
-      <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto md:h-full">
-        <FieldCanvas step={step} selectedPosition={selectedPosition} playCategory={play.category} highlightZone={highlightZone} />
+      <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto md:h-full p-4">
+        <div className="w-full h-full rounded-xl border border-border bg-surface overflow-hidden">
+          <FieldCanvas step={step} selectedPosition={selectedPosition} playCategory={play.category} highlightZone={highlightZone} />
+        </div>
       </div>
       <Sidebar
         play={play}
