@@ -1,5 +1,5 @@
 'use client'
-import { FIELD_WIDTH, FIELD_HEIGHT } from '@/lib/field'
+import { FIELD_WIDTH, FIELD_HEIGHT, ENDZONE_VIEW_HEIGHT } from '@/lib/field'
 import { FieldBackground } from './FieldBackground'
 import { ForceIndicator } from './ForceIndicator'
 import { StallCounter } from './StallCounter'
@@ -20,9 +20,11 @@ type FieldCanvasProps = {
 }
 
 export function FieldCanvas({ step, selectedPosition, playCategory, playSet, roster, onThrowComplete, highlightZone }: FieldCanvasProps) {
+  const isEndzone = playSet === 'endzone'
+  const viewHeight = isEndzone ? ENDZONE_VIEW_HEIGHT : FIELD_HEIGHT
   return (
-    <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} className="w-full h-full" role="img" aria-label={step.label}>
-      <FieldBackground showAttackingEndzone={playSet === 'endzone'} />
+    <svg viewBox={`0 0 ${FIELD_WIDTH} ${viewHeight}`} className="w-full h-full" role="img" aria-label={step.label}>
+      <FieldBackground showAttackingEndzone={isEndzone} endzoneCrop={isEndzone} />
       <ForceIndicator force={step.force} />
       <StallCounter startAt={step.stallCount} active={true} />
       <PathPreviews paths={step.pathPreviews} />
