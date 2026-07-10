@@ -2,10 +2,9 @@ import type { Play, PlayStep, Position, Quiz, PlayBranch } from '@/types/play'
 import { PositionSelector } from './PositionSelector'
 import { PlayHeader } from './PlayHeader'
 import { NarrativePanel } from './NarrativePanel'
-import { StepControls } from './StepControls'
 import { QuizPanel } from './QuizPanel'
-import { BranchChoice } from './BranchChoice'
 import { PlayPicker } from './PlayPicker'
+import { PlayControls } from './PlayControls'
 
 type SidebarProps = {
   play: Play
@@ -35,25 +34,21 @@ export function Sidebar({
       <PositionSelector value={selectedPosition} onChange={onPositionChange} roster={roster} />
       <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} roster={roster} />
       {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} roster={roster} />}
-      <PlayPicker currentPlay={play} />
-      {step.branches?.length ? (
-        <div className="flex flex-col gap-2">
-          <button onClick={onPrev} disabled={isFirst} className="self-start px-3 py-1 rounded-md border border-border bg-surface text-text hover:bg-surface-raised disabled:opacity-30">
-            ◀ Prev
-          </button>
-          <BranchChoice branches={step.branches} onChoose={onChooseBranch} />
-        </div>
-      ) : (
-        <StepControls
-          stepIndex={stepIndex}
-          totalSteps={play.steps.length}
-          isFirst={isFirst}
-          isLast={isLast}
-          nextDisabled={!!quiz && !quizPassed}
-          onPrev={onPrev}
-          onNext={onNext}
-        />
-      )}
+      <div className="hidden md:block">
+        <PlayPicker currentPlay={play} />
+      </div>
+      <PlayControls
+        step={step}
+        stepIndex={stepIndex}
+        totalSteps={play.steps.length}
+        isFirst={isFirst}
+        isLast={isLast}
+        nextDisabled={!!quiz && !quizPassed}
+        onPrev={onPrev}
+        onNext={onNext}
+        onChooseBranch={onChooseBranch}
+        className="hidden md:block"
+      />
     </aside>
   )
 }
