@@ -4,8 +4,7 @@ import { FieldBackground } from './FieldBackground'
 import { StallCounter } from './StallCounter'
 import { PathPreviews } from './PathPreviews'
 import { PlayerTokens } from './PlayerTokens'
-import { DiscMarker } from './DiscMarker'
-import { ThrowArc } from './ThrowArc'
+import { Disc } from './Disc'
 import type { Play, PlayStep, Position } from '@/types/play'
 
 type FieldCanvasProps = {
@@ -26,8 +25,7 @@ export function FieldCanvas({ step, selectedPosition, playCategory, playSet, ros
       <StallCounter startAt={step.stallCount} active={true} />
       <PathPreviews paths={step.pathPreviews} />
       <PlayerTokens players={step.players} selectedPosition={selectedPosition} playCategory={playCategory} roster={roster} pathPreviews={step.pathPreviews} />
-      <DiscMarker players={step.players} />
-      <ThrowArc key={step.id} throwArc={step.throw} players={step.players} onComplete={onThrowComplete} />
+      <Disc step={step} onThrowComplete={onThrowComplete} />
       {highlightZone && (
         <rect
           x={highlightZone.x * FIELD_WIDTH}
