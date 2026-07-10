@@ -18,7 +18,7 @@ export function StallCounter({ startAt, active }: { startAt: number | undefined;
   if (startAt === undefined) return null
 
   return (
-    <text x={50} y={16} fontSize={5} fill="white" textAnchor="middle" fontWeight="bold">
+    <text x={50} y={8} fontSize={5} fill="white" textAnchor="middle" fontWeight="bold">
       Stall {count}
     </text>
   )
