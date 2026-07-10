@@ -1,11 +1,13 @@
 import { NarrativeWithTooltips } from './NarrativeWithTooltips'
+import type { Position } from '@/types/play'
 
 type NarrativePanelProps = {
   text: string | undefined
   onHighlightZone: (zone: { x: number; y: number; width: number; height: number } | null) => void
+  roster: Record<Position, string>
 }
 
-export function NarrativePanel({ text, onHighlightZone }: NarrativePanelProps) {
+export function NarrativePanel({ text, onHighlightZone, roster }: NarrativePanelProps) {
   if (!text) {
     return (
       <p className="text-lg leading-relaxed text-text-muted">
@@ -14,5 +16,5 @@ export function NarrativePanel({ text, onHighlightZone }: NarrativePanelProps) {
     )
   }
 
-  return <NarrativeWithTooltips text={text} onHighlightZone={onHighlightZone} />
+  return <NarrativeWithTooltips text={text} onHighlightZone={onHighlightZone} roster={roster} />
 }

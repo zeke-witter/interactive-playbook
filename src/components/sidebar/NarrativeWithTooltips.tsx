@@ -1,6 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { GLOSSARY } from '@/data/glossary'
+import { substituteNames } from '@/lib/names'
+import type { Position } from '@/types/play'
 
 const TERMS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length)
 const TERM_PATTERN = new RegExp(`\\b(${TERMS.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'gi')
@@ -8,13 +10,15 @@ const TERM_PATTERN = new RegExp(`\\b(${TERMS.map((t) => t.replace(/[.*+?^${}()|[
 type NarrativeWithTooltipsProps = {
   text: string
   onHighlightZone: (zone: GlossaryEntryZone | null) => void
+  roster: Record<Position, string>
 }
 
 type GlossaryEntryZone = NonNullable<(typeof GLOSSARY)[string]['zone']>
 
-export function NarrativeWithTooltips({ text, onHighlightZone }: NarrativeWithTooltipsProps) {
+export function NarrativeWithTooltips({ text, onHighlightZone, roster }: NarrativeWithTooltipsProps) {
   const [openTerm, setOpenTerm] = useState<string | null>(null)
-  const parts = text.split(TERM_PATTERN)
+  const substitutedText = substituteNames(text, roster)
+  const parts = substitutedText.split(TERM_PATTERN)
 
   return (
     <p className="text-lg leading-relaxed text-text">

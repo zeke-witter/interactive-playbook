@@ -22,18 +22,19 @@ type SidebarProps = {
   quizPassed: boolean
   onQuizAnswered: (correct: boolean) => void
   onHighlightZone: (zone: { x: number; y: number; width: number; height: number } | null) => void
+  roster: Record<Position, string>
 }
 
 export function Sidebar({
   play, step, stepIndex, selectedPosition, onPositionChange,
-  isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered, onHighlightZone,
+  isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered, onHighlightZone, roster,
 }: SidebarProps) {
   return (
     <aside className="w-full md:w-[35%] flex flex-col gap-4 p-4 border-t md:border-t-0 md:border-l border-border overflow-y-auto">
-      <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepIndex} totalSteps={play.steps.length} />
-      <PositionSelector value={selectedPosition} onChange={onPositionChange} />
-      <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} />
-      {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} />}
+      <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepIndex} totalSteps={play.steps.length} roster={roster} />
+      <PositionSelector value={selectedPosition} onChange={onPositionChange} roster={roster} />
+      <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} roster={roster} />
+      {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} roster={roster} />}
       <PlayPicker currentPlay={play} />
       {step.branches?.length ? (
         <div className="flex flex-col gap-2">

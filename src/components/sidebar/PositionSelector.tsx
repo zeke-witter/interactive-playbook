@@ -6,9 +6,10 @@ const ALL_POSITIONS: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
 type PositionSelectorProps = {
   value: Position
   onChange: (position: Position) => void
+  roster: Record<Position, string>
 }
 
-export function PositionSelector({ value, onChange }: PositionSelectorProps) {
+export function PositionSelector({ value, onChange, roster }: PositionSelectorProps) {
   return (
     <label className="flex items-center gap-2 text-sm font-medium text-text">
       <span>🎯 You are:</span>
@@ -18,7 +19,7 @@ export function PositionSelector({ value, onChange }: PositionSelectorProps) {
         className="rounded-md border border-border bg-surface text-text px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent"
       >
         {ALL_POSITIONS.map((pos) => (
-          <option key={pos} value={pos}>{pos}</option>
+          <option key={pos} value={pos}>{roster[pos]}</option>
         ))}
       </select>
     </label>
