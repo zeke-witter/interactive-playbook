@@ -10,20 +10,24 @@ type PlayerTokenProps = {
   dimmed: boolean
   enterIndex: number
   label: string
+  pathPoints?: { px: number; py: number }[]
 }
 
-export function PlayerToken({ player, isYou, dimmed, enterIndex, label }: PlayerTokenProps) {
+export function PlayerToken({ player, isYou, dimmed, enterIndex, label, pathPoints }: PlayerTokenProps) {
   const { px, py } = toPixel(player.x, player.y)
   const fill = player.isDefense ? '#dc2626' : '#2563eb'
   const [entering, setEntering] = useState(true)
   const enterDelay = enterIndex * 0.035
 
+  const xTarget = !entering && pathPoints ? pathPoints.map((p) => p.px) : px
+  const yTarget = !entering && pathPoints ? pathPoints.map((p) => p.py) : py
+
   return (
     <motion.g
       initial={{ x: px, y: py, opacity: 0, scale: 0 }}
       animate={{
-        x: px,
-        y: py,
+        x: xTarget,
+        y: yTarget,
         opacity: dimmed ? 0.4 : 1,
         scale: entering ? [0, 1.35, 0.85, 1.05, 1] : 1,
       }}

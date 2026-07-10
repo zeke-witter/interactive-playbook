@@ -1,15 +1,17 @@
 import { PlayerToken } from './PlayerToken'
 import { GENERIC_DEFENDER_LABELS } from '@/lib/names'
-import type { PlayerState, Position } from '@/types/play'
+import { toPixel } from '@/lib/field'
+import type { PlayerState, PlayerPath, Position } from '@/types/play'
 
 type PlayerTokensProps = {
   players: PlayerState[]
   selectedPosition: Position
   playCategory: 'offense' | 'defense'
   roster: Record<Position, string>
+  pathPreviews: PlayerPath[]
 }
 
-export function PlayerTokens({ players, selectedPosition, playCategory, roster }: PlayerTokensProps) {
+export function PlayerTokens({ players, selectedPosition, playCategory, roster, pathPreviews }: PlayerTokensProps) {
   return (
     <g>
       {players.map((player, i) => {
@@ -17,6 +19,8 @@ export function PlayerTokens({ players, selectedPosition, playCategory, roster }
         const label = dimmed
           ? (player.isDefense ? GENERIC_DEFENDER_LABELS[player.id] : player.id)
           : roster[player.id]
+        const path = !player.isDefense ? pathPreviews.find((p) => p.playerId === player.id) : undefined
+        const pathPoints = path?.points.map((pt) => toPixel(pt.x, pt.y))
 
         return (
           <PlayerToken
@@ -26,6 +30,7 @@ export function PlayerTokens({ players, selectedPosition, playCategory, roster }
             dimmed={dimmed}
             enterIndex={i}
             label={label}
+            pathPoints={pathPoints}
           />
         )
       })}
