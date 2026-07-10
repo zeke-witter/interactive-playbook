@@ -4,7 +4,7 @@ export const flood: Play = {
   id: 'flood',
   name: 'Flood',
   category: 'offense',
-  set: 'pull-play',
+  set: 'ho-stack',
   description:
     "Post-pull play that isolates under space for C1, who looks for a quick continuation throw to C4. Not force-dependent; can be run from either side. Source: Mousetrap Playbook p.46 (diagram-verified).",
   steps: [

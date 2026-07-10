@@ -22,7 +22,6 @@ const SET_LABELS: Record<Play['set'], string> = {
   'zone-d': 'Zone Defense',
   'person-d': 'Person Defense',
   endzone: 'Endzone',
-  'pull-play': 'Pull Play',
 }
 
 const ROW_CLASS = 'text-left rounded-md border px-3 py-2 border-border bg-surface text-text hover:bg-surface-raised transition-colors'

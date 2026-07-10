@@ -52,7 +52,7 @@ export type Play = {
   id: string
   name: string
   category: 'offense' | 'defense'
-  set: 'ho-stack' | 'vert-stack' | 'zone-o' | 'zone-d' | 'person-d' | 'endzone' | 'pull-play'
+  set: 'ho-stack' | 'vert-stack' | 'zone-o' | 'zone-d' | 'person-d' | 'endzone'
   description: string
   steps: PlayStep[]
 }

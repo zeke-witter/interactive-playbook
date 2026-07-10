@@ -4,7 +4,7 @@ export const reverse: Play = {
   id: 'reverse',
   name: 'Reverse Flood',
   category: 'offense',
-  set: 'pull-play',
+  set: 'ho-stack',
   description:
     "Post-pull play that isolates deep space for C1 while C2, C3, and C4 flood under toward the break side as live short options. Not force-dependent; can be run from either side. Source: Mousetrap Playbook p.47.",
   steps: [
