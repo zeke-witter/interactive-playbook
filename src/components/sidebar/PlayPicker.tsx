@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { categoriesWithPlays, setsInCategory, playsInSet } from '@/data/plays'
-import { useProgress } from '@/hooks/useProgress'
 import type { Play } from '@/types/play'
 
 type PickerLevel =
@@ -28,7 +27,6 @@ const ROW_CLASS = 'text-left rounded-md border px-3 py-2 border-border bg-surfac
 
 export function PlayPicker({ currentPlay }: { currentPlay: Play }) {
   const router = useRouter()
-  const { completedCount } = useProgress()
   const [level, setLevel] = useState<PickerLevel>({
     view: 'plays',
     category: currentPlay.category,
@@ -37,22 +35,22 @@ export function PlayPicker({ currentPlay }: { currentPlay: Play }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-1 text-xs text-text-muted uppercase tracking-wide">
-        <button onClick={() => setLevel({ view: 'categories' })} className="hover:text-accent">
+      <div className="flex items-center gap-1 text-xs uppercase tracking-wide">
+        <button onClick={() => setLevel({ view: 'categories' })} className="text-accent underline underline-offset-2 hover:text-accent-hover">
           Plays
         </button>
         {level.view !== 'categories' && (
           <>
-            <span>›</span>
-            <button onClick={() => setLevel({ view: 'sets', category: level.category })} className="hover:text-accent">
+            <span className="text-text-muted">›</span>
+            <button onClick={() => setLevel({ view: 'sets', category: level.category })} className="text-accent underline underline-offset-2 hover:text-accent-hover">
               {CATEGORY_LABELS[level.category]}
             </button>
           </>
         )}
         {level.view === 'plays' && (
           <>
-            <span>›</span>
-            <span className="text-text">{SET_LABELS[level.set]}</span>
+            <span className="text-text-muted">›</span>
+            <span className="text-text-muted">{SET_LABELS[level.set]}</span>
           </>
         )}
       </div>
@@ -83,8 +81,7 @@ export function PlayPicker({ currentPlay }: { currentPlay: Play }) {
                   : ROW_CLASS
               }
             >
-              <div>{play.name}</div>
-              <div className="text-xs text-text-muted">{completedCount(play.id)}/7 positions learned</div>
+              {play.name}
             </button>
           ))}
       </div>

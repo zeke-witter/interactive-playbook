@@ -34,9 +34,6 @@ export function Sidebar({
       <PositionSelector value={selectedPosition} onChange={onPositionChange} roster={roster} />
       <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} roster={roster} />
       {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} roster={roster} />}
-      <div className="hidden md:block">
-        <PlayPicker currentPlay={play} />
-      </div>
       <PlayControls
         step={step}
         stepIndex={stepIndex}
@@ -49,6 +46,9 @@ export function Sidebar({
         onChooseBranch={onChooseBranch}
         className="hidden md:block"
       />
+      <div className="hidden md:block">
+        <PlayPicker currentPlay={play} />
+      </div>
     </aside>
   )
 }

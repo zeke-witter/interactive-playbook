@@ -38,9 +38,5 @@ export function useProgress() {
     return (progress[playId] ?? []).includes(position)
   }
 
-  function completedCount(playId: string) {
-    return (progress[playId] ?? []).length
-  }
-
-  return { markComplete, isComplete, completedCount }
+  return { markComplete, isComplete }
 }
