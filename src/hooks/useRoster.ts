@@ -1,7 +1,17 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MMP_CUTTER_NAMES, FMP_CUTTER_NAMES, MMP_HANDLER_NAMES, FMP_HANDLER_NAMES } from '@/data/names'
 import type { Position } from '@/types/play'
+
+const PLACEHOLDER_ROSTER: Record<Position, string> = {
+  H1: 'H1',
+  H2: 'H2',
+  H3: 'H3',
+  C1: 'C1',
+  C2: 'C2',
+  C3: 'C3',
+  C4: 'C4',
+}
 
 function pickUnique(pool: string[], count: number): string[] {
   const shuffled = [...pool].sort(() => Math.random() - 0.5)
@@ -35,6 +45,11 @@ function generateRoster(): Record<Position, string> {
 }
 
 export function useRoster(): Record<Position, string> {
-  const [roster] = useState<Record<Position, string>>(() => generateRoster())
+  const [roster, setRoster] = useState<Record<Position, string>>(PLACEHOLDER_ROSTER)
+
+  useEffect(() => {
+    setRoster(generateRoster())
+  }, [])
+
   return roster
 }
