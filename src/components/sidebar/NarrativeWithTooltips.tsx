@@ -17,7 +17,7 @@ export function NarrativeWithTooltips({ text, onHighlightZone }: NarrativeWithTo
   const parts = text.split(TERM_PATTERN)
 
   return (
-    <p className="text-base leading-relaxed">
+    <p className="text-base leading-relaxed text-text">
       {parts.map((part, i) => {
         const entry = GLOSSARY[part.toLowerCase()]
         if (!entry) return <span key={i}>{part}</span>
@@ -25,7 +25,7 @@ export function NarrativeWithTooltips({ text, onHighlightZone }: NarrativeWithTo
         return (
           <span
             key={i}
-            className="underline decoration-dotted cursor-help relative"
+            className="underline decoration-dotted decoration-accent cursor-help relative"
             onMouseEnter={() => {
               setOpenTerm(part)
               if (entry.zone) onHighlightZone(entry.zone)
@@ -37,7 +37,7 @@ export function NarrativeWithTooltips({ text, onHighlightZone }: NarrativeWithTo
           >
             {part}
             {openTerm === part && (
-              <span className="absolute left-0 top-full z-10 w-56 rounded bg-gray-900 text-white text-sm p-2 shadow-lg">
+              <span className="absolute left-0 top-full z-10 w-56 rounded-md border border-border bg-surface-raised text-text text-sm p-2 shadow-lg">
                 {entry.definition}
               </span>
             )}
