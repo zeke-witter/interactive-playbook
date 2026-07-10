@@ -14,6 +14,7 @@ export function DiscMarker({ players }: { players: PlayerState[] }) {
       fill="white"
       stroke="black"
       strokeWidth={0.2}
+      initial={{ cx: px + 2.4, cy: py - 2.4 }}
       animate={{ cx: px + 2.4, cy: py - 2.4 }}
       transition={{ duration: 0.6, ease: 'easeInOut' }}
     />
