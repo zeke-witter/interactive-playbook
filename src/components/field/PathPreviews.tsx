@@ -1,12 +1,6 @@
 import { toPixel } from '@/lib/field'
+import { PATH_COLOR } from '@/lib/pathColors'
 import type { PlayerPath } from '@/types/play'
-
-const PATH_COLOR: Record<PlayerPath['type'], string> = {
-  primary: '#fbbf24',
-  secondary: '#93c5fd',
-  clear: '#a3a3a3',
-  reset: '#f472b6',
-}
 
 export function PathPreviews({ paths }: { paths: PlayerPath[] }) {
   return (
