@@ -1,7 +1,6 @@
 'use client'
 import { FIELD_WIDTH, FIELD_HEIGHT, ENDZONE_VIEW_HEIGHT } from '@/lib/field'
 import { FieldBackground } from './FieldBackground'
-import { ForceIndicator } from './ForceIndicator'
 import { StallCounter } from './StallCounter'
 import { PathPreviews } from './PathPreviews'
 import { PlayerTokens } from './PlayerTokens'
@@ -24,8 +23,7 @@ export function FieldCanvas({ step, selectedPosition, playCategory, playSet, ros
   const viewHeight = isEndzone ? ENDZONE_VIEW_HEIGHT : FIELD_HEIGHT
   return (
     <svg viewBox={`0 0 ${FIELD_WIDTH} ${viewHeight}`} className="w-full h-full" role="img" aria-label={step.label}>
-      <FieldBackground showAttackingEndzone={isEndzone} endzoneCrop={isEndzone} />
-      <ForceIndicator force={step.force} />
+      <FieldBackground endzoneCrop={isEndzone} />
       <StallCounter startAt={step.stallCount} active={true} />
       <PathPreviews paths={step.pathPreviews} />
       <PlayerTokens players={step.players} selectedPosition={selectedPosition} playCategory={playCategory} roster={roster} pathPreviews={step.pathPreviews} />
