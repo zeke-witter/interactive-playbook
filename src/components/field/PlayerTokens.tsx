@@ -18,6 +18,7 @@ export function PlayerTokens({ players, selectedPosition, playCategory }: Player
             player={player}
             isYou={!player.isDefense && player.id === selectedPosition}
             dimmed={dimmed}
+            enterIndex={i}
           />
         )
       })}
