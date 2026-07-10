@@ -17,7 +17,7 @@ export function NarrativeWithTooltips({ text, onHighlightZone }: NarrativeWithTo
   const parts = text.split(TERM_PATTERN)
 
   return (
-    <p className="text-base leading-relaxed text-text">
+    <p className="text-lg leading-relaxed text-text">
       {parts.map((part, i) => {
         const entry = GLOSSARY[part.toLowerCase()]
         if (!entry) return <span key={i}>{part}</span>

@@ -8,7 +8,7 @@ type NarrativePanelProps = {
 export function NarrativePanel({ text, onHighlightZone }: NarrativePanelProps) {
   if (!text) {
     return (
-      <p className="text-base leading-relaxed text-text-muted">
+      <p className="text-lg leading-relaxed text-text-muted">
         You&apos;re off the disc for this step — hold your spacing and watch how the play develops.
       </p>
     )
