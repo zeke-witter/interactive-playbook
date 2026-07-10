@@ -1,5 +1,5 @@
 'use client'
-import { FIELD_WIDTH, FIELD_HEIGHT, ENDZONE_VIEW_HEIGHT } from '@/lib/field'
+import { FIELD_WIDTH, FIELD_HEIGHT } from '@/lib/field'
 import { FieldBackground } from './FieldBackground'
 import { StallCounter } from './StallCounter'
 import { PathPreviews } from './PathPreviews'
@@ -20,10 +20,9 @@ type FieldCanvasProps = {
 
 export function FieldCanvas({ step, selectedPosition, playCategory, playSet, roster, onThrowComplete, highlightZone }: FieldCanvasProps) {
   const isEndzone = playSet === 'endzone'
-  const viewHeight = isEndzone ? ENDZONE_VIEW_HEIGHT : FIELD_HEIGHT
   return (
-    <svg viewBox={`0 0 ${FIELD_WIDTH} ${viewHeight}`} className="w-full h-full" role="img" aria-label={step.label}>
-      <FieldBackground endzoneCrop={isEndzone} />
+    <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} className="w-full h-full" role="img" aria-label={step.label}>
+      <FieldBackground showEndzone={isEndzone} />
       <StallCounter startAt={step.stallCount} active={true} />
       <PathPreviews paths={step.pathPreviews} />
       <PlayerTokens players={step.players} selectedPosition={selectedPosition} playCategory={playCategory} roster={roster} pathPreviews={step.pathPreviews} />
