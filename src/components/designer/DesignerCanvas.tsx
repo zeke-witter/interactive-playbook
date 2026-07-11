@@ -42,7 +42,7 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
       return
     }
     if (mode === 'path') {
-      if (!inProgressPath) startPath(index)
+      if (!inProgressPath && !currentStep.players[index].isDefense) startPath(index)
       return
     }
     if (mode === 'throw') {
