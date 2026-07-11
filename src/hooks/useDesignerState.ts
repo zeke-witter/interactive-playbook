@@ -158,6 +158,16 @@ export function useDesignerState() {
 
   function addStep() {
     let duplicated = freshStepFrom(currentStep)
+    duplicated = {
+      ...duplicated,
+      players: duplicated.players.map((p) => {
+        if (p.isDefense) return p
+        const path = currentStep.pathPreviews.find((pp) => pp.playerId === p.id)
+        if (!path) return p
+        const last = path.points[path.points.length - 1]
+        return { ...p, x: last.x, y: last.y }
+      }),
+    }
     if (currentStep.throw) {
       const { from, to } = currentStep.throw
       duplicated = {
