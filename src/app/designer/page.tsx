@@ -8,7 +8,7 @@ import type { Play } from '@/types/play'
 
 export default function DesignerPage() {
   const designer = useDesignerState()
-  const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const [status, setStatus] = useState<string | null>(null)
   const [draftNames, setDraftNames] = useState<string[]>([])
 
   async function refreshDrafts() {
@@ -26,7 +26,7 @@ export default function DesignerPage() {
   }, [])
 
   async function handleSave(name: string) {
-    setSaveStatus('Saving...')
+    setStatus('Saving...')
     try {
       const res = await fetch('/api/designer/save', {
         method: 'POST',
@@ -34,10 +34,10 @@ export default function DesignerPage() {
         body: JSON.stringify({ name, category: designer.category, set: designer.set, steps: designer.steps }),
       })
       const data = await res.json()
-      setSaveStatus(res.ok ? `Saved to ${data.path}` : `Error: ${data.error}`)
+      setStatus(res.ok ? `Saved to ${data.path}` : `Error: ${data.error}`)
       if (res.ok) refreshDrafts()
     } catch {
-      setSaveStatus('Error: failed to save')
+      setStatus('Error: failed to save')
     }
   }
 
@@ -48,16 +48,25 @@ export default function DesignerPage() {
       const data = await res.json()
       if (res.ok) {
         designer.loadDraft(data as { category?: Play['category']; set?: Play['set']; steps: DesignerStep[] })
+        setStatus(`Loaded ${name}`)
+      } else {
+        setStatus(`Error: ${data.error}`)
       }
     } catch {
-      // ignore load errors — the toolbar list only ever shows names the server reported
+      setStatus('Error: failed to load draft')
     }
   }
 
   async function handleDeleteDraft(name: string) {
     if (!window.confirm(`Delete draft "${name}"? This cannot be undone.`)) return
-    await fetch(`/api/designer/drafts/${name}`, { method: 'DELETE' })
-    refreshDrafts()
+    try {
+      const res = await fetch(`/api/designer/drafts/${name}`, { method: 'DELETE' })
+      const data = await res.json()
+      setStatus(res.ok ? `Deleted ${name}` : `Error: ${data.error}`)
+      refreshDrafts()
+    } catch {
+      setStatus('Error: failed to delete draft')
+    }
   }
 
   return (
@@ -76,7 +85,7 @@ export default function DesignerPage() {
           onLoadDraft={handleLoadDraft}
           onDeleteDraft={handleDeleteDraft}
         />
-        {saveStatus && <p className="text-sm text-text-muted">{saveStatus}</p>}
+        {status && <p className="text-sm text-text-muted">{status}</p>}
       </aside>
     </main>
   )
