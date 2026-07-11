@@ -14,7 +14,7 @@ export default function DesignerPage() {
       const res = await fetch('/api/designer/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, steps: designer.steps }),
+        body: JSON.stringify({ name, category: designer.category, set: designer.set, steps: designer.steps }),
       })
       const data = await res.json()
       setSaveStatus(res.ok ? `Saved to ${data.path}` : `Error: ${data.error}`)

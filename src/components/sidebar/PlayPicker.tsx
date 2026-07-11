@@ -2,26 +2,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { categoriesWithPlays, setsInCategory, playsInSet } from '@/data/plays'
+import { CATEGORY_LABELS, SET_LABELS } from '@/lib/playLabels'
 import type { Play } from '@/types/play'
 
 type PickerLevel =
   | { view: 'categories' }
   | { view: 'sets'; category: Play['category'] }
   | { view: 'plays'; category: Play['category']; set: Play['set'] }
-
-const CATEGORY_LABELS: Record<Play['category'], string> = {
-  offense: 'Offense',
-  defense: 'Defense',
-}
-
-const SET_LABELS: Record<Play['set'], string> = {
-  'ho-stack': 'Ho Stack',
-  'vert-stack': 'Vert Stack',
-  'zone-o': 'Zone Offense',
-  'zone-d': 'Zone Defense',
-  'person-d': 'Person Defense',
-  endzone: 'Endzone',
-}
 
 const ROW_CLASS = 'text-left rounded-md border px-3 py-2 border-border bg-surface text-text hover:bg-surface-raised transition-colors'
 

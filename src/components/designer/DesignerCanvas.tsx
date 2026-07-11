@@ -15,8 +15,9 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const {
     currentStep, mode, selectedIndex, selectToken, moveToken,
-    inProgressPath, startPath, addWaypoint, setThrow, isEndzone, pathType,
+    inProgressPath, startPath, addWaypoint, setThrow, set, pathType,
   } = designer
+  const showEndzone = set === 'endzone'
 
   function toSvgPoint(clientX: number, clientY: number) {
     const svg = svgRef.current
@@ -96,7 +97,7 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
       className="w-full h-full"
       onPointerDown={handleBackgroundPointerDown}
     >
-      <FieldBackground showEndzone={isEndzone} />
+      <FieldBackground showEndzone={showEndzone} />
       {finishedPaths}
       {inProgressLine}
       {currentStep.players.map((player, i) => (

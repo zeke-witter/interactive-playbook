@@ -3,6 +3,7 @@ import type { useDesignerState } from '@/hooks/useDesignerState'
 import type { PlayerPath } from '@/types/play'
 import type { DesignerMode } from '@/types/designer'
 import { PATH_COLOR } from '@/lib/pathColors'
+import { CATEGORY_LABELS, SET_LABELS, ALL_CATEGORIES, ALL_SETS } from '@/lib/playLabels'
 
 type DesignerToolbarProps = {
   designer: ReturnType<typeof useDesignerState>
@@ -17,7 +18,7 @@ export function DesignerToolbar({ designer, onSave }: DesignerToolbarProps) {
   const {
     steps, currentStepIndex, currentStep, mode, setMode, selectedIndex,
     pathType, setPathType, inProgressPath, finishPath, cancelPath,
-    setDiscHolder, addStep, deleteStep, goToStep, isEndzone, setIsEndzone,
+    setDiscHolder, addStep, deleteStep, goToStep, category, setCategory, set, setSet,
   } = designer
 
   return (
@@ -69,10 +70,26 @@ export function DesignerToolbar({ designer, onSave }: DesignerToolbarProps) {
         </button>
       )}
 
-      <label className="flex items-center gap-2 text-sm text-text">
-        <input type="checkbox" checked={isEndzone} onChange={(e) => setIsEndzone(e.target.checked)} />
-        Endzone play
-      </label>
+      <div className="flex gap-2">
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as typeof category)}
+          className="flex-1 px-2 py-1 rounded-md border border-border bg-bg text-text text-sm"
+        >
+          {ALL_CATEGORIES.map((c) => (
+            <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
+          ))}
+        </select>
+        <select
+          value={set}
+          onChange={(e) => setSet(e.target.value as typeof set)}
+          className="flex-1 px-2 py-1 rounded-md border border-border bg-bg text-text text-sm"
+        >
+          {ALL_SETS.map((s) => (
+            <option key={s} value={s}>{SET_LABELS[s]}</option>
+          ))}
+        </select>
+      </div>
 
       <div className="flex flex-col gap-1">
         {steps.map((_, i) => (

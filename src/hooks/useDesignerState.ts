@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import type { DesignerStep, DesignerMode } from '@/types/designer'
-import type { PlayerPath, Position } from '@/types/play'
+import type { PlayerPath, Position, Play } from '@/types/play'
 
 const OFFENSE_ORDER: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
 
@@ -24,7 +24,8 @@ export function useDesignerState() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [pathType, setPathType] = useState<PlayerPath['type']>('primary')
   const [inProgressPath, setInProgressPath] = useState<InProgressPath | null>(null)
-  const [isEndzone, setIsEndzone] = useState(false)
+  const [category, setCategory] = useState<Play['category']>('offense')
+  const [set, setSet] = useState<Play['set']>('ho-stack')
 
   const currentStep = steps[currentStepIndex]
 
@@ -123,8 +124,10 @@ export function useDesignerState() {
     pathType,
     setPathType,
     inProgressPath,
-    isEndzone,
-    setIsEndzone,
+    category,
+    setCategory,
+    set,
+    setSet,
     moveToken,
     startPath,
     addWaypoint,
