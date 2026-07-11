@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import { readFile, unlink } from 'fs/promises'
 import path from 'path'
-import { sanitizeDraftName } from '@/lib/designerDrafts'
+import { sanitizeSlug } from '@/lib/slug'
 
 export async function GET(_request: Request, { params }: { params: Promise<{ name: string }> }) {
   const { name } = await params
-  const safeName = sanitizeDraftName(name)
+  const safeName = sanitizeSlug(name)
   const filePath = path.join(process.cwd(), 'designer-output', `${safeName}.json`)
 
   try {
@@ -18,7 +18,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ nam
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ name: string }> }) {
   const { name } = await params
-  const safeName = sanitizeDraftName(name)
+  const safeName = sanitizeSlug(name)
   const filePath = path.join(process.cwd(), 'designer-output', `${safeName}.json`)
 
   try {

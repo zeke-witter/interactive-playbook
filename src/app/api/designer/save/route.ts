@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
-import { sanitizeDraftName } from '@/lib/designerDrafts'
+import { sanitizeSlug } from '@/lib/slug'
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing name or steps' }, { status: 400 })
   }
 
-  const safeName = sanitizeDraftName(name)
+  const safeName = sanitizeSlug(name)
   const dir = path.join(process.cwd(), 'designer-output')
   const filename = `${safeName}.json`
 

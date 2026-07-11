@@ -32,7 +32,14 @@ export function Sidebar({
     <aside className="w-full md:w-[35%] flex flex-col gap-4 p-4 border-t md:border-t-0 md:border-l border-border overflow-y-auto">
       <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepIndex} totalSteps={play.steps.length} roster={roster} />
       <PositionSelector value={selectedPosition} onChange={onPositionChange} roster={roster} />
-      <NarrativePanel text={step.narrative[selectedPosition]} onHighlightZone={onHighlightZone} roster={roster} />
+      <NarrativePanel
+        text={step.narrative[selectedPosition]}
+        onHighlightZone={onHighlightZone}
+        roster={roster}
+        playId={play.id}
+        stepId={step.id}
+        position={selectedPosition}
+      />
       {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} roster={roster} />}
       <PlayControls
         step={step}
