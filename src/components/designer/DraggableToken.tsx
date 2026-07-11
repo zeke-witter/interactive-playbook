@@ -13,11 +13,12 @@ type DraggableTokenProps = {
   toSvgPoint: (clientX: number, clientY: number) => { x: number; y: number }
   onMove: (x: number, y: number) => void
   onDragEnd?: () => void
+  onDragCancel?: () => void
   onClick: () => void
 }
 
 export function DraggableToken({
-  x, y, label, isDefense, ringColor, isDiscHolder, draggable, toSvgPoint, onMove, onDragEnd, onClick,
+  x, y, label, isDefense, ringColor, isDiscHolder, draggable, toSvgPoint, onMove, onDragEnd, onDragCancel, onClick,
 }: DraggableTokenProps) {
   const draggingRef = useRef(false)
   const movedRef = useRef(false)
@@ -49,6 +50,17 @@ export function DraggableToken({
     }
   }
 
+  function handlePointerCancel(e: React.PointerEvent<SVGGElement>) {
+    // Fires when the browser reclaims the gesture (e.g. a touch scroll,
+    // an OS interruption) instead of a normal release. Reset drag state
+    // without committing anything — a cancelled gesture is not a click
+    // or a completed drag.
+    const wasDragging = draggingRef.current
+    draggingRef.current = false
+    movedRef.current = false
+    if (wasDragging) onDragCancel?.()
+  }
+
   const { px, py } = toPixel(x, y)
   const fill = isDefense ? '#dc2626' : '#2563eb'
 
@@ -58,6 +70,7 @@ export function DraggableToken({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
       style={{ cursor: draggable ? 'grab' : 'pointer' }}
     >
       <circle r={3.2} fill={fill} />

@@ -162,6 +162,7 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
               }
             }}
             onDragEnd={mode === 'throw' && i === holderIndex ? handleHolderDragEnd : undefined}
+            onDragCancel={mode === 'throw' && i === holderIndex ? () => setDiscDrag(null) : undefined}
             onClick={() => handleTokenClick(i)}
           />
         ))}

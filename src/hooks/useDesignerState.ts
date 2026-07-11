@@ -127,6 +127,10 @@ export function useDesignerState() {
     updateCurrentStep((step) => ({
       ...step,
       players: step.players.map((p) => ({ ...p, hasDisc: false })),
+      // A throw authored from this step names the holder being cleared as
+      // its `from` — leaving it in place would let addStep transfer the
+      // disc based on a throw whose source no longer holds it.
+      throw: undefined,
     }))
   }
 
