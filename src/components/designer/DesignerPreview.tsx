@@ -93,7 +93,7 @@ export function DesignerPreview({ steps, set, onExit }: DesignerPreviewProps) {
           <PathPreviews paths={previewStep.pathPreviews} />
           {previewStep.players.map((player, i) => {
             const label = player.isDefense ? GENERIC_DEFENDER_LABELS[player.id] : player.id
-            const path = !player.isDefense ? previewStep.pathPreviews.find((p) => p.playerId === player.id) : undefined
+            const path = !player.isDefense ? previewStep.pathPreviews.find((p) => p.playerId === player.id && !p.isDefense) : undefined
             const pathPoints = path?.points.map((pt) => toPixel(pt.x, pt.y))
             return (
               <PlayerToken

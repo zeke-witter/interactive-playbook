@@ -14,6 +14,7 @@ export type PlayerPath = {
   playerId: Position
   points: Array<{ x: number; y: number }>
   type: PathType
+  isDefense?: boolean
 }
 
 export type ThrowArc = {

@@ -164,7 +164,12 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
           depth={0}
         />
         {!isBranchPoint && (
-          <button onClick={addStep} className="px-2 py-1 text-sm rounded-md border border-accent text-accent">
+          <button
+            onClick={addStep}
+            disabled={!!inProgressPath}
+            title={inProgressPath ? 'Finish or cancel the in-progress path first' : undefined}
+            className="px-2 py-1 text-sm rounded-md border border-accent text-accent disabled:opacity-40 disabled:cursor-not-allowed"
+          >
             + Add Step
           </button>
         )}

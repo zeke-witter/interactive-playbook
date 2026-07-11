@@ -175,10 +175,16 @@ export function useDesignerState() {
     }
     pushHistory()
     const player = currentStep.players[inProgressPath.playerIndex]
-    const newPath: PlayerPath = { playerId: player.id, points: inProgressPath.points, type: pathType }
+    const newPath: PlayerPath = { playerId: player.id, points: inProgressPath.points, type: pathType, isDefense: player.isDefense }
     updateCurrentStep((step) => ({
       ...step,
-      pathPreviews: [...step.pathPreviews.filter((p) => p.playerId !== player.id), newPath],
+      // Matched on both playerId AND isDefense — offense and defense share
+      // the same Position ids, so an id-only filter would wipe out the
+      // other side's path when replacing this one.
+      pathPreviews: [
+        ...step.pathPreviews.filter((p) => !(p.playerId === player.id && !!p.isDefense === !!player.isDefense)),
+        newPath,
+      ],
     }))
     setInProgressPath(null)
   }
@@ -225,8 +231,7 @@ export function useDesignerState() {
     duplicated = {
       ...duplicated,
       players: duplicated.players.map((p) => {
-        if (p.isDefense) return p
-        const path = currentStep.pathPreviews.find((pp) => pp.playerId === p.id)
+        const path = currentStep.pathPreviews.find((pp) => pp.playerId === p.id && !!pp.isDefense === !!p.isDefense)
         if (!path) return p
         const last = path.points[path.points.length - 1]
         return { ...p, x: last.x, y: last.y }

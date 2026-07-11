@@ -19,7 +19,7 @@ export function PlayerTokens({ players, selectedPosition, playCategory, roster, 
         const label = dimmed
           ? (player.isDefense ? GENERIC_DEFENDER_LABELS[player.id] : player.id)
           : roster[player.id]
-        const path = !player.isDefense ? pathPreviews.find((p) => p.playerId === player.id) : undefined
+        const path = !player.isDefense ? pathPreviews.find((p) => p.playerId === player.id && !p.isDefense) : undefined
         const pathPoints = path?.points.map((pt) => toPixel(pt.x, pt.y))
 
         return (

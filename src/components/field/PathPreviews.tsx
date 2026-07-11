@@ -5,7 +5,9 @@ import type { PlayerPath } from '@/types/play'
 export function PathPreviews({ paths }: { paths: PlayerPath[] }) {
   return (
     <g>
-      {paths.map((path, i) => {
+      {/* Defensive paths are an authoring-only annotation (e.g. illustrating
+          a defensive adjustment) — never shown in the animated play itself. */}
+      {paths.filter((path) => !path.isDefense).map((path, i) => {
         const pixelPoints = path.points.map((pt) => {
           const { px, py } = toPixel(pt.x, pt.y)
           return `${px},${py}`
