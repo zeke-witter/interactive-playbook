@@ -7,16 +7,17 @@ type DraggableTokenProps = {
   y: number
   label: string
   isDefense: boolean
-  isSelected: boolean
+  ringColor: string | null
   isDiscHolder: boolean
   draggable: boolean
   toSvgPoint: (clientX: number, clientY: number) => { x: number; y: number }
   onMove: (x: number, y: number) => void
+  onDragEnd?: () => void
   onClick: () => void
 }
 
 export function DraggableToken({
-  x, y, label, isDefense, isSelected, isDiscHolder, draggable, toSvgPoint, onMove, onClick,
+  x, y, label, isDefense, ringColor, isDiscHolder, draggable, toSvgPoint, onMove, onDragEnd, onClick,
 }: DraggableTokenProps) {
   const draggingRef = useRef(false)
   const movedRef = useRef(false)
@@ -43,6 +44,8 @@ export function DraggableToken({
     e.currentTarget.releasePointerCapture(e.pointerId)
     if (!wasDragging || !movedRef.current) {
       onClick()
+    } else {
+      onDragEnd?.()
     }
   }
 
@@ -58,7 +61,7 @@ export function DraggableToken({
       style={{ cursor: draggable ? 'grab' : 'pointer' }}
     >
       <circle r={3.2} fill={fill} />
-      {isSelected && <circle r={4.2} fill="none" stroke="white" strokeWidth={0.6} />}
+      {ringColor && <circle r={4.2} fill="none" stroke={ringColor} strokeWidth={0.6} />}
       {isDiscHolder && <circle cx={2.4} cy={-2.4} r={1} fill="white" stroke="black" strokeWidth={0.2} />}
       <text y={1} fontSize={2.6} fill="white" textAnchor="middle" fontWeight="bold">
         {label}
