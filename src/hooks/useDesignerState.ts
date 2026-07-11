@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import type { DesignerStep, DesignerMode } from '@/types/designer'
+import type { DesignerStep, DesignerBranch, DesignerMode, StepPath } from '@/types/designer'
 import type { PlayerPath, Position, Play } from '@/types/play'
 
 const OFFENSE_ORDER: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
@@ -15,11 +15,49 @@ function defaultStep(): DesignerStep {
   }
 }
 
+function freshStepFrom(step: DesignerStep): DesignerStep {
+  return { players: step.players.map((p) => ({ ...p })), pathPreviews: [] }
+}
+
+function getStepAtPath(root: DesignerStep[], path: StepPath): DesignerStep {
+  let steps = root
+  let step = steps[path[0]]
+  for (let i = 1; i < path.length; i += 2) {
+    const branchIndex = path[i]
+    const stepIndex = path[i + 1]
+    steps = step.branches![branchIndex].steps
+    step = steps[stepIndex]
+  }
+  return step
+}
+
+function getSequenceAtPath(root: DesignerStep[], path: StepPath): DesignerStep[] {
+  if (path.length === 1) return root
+  const parentStep = getStepAtPath(root, path.slice(0, -2))
+  const branchIndex = path[path.length - 2]
+  return parentStep.branches![branchIndex].steps
+}
+
+function replaceStepAtPath(root: DesignerStep[], path: StepPath, updater: (step: DesignerStep) => DesignerStep): DesignerStep[] {
+  const stepIndex = path[path.length - 1]
+  return replaceSequenceAtPath(root, path, (seq) => seq.map((s, i) => (i === stepIndex ? updater(s) : s)))
+}
+
+function replaceSequenceAtPath(root: DesignerStep[], path: StepPath, updater: (seq: DesignerStep[]) => DesignerStep[]): DesignerStep[] {
+  if (path.length === 1) return updater(root)
+  const parentPath = path.slice(0, -2)
+  const branchIndex = path[path.length - 2]
+  return replaceStepAtPath(root, parentPath, (step) => ({
+    ...step,
+    branches: step.branches!.map((b, i) => (i === branchIndex ? { ...b, steps: updater(b.steps) } : b)),
+  }))
+}
+
 type InProgressPath = { playerIndex: number; points: { x: number; y: number }[] }
 
 export function useDesignerState() {
-  const [steps, setSteps] = useState<DesignerStep[]>([defaultStep()])
-  const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const [rootSteps, setRootSteps] = useState<DesignerStep[]>([defaultStep()])
+  const [currentPath, setCurrentPath] = useState<StepPath>([0])
   const [modeState, setModeState] = useState<DesignerMode>('position')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [pathType, setPathType] = useState<PlayerPath['type']>('primary')
@@ -27,10 +65,10 @@ export function useDesignerState() {
   const [category, setCategory] = useState<Play['category']>('offense')
   const [set, setSet] = useState<Play['set']>('ho-stack')
 
-  const currentStep = steps[currentStepIndex]
+  const currentStep = getStepAtPath(rootSteps, currentPath)
 
-  function updateStep(index: number, updater: (step: DesignerStep) => DesignerStep) {
-    setSteps((prev) => prev.map((s, i) => (i === index ? updater(s) : s)))
+  function updateCurrentStep(updater: (step: DesignerStep) => DesignerStep) {
+    setRootSteps((prev) => replaceStepAtPath(prev, currentPath, updater))
   }
 
   function setMode(newMode: DesignerMode) {
@@ -44,7 +82,7 @@ export function useDesignerState() {
   }
 
   function moveToken(index: number, x: number, y: number) {
-    updateStep(currentStepIndex, (step) => ({
+    updateCurrentStep((step) => ({
       ...step,
       players: step.players.map((p, i) => (i === index ? { ...p, x, y } : p)),
     }))
@@ -66,7 +104,7 @@ export function useDesignerState() {
     }
     const player = currentStep.players[inProgressPath.playerIndex]
     const newPath: PlayerPath = { playerId: player.id, points: inProgressPath.points, type: pathType }
-    updateStep(currentStepIndex, (step) => ({
+    updateCurrentStep((step) => ({
       ...step,
       pathPreviews: [...step.pathPreviews.filter((p) => p.playerId !== player.id), newPath],
     }))
@@ -78,7 +116,7 @@ export function useDesignerState() {
   }
 
   function setDiscHolder(index: number) {
-    updateStep(currentStepIndex, (step) => ({
+    updateCurrentStep((step) => ({
       ...step,
       players: step.players.map((p, i) => ({ ...p, hasDisc: i === index })),
     }))
@@ -87,35 +125,77 @@ export function useDesignerState() {
   function setThrow(fromIndex: number, toIndex: number) {
     const from = currentStep.players[fromIndex]
     const to = currentStep.players[toIndex]
-    updateStep(currentStepIndex, (step) => ({ ...step, throw: { from: from.id, to: to.id } }))
+    updateCurrentStep((step) => ({ ...step, throw: { from: from.id, to: to.id } }))
   }
 
   function addStep() {
-    const duplicated: DesignerStep = {
-      players: currentStep.players.map((p) => ({ ...p })),
-      pathPreviews: [],
-    }
-    const newIndex = steps.length
-    setSteps((prev) => [...prev, duplicated])
-    setCurrentStepIndex(newIndex)
+    const duplicated = freshStepFrom(currentStep)
+    const sequence = getSequenceAtPath(rootSteps, currentPath)
+    const newIndex = sequence.length
+    setRootSteps((prev) => replaceSequenceAtPath(prev, currentPath, (seq) => [...seq, duplicated]))
+    setCurrentPath([...currentPath.slice(0, -1), newIndex])
     setSelectedIndex(null)
   }
 
-  function deleteStep(index: number) {
-    if (steps.length <= 1) return
-    setSteps((prev) => prev.filter((_, i) => i !== index))
-    setCurrentStepIndex((prev) => (prev >= index ? Math.max(0, prev - 1) : prev))
+  function deleteStep(path: StepPath) {
+    const sequence = getSequenceAtPath(rootSteps, path)
+    if (sequence.length <= 1) return
+    const indexToDelete = path[path.length - 1]
+    setRootSteps((prev) => replaceSequenceAtPath(prev, path, (seq) => seq.filter((_, i) => i !== indexToDelete)))
+    setCurrentPath([0])
     setSelectedIndex(null)
   }
 
-  function goToStep(index: number) {
-    setCurrentStepIndex(index)
+  function goToStep(path: StepPath) {
+    setCurrentPath(path)
+    setSelectedIndex(null)
+  }
+
+  function addBranch(label1: string, label2: string) {
+    const sequence = getSequenceAtPath(rootSteps, currentPath)
+    const currentIndex = currentPath[currentPath.length - 1]
+    const remainder = sequence.slice(currentIndex + 1)
+    const branch1Steps = remainder.length > 0 ? remainder : [freshStepFrom(currentStep)]
+    const branch2Steps = [freshStepFrom(currentStep)]
+
+    setRootSteps((prev) => {
+      const truncated = replaceSequenceAtPath(prev, currentPath, (seq) => seq.slice(0, currentIndex + 1))
+      return replaceStepAtPath(truncated, currentPath, (step) => ({
+        ...step,
+        branches: [
+          { label: label1, steps: branch1Steps },
+          { label: label2, steps: branch2Steps },
+        ],
+      }))
+    })
+    setCurrentPath([...currentPath, 1, 0])
+    setSelectedIndex(null)
+  }
+
+  function addAnotherBranch(label: string) {
+    const newBranch: DesignerBranch = { label, steps: [freshStepFrom(currentStep)] }
+    const newBranches = [...(currentStep.branches ?? []), newBranch]
+    const newBranchIndex = newBranches.length - 1
+    setRootSteps((prev) => replaceStepAtPath(prev, currentPath, (step) => ({ ...step, branches: newBranches })))
+    setCurrentPath([...currentPath, newBranchIndex, 0])
+    setSelectedIndex(null)
+  }
+
+  function removeBranch(stepPath: StepPath, branchIndex: number) {
+    const step = getStepAtPath(rootSteps, stepPath)
+    if (!step.branches) return
+    const newBranches = step.branches.filter((_, i) => i !== branchIndex)
+    setRootSteps((prev) => replaceStepAtPath(prev, stepPath, (s) => ({
+      ...s,
+      branches: newBranches.length > 0 ? newBranches : undefined,
+    })))
+    setCurrentPath([0])
     setSelectedIndex(null)
   }
 
   return {
-    steps,
-    currentStepIndex,
+    steps: rootSteps,
+    currentPath,
     currentStep,
     mode: modeState,
     setMode,
@@ -138,5 +218,8 @@ export function useDesignerState() {
     addStep,
     deleteStep,
     goToStep,
+    addBranch,
+    addAnotherBranch,
+    removeBranch,
   }
 }
