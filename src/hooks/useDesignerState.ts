@@ -129,7 +129,19 @@ export function useDesignerState() {
   }
 
   function addStep() {
-    const duplicated = freshStepFrom(currentStep)
+    let duplicated = freshStepFrom(currentStep)
+    if (currentStep.throw) {
+      const { from, to } = currentStep.throw
+      duplicated = {
+        ...duplicated,
+        players: duplicated.players.map((p) => {
+          if (p.isDefense) return p
+          if (p.id === to) return { ...p, hasDisc: true }
+          if (p.id === from) return { ...p, hasDisc: false }
+          return p
+        }),
+      }
+    }
     const sequence = getSequenceAtPath(rootSteps, currentPath)
     const newIndex = sequence.length
     setRootSteps((prev) => replaceSequenceAtPath(prev, currentPath, (seq) => [...seq, duplicated]))
