@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import type { DesignerStep, DesignerBranch, DesignerMode, StepPath } from '@/types/designer'
 import type { PlayerPath, Position, Play } from '@/types/play'
+import { getStepAtPath, getSequenceAtPath, replaceStepAtPath, replaceSequenceAtPath } from '@/lib/designerSteps'
 
 const OFFENSE_ORDER: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
 const AUTOSAVE_KEY = 'mousetrap-designer-autosave'
@@ -18,40 +19,6 @@ function defaultStep(): DesignerStep {
 
 function freshStepFrom(step: DesignerStep): DesignerStep {
   return { players: step.players.map((p) => ({ ...p })), pathPreviews: [] }
-}
-
-function getStepAtPath(root: DesignerStep[], path: StepPath): DesignerStep {
-  let steps = root
-  let step = steps[path[0]]
-  for (let i = 1; i < path.length; i += 2) {
-    const branchIndex = path[i]
-    const stepIndex = path[i + 1]
-    steps = step.branches![branchIndex].steps
-    step = steps[stepIndex]
-  }
-  return step
-}
-
-function getSequenceAtPath(root: DesignerStep[], path: StepPath): DesignerStep[] {
-  if (path.length === 1) return root
-  const parentStep = getStepAtPath(root, path.slice(0, -2))
-  const branchIndex = path[path.length - 2]
-  return parentStep.branches![branchIndex].steps
-}
-
-function replaceStepAtPath(root: DesignerStep[], path: StepPath, updater: (step: DesignerStep) => DesignerStep): DesignerStep[] {
-  const stepIndex = path[path.length - 1]
-  return replaceSequenceAtPath(root, path, (seq) => seq.map((s, i) => (i === stepIndex ? updater(s) : s)))
-}
-
-function replaceSequenceAtPath(root: DesignerStep[], path: StepPath, updater: (seq: DesignerStep[]) => DesignerStep[]): DesignerStep[] {
-  if (path.length === 1) return updater(root)
-  const parentPath = path.slice(0, -2)
-  const branchIndex = path[path.length - 2]
-  return replaceStepAtPath(root, parentPath, (step) => ({
-    ...step,
-    branches: step.branches!.map((b, i) => (i === branchIndex ? { ...b, steps: updater(b.steps) } : b)),
-  }))
 }
 
 type InProgressPath = { playerIndex: number; points: { x: number; y: number }[] }

@@ -1,10 +1,10 @@
 'use client'
 import { motion } from 'framer-motion'
 import { toPixel } from '@/lib/field'
-import type { PlayStep } from '@/types/play'
+import type { PlayerState, ThrowArc } from '@/types/play'
 
 type DiscProps = {
-  step: PlayStep
+  step: { id: string; players: PlayerState[]; throw?: ThrowArc }
   onThrowComplete?: () => void
 }
 
