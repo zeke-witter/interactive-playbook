@@ -1,9 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { DesignerStep, DesignerBranch, DesignerMode, StepPath } from '@/types/designer'
 import type { PlayerPath, Position, Play } from '@/types/play'
 
 const OFFENSE_ORDER: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
+const AUTOSAVE_KEY = 'mousetrap-designer-autosave'
 
 function defaultStep(): DesignerStep {
   return {
@@ -64,8 +65,35 @@ export function useDesignerState() {
   const [inProgressPath, setInProgressPath] = useState<InProgressPath | null>(null)
   const [category, setCategory] = useState<Play['category']>('offense')
   const [set, setSet] = useState<Play['set']>('ho-stack')
+  const [hasHydrated, setHasHydrated] = useState(false)
 
   const currentStep = getStepAtPath(rootSteps, currentPath)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(AUTOSAVE_KEY)
+      if (raw) {
+        const data = JSON.parse(raw) as { category?: Play['category']; set?: Play['set']; steps?: DesignerStep[] }
+        if (Array.isArray(data.steps) && data.steps.length > 0) {
+          setRootSteps(data.steps)
+          if (data.category) setCategory(data.category)
+          if (data.set) setSet(data.set)
+          setCurrentPath([0])
+        }
+      }
+    } catch {
+      // malformed or absent autosave data — ignore and keep defaults
+    }
+    setHasHydrated(true)
+  }, [])
+
+  // Guarded by hasHydrated so this effect's first run (which fires on mount
+  // regardless of whether the restore effect above has applied its update yet)
+  // doesn't immediately overwrite a just-restored draft with default state.
+  useEffect(() => {
+    if (!hasHydrated) return
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ category, set, steps: rootSteps }))
+  }, [hasHydrated, rootSteps, category, set])
 
   function updateCurrentStep(updater: (step: DesignerStep) => DesignerStep) {
     setRootSteps((prev) => replaceStepAtPath(prev, currentPath, updater))
@@ -205,6 +233,14 @@ export function useDesignerState() {
     setSelectedIndex(null)
   }
 
+  function loadDraft(data: { category?: Play['category']; set?: Play['set']; steps: DesignerStep[] }) {
+    setRootSteps(data.steps)
+    if (data.category) setCategory(data.category)
+    if (data.set) setSet(data.set)
+    setCurrentPath([0])
+    setSelectedIndex(null)
+  }
+
   return {
     steps: rootSteps,
     currentPath,
@@ -233,5 +269,6 @@ export function useDesignerState() {
     addBranch,
     addAnotherBranch,
     removeBranch,
+    loadDraft,
   }
 }
