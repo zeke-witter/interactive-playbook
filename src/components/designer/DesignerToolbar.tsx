@@ -24,19 +24,37 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
     steps, currentPath, currentStep, mode, setMode, selectedIndex,
     pathType, setPathType, inProgressPath, finishPath, cancelPath,
     setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep, category, setCategory, set, setSet,
-    addBranch, addAnotherBranch, removeBranch,
+    addBranch, addAnotherBranch, removeBranch, undo, redo, canUndo, canRedo,
   } = designer
 
   const isBranchPoint = !!currentStep.branches && currentStep.branches.length > 0
 
   return (
     <div className="flex flex-col gap-3 p-3 border border-border rounded-md bg-surface">
-      <button
-        onClick={onPreview}
-        className="self-start px-3 py-1 text-sm rounded-md border border-accent text-accent"
-      >
-        ▶ Preview
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={onPreview}
+          className="px-3 py-1 text-sm rounded-md border border-accent text-accent"
+        >
+          ▶ Preview
+        </button>
+        <button
+          onClick={undo}
+          disabled={!canUndo}
+          title="Undo (Ctrl/Cmd+Z)"
+          className="px-3 py-1 text-sm rounded-md border border-border text-text disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Undo
+        </button>
+        <button
+          onClick={redo}
+          disabled={!canRedo}
+          title="Redo (Ctrl/Cmd+Shift+Z)"
+          className="px-3 py-1 text-sm rounded-md border border-border text-text disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Redo
+        </button>
+      </div>
 
       <div className="flex gap-2">
         {MODES.map((m) => (

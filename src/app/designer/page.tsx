@@ -26,6 +26,24 @@ export default function DesignerPage() {
     refreshDrafts()
   }, [])
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null
+      const isTyping = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA'
+      if (isTyping || isPreviewing) return
+      const meta = e.metaKey || e.ctrlKey
+      if (!meta || e.key.toLowerCase() !== 'z') return
+      e.preventDefault()
+      if (e.shiftKey) {
+        designer.redo()
+      } else {
+        designer.undo()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [designer, isPreviewing])
+
   async function handleSave(name: string) {
     setStatus('Saving...')
     try {

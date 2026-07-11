@@ -23,6 +23,7 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
   const {
     currentStep, mode, selectedIndex, selectToken, moveToken,
     inProgressPath, startPath, addWaypoint, setThrow, set, pathType,
+    beginDrag, endDrag, cancelDrag,
   } = designer
   const showEndzone = set === 'endzone'
   const holderIndex = currentStep.players.findIndex((p) => p.hasDisc)
@@ -161,8 +162,21 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
                 moveToken(i, x, y)
               }
             }}
-            onDragEnd={mode === 'throw' && i === holderIndex ? handleHolderDragEnd : undefined}
-            onDragCancel={mode === 'throw' && i === holderIndex ? () => setDiscDrag(null) : undefined}
+            onDragStart={mode === 'position' ? beginDrag : undefined}
+            onDragEnd={
+              mode === 'throw' && i === holderIndex
+                ? handleHolderDragEnd
+                : mode === 'position'
+                ? endDrag
+                : undefined
+            }
+            onDragCancel={
+              mode === 'throw' && i === holderIndex
+                ? () => setDiscDrag(null)
+                : mode === 'position'
+                ? cancelDrag
+                : undefined
+            }
             onClick={() => handleTokenClick(i)}
           />
         ))}

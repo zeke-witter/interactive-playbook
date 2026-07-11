@@ -12,13 +12,14 @@ type DraggableTokenProps = {
   draggable: boolean
   toSvgPoint: (clientX: number, clientY: number) => { x: number; y: number }
   onMove: (x: number, y: number) => void
+  onDragStart?: () => void
   onDragEnd?: () => void
   onDragCancel?: () => void
   onClick: () => void
 }
 
 export function DraggableToken({
-  x, y, label, isDefense, ringColor, isDiscHolder, draggable, toSvgPoint, onMove, onDragEnd, onDragCancel, onClick,
+  x, y, label, isDefense, ringColor, isDiscHolder, draggable, toSvgPoint, onMove, onDragStart, onDragEnd, onDragCancel, onClick,
 }: DraggableTokenProps) {
   const draggingRef = useRef(false)
   const movedRef = useRef(false)
@@ -29,6 +30,7 @@ export function DraggableToken({
     draggingRef.current = true
     movedRef.current = false
     e.currentTarget.setPointerCapture(e.pointerId)
+    onDragStart?.()
   }
 
   function handlePointerMove(e: React.PointerEvent<SVGGElement>) {
