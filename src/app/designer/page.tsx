@@ -72,7 +72,7 @@ export default function DesignerPage() {
 
   if (isPreviewing) {
     return (
-      <main className="flex h-screen bg-bg p-4">
+      <main className="flex flex-col h-screen bg-bg p-4">
         <DesignerPreview steps={designer.steps} set={designer.set} onExit={() => setIsPreviewing(false)} />
       </main>
     )
