@@ -147,7 +147,13 @@ function StepTree({
                 Step {i + 1}
               </button>
               {steps.length > 1 && (
-                <button onClick={() => onDelete(path)} className="text-xs text-text-muted hover:text-danger-border">
+                <button onClick={() => {
+                  const hasBranches = step.branches && step.branches.length > 0
+                  const message = hasBranches ? 'Delete this step and all its branches?' : 'Delete this step?'
+                  if (window.confirm(message)) {
+                    onDelete(path)
+                  }
+                }} className="text-xs text-text-muted hover:text-danger-border">
                   Remove
                 </button>
               )}
@@ -156,7 +162,11 @@ function StepTree({
               <div key={b} className="flex flex-col gap-1" style={{ marginLeft: 12 }}>
                 <div className="flex items-center gap-2 text-xs text-text-muted uppercase tracking-wide">
                   <span>{branch.label}</span>
-                  <button onClick={() => onRemoveBranch(path, b)} className="hover:text-danger-border normal-case">
+                  <button onClick={() => {
+                    if (window.confirm('Delete this branch and everything in it?')) {
+                      onRemoveBranch(path, b)
+                    }
+                  }} className="hover:text-danger-border normal-case">
                     Remove Branch
                   </button>
                 </div>
