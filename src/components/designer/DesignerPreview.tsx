@@ -97,6 +97,10 @@ export function DesignerPreview({ steps, set, onExit }: DesignerPreviewProps) {
             const pathPoints = path?.points.map((pt) => toPixel(pt.x, pt.y))
             return (
               <PlayerToken
+                // Must match PlayerTokens.tsx's key format exactly — this is what
+                // lets Framer Motion tween a token's position between steps
+                // instead of remounting it (remounting would replay the
+                // entrance animation on every Next/Prev instead of a smooth slide).
                 key={`${player.id}-${player.isDefense ? 'd' : 'o'}-${i}`}
                 player={player}
                 isYou={false}
