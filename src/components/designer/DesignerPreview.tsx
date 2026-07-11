@@ -25,6 +25,20 @@ function branchTrail(root: DesignerStep[], path: StepPath): string[] {
   return labels
 }
 
+// Total step-hops taken to reach `path`: the sum of the step-index at every
+// step-hop along it (root sequence plus every branch entered), +1 each,
+// since a step-index of 0 is still one step taken. This increments by
+// exactly 1 on every Prev/Next/branch-choice action, unlike `path.length`
+// (which only changes when entering/exiting a branch, not on ordinary
+// same-sequence Next clicks).
+function stepNumberFor(path: StepPath): number {
+  let total = 0
+  for (let i = 0; i < path.length; i += 2) {
+    total += path[i] + 1
+  }
+  return total
+}
+
 export function DesignerPreview({ steps, set, onExit }: DesignerPreviewProps) {
   const [previewPath, setPreviewPath] = useState<StepPath>([0])
 
@@ -34,7 +48,7 @@ export function DesignerPreview({ steps, set, onExit }: DesignerPreviewProps) {
   const isBranchPoint = !!previewStep.branches && previewStep.branches.length > 0
   const hasNext = !isBranchPoint && currentIndex + 1 < sequence.length
   const canGoPrev = previewPath.length > 1 || currentIndex > 0
-  const stepNumber = (previewPath.length + 1) / 2
+  const stepNumber = stepNumberFor(previewPath)
   const trail = branchTrail(steps, previewPath)
   const showEndzone = set === 'endzone'
 
