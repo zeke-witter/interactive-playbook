@@ -1,6 +1,7 @@
 import type { Play } from '@/types/play'
+import { reallyBadFlood } from './really-bad-flood'
 
-export const ALL_PLAYS: Play[] = []
+export const ALL_PLAYS: Play[] = [reallyBadFlood]
 
 export const PLAYS: Record<string, Play> = Object.fromEntries(ALL_PLAYS.map((play) => [play.id, play]))
 
