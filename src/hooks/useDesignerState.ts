@@ -97,16 +97,19 @@ export function useDesignerState() {
     const newIndex = steps.length
     setSteps((prev) => [...prev, duplicated])
     setCurrentStepIndex(newIndex)
+    setSelectedIndex(null)
   }
 
   function deleteStep(index: number) {
     if (steps.length <= 1) return
     setSteps((prev) => prev.filter((_, i) => i !== index))
     setCurrentStepIndex((prev) => (prev >= index ? Math.max(0, prev - 1) : prev))
+    setSelectedIndex(null)
   }
 
   function goToStep(index: number) {
     setCurrentStepIndex(index)
+    setSelectedIndex(null)
   }
 
   return {
