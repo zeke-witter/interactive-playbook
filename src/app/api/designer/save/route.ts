@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
+import { sanitizeDraftName } from '@/lib/designerDrafts'
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -10,10 +11,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing name or steps' }, { status: 400 })
   }
 
-  const safeName = name.replace(/[^a-z0-9-]/gi, '-').toLowerCase()
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const safeName = sanitizeDraftName(name)
   const dir = path.join(process.cwd(), 'designer-output')
-  const filename = `${safeName}-${timestamp}.json`
+  const filename = `${safeName}.json`
 
   await mkdir(dir, { recursive: true })
   await writeFile(path.join(dir, filename), JSON.stringify({ category, set, steps }, null, 2))
