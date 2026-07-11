@@ -9,13 +9,16 @@ import { CATEGORY_LABELS, SET_LABELS, ALL_CATEGORIES, ALL_SETS } from '@/lib/pla
 type DesignerToolbarProps = {
   designer: ReturnType<typeof useDesignerState>
   onSave: (name: string) => void
+  draftNames: string[]
+  onLoadDraft: (name: string) => void
+  onDeleteDraft: (name: string) => void
 }
 
 const PATH_TYPES: PlayerPath['type'][] = ['primary', 'secondary', 'clear', 'reset']
 const MODE_LABELS: Record<DesignerMode, string> = { position: 'Position', path: 'Draw Path', throw: 'Mark Throw' }
 const MODES: DesignerMode[] = ['position', 'path', 'throw']
 
-export function DesignerToolbar({ designer, onSave }: DesignerToolbarProps) {
+export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onDeleteDraft }: DesignerToolbarProps) {
   const {
     steps, currentPath, currentStep, mode, setMode, selectedIndex,
     pathType, setPathType, inProgressPath, finishPath, cancelPath,
@@ -113,6 +116,28 @@ export function DesignerToolbar({ designer, onSave }: DesignerToolbarProps) {
         {!isBranchPoint && <AddBranchForm onAdd={addBranch} />}
         {isBranchPoint && <AddAnotherBranchForm onAdd={addAnotherBranch} />}
       </div>
+
+      {draftNames.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs uppercase tracking-wide text-text-muted">Load Draft</span>
+          {draftNames.map((name) => (
+            <div key={name} className="flex items-center gap-2">
+              <button
+                onClick={() => onLoadDraft(name)}
+                className="flex-1 text-left px-2 py-1 rounded-md border border-border text-text text-sm"
+              >
+                {name}
+              </button>
+              <button
+                onClick={() => onDeleteDraft(name)}
+                className="text-xs text-text-muted hover:text-danger-border"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <SaveForm onSave={onSave} />
     </div>
