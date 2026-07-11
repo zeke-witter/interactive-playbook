@@ -316,6 +316,17 @@ export function useDesignerState() {
     setSelectedIndex(null)
   }
 
+  function newPlay() {
+    pushHistory()
+    setRootSteps([defaultStep()])
+    setCurrentPath([0])
+    setCategoryState('offense')
+    setSetState('ho-stack')
+    setSelectedIndex(null)
+    setModeState('position')
+    setInProgressPath(null)
+  }
+
   function loadDraft(data: { category?: Play['category']; set?: Play['set']; steps?: unknown }): boolean {
     if (!Array.isArray(data.steps) || data.steps.length === 0) return false
     pushHistory()
@@ -359,6 +370,7 @@ export function useDesignerState() {
     addBranch,
     addAnotherBranch,
     removeBranch,
+    newPlay,
     loadDraft,
     undo,
     redo,

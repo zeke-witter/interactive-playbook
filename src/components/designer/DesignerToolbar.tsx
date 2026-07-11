@@ -24,7 +24,7 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
     steps, currentPath, currentStep, mode, setMode, selectedIndex,
     pathType, setPathType, inProgressPath, finishPath, cancelPath,
     setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep, category, setCategory, set, setSet,
-    addBranch, addAnotherBranch, removeBranch, undo, redo, canUndo, canRedo,
+    addBranch, addAnotherBranch, removeBranch, undo, redo, canUndo, canRedo, newPlay,
   } = designer
 
   const isBranchPoint = !!currentStep.branches && currentStep.branches.length > 0
@@ -54,6 +54,44 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
         >
           Redo
         </button>
+      </div>
+
+      <div className="flex flex-col gap-2 p-2 border border-border rounded-md">
+        <div className="flex items-center justify-between">
+          <span className="text-xs uppercase tracking-wide text-text-muted">Play File</span>
+          <button
+            onClick={() => {
+              if (window.confirm('Start a new play? This clears everything on the canvas (Undo will bring it back if you change your mind).')) {
+                newPlay()
+              }
+            }}
+            className="text-xs text-text-muted hover:text-danger-border"
+          >
+            New Play
+          </button>
+        </div>
+        <SaveForm onSave={onSave} />
+        {draftNames.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-wide text-text-muted">Load Draft</span>
+            {draftNames.map((name) => (
+              <div key={name} className="flex items-center gap-2">
+                <button
+                  onClick={() => onLoadDraft(name)}
+                  className="flex-1 text-left px-2 py-1 rounded-md border border-border text-text text-sm"
+                >
+                  {name}
+                </button>
+                <button
+                  onClick={() => onDeleteDraft(name)}
+                  className="text-xs text-text-muted hover:text-danger-border"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2">
@@ -177,29 +215,6 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
         {isBranchPoint && <AddAnotherBranchForm onAdd={addAnotherBranch} />}
       </div>
 
-      {draftNames.length > 0 && (
-        <div className="flex flex-col gap-1">
-          <span className="text-xs uppercase tracking-wide text-text-muted">Load Draft</span>
-          {draftNames.map((name) => (
-            <div key={name} className="flex items-center gap-2">
-              <button
-                onClick={() => onLoadDraft(name)}
-                className="flex-1 text-left px-2 py-1 rounded-md border border-border text-text text-sm"
-              >
-                {name}
-              </button>
-              <button
-                onClick={() => onDeleteDraft(name)}
-                className="text-xs text-text-muted hover:text-danger-border"
-              >
-                Delete
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <SaveForm onSave={onSave} />
     </div>
   )
 }
