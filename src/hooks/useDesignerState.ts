@@ -123,6 +123,17 @@ export function useDesignerState() {
     updateCurrentStep((step) => ({ ...step, throw: { from: from.id, to: to.id } }))
   }
 
+  function clearDiscHolder() {
+    updateCurrentStep((step) => ({
+      ...step,
+      players: step.players.map((p) => ({ ...p, hasDisc: false })),
+    }))
+  }
+
+  function clearThrow() {
+    updateCurrentStep((step) => ({ ...step, throw: undefined }))
+  }
+
   function addStep() {
     let duplicated = freshStepFrom(currentStep)
     duplicated = {
@@ -244,6 +255,8 @@ export function useDesignerState() {
     cancelPath,
     setDiscHolder,
     setThrow,
+    clearDiscHolder,
+    clearThrow,
     addStep,
     deleteStep,
     goToStep,

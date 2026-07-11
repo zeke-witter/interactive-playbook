@@ -23,7 +23,7 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
   const {
     steps, currentPath, currentStep, mode, setMode, selectedIndex,
     pathType, setPathType, inProgressPath, finishPath, cancelPath,
-    setDiscHolder, addStep, deleteStep, goToStep, category, setCategory, set, setSet,
+    setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep, category, setCategory, set, setSet,
     addBranch, addAnotherBranch, removeBranch,
   } = designer
 
@@ -84,6 +84,35 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
           {currentStep.players[selectedIndex].hasDisc ? 'Has Disc ✓' : 'Set as Disc Holder'}
         </button>
       )}
+
+      {mode === 'throw' && selectedIndex !== null && (() => {
+        const holderIndex = currentStep.players.findIndex((p) => p.hasDisc)
+        const player = currentStep.players[selectedIndex]
+        const isStepOne = currentPath.length === 1 && currentPath[0] === 0
+        if (selectedIndex === holderIndex) {
+          return (
+            <div className="flex items-center gap-2 self-start px-2 py-1 rounded-full border border-accent text-xs text-accent">
+              <span>Has disc</span>
+              {isStepOne && (
+                <button onClick={clearDiscHolder} aria-label="Remove has-disc status" className="hover:text-danger-border">
+                  ×
+                </button>
+              )}
+            </div>
+          )
+        }
+        if (!player.isDefense && currentStep.throw?.to === player.id) {
+          return (
+            <div className="flex items-center gap-2 self-start px-2 py-1 rounded-full border border-success-border text-xs text-success-border">
+              <span>Receiving disc</span>
+              <button onClick={clearThrow} aria-label="Remove receiving-disc status" className="hover:text-danger-border">
+                ×
+              </button>
+            </div>
+          )
+        }
+        return null
+      })()}
 
       <div className="flex gap-2">
         <select
