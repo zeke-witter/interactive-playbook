@@ -233,12 +233,16 @@ export function useDesignerState() {
     setSelectedIndex(null)
   }
 
-  function loadDraft(data: { category?: Play['category']; set?: Play['set']; steps: DesignerStep[] }) {
-    setRootSteps(data.steps)
+  function loadDraft(data: { category?: Play['category']; set?: Play['set']; steps?: unknown }): boolean {
+    if (!Array.isArray(data.steps) || data.steps.length === 0) return false
+    setRootSteps(data.steps as DesignerStep[])
     if (data.category) setCategory(data.category)
     if (data.set) setSet(data.set)
     setCurrentPath([0])
     setSelectedIndex(null)
+    setModeState('position')
+    setInProgressPath(null)
+    return true
   }
 
   return {

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { useDesignerState } from '@/hooks/useDesignerState'
 import { DesignerCanvas } from '@/components/designer/DesignerCanvas'
 import { DesignerToolbar } from '@/components/designer/DesignerToolbar'
-import type { DesignerStep } from '@/types/designer'
 import type { Play } from '@/types/play'
 
 export default function DesignerPage() {
@@ -46,12 +45,12 @@ export default function DesignerPage() {
     try {
       const res = await fetch(`/api/designer/drafts/${name}`)
       const data = await res.json()
-      if (res.ok) {
-        designer.loadDraft(data as { category?: Play['category']; set?: Play['set']; steps: DesignerStep[] })
-        setStatus(`Loaded ${name}`)
-      } else {
+      if (!res.ok) {
         setStatus(`Error: ${data.error}`)
+        return
       }
+      const applied = designer.loadDraft(data as { category?: Play['category']; set?: Play['set']; steps?: unknown })
+      setStatus(applied ? `Loaded ${name}` : `Error: "${name}" is not a valid draft file`)
     } catch {
       setStatus('Error: failed to load draft')
     }
