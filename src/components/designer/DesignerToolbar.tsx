@@ -12,13 +12,14 @@ type DesignerToolbarProps = {
   draftNames: string[]
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
+  onPreview: () => void
 }
 
 const PATH_TYPES: PlayerPath['type'][] = ['primary', 'secondary', 'clear', 'reset']
 const MODE_LABELS: Record<DesignerMode, string> = { position: 'Position', path: 'Draw Path', throw: 'Mark Throw' }
 const MODES: DesignerMode[] = ['position', 'path', 'throw']
 
-export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onDeleteDraft }: DesignerToolbarProps) {
+export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onDeleteDraft, onPreview }: DesignerToolbarProps) {
   const {
     steps, currentPath, currentStep, mode, setMode, selectedIndex,
     pathType, setPathType, inProgressPath, finishPath, cancelPath,
@@ -30,6 +31,13 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
 
   return (
     <div className="flex flex-col gap-3 p-3 border border-border rounded-md bg-surface">
+      <button
+        onClick={onPreview}
+        className="self-start px-3 py-1 text-sm rounded-md border border-accent text-accent"
+      >
+        ▶ Preview
+      </button>
+
       <div className="flex gap-2">
         {MODES.map((m) => (
           <button

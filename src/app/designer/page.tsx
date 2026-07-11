@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react'
 import { useDesignerState } from '@/hooks/useDesignerState'
 import { DesignerCanvas } from '@/components/designer/DesignerCanvas'
 import { DesignerToolbar } from '@/components/designer/DesignerToolbar'
+import { DesignerPreview } from '@/components/designer/DesignerPreview'
 import type { Play } from '@/types/play'
 
 export default function DesignerPage() {
   const designer = useDesignerState()
   const [status, setStatus] = useState<string | null>(null)
   const [draftNames, setDraftNames] = useState<string[]>([])
+  const [isPreviewing, setIsPreviewing] = useState(false)
 
   async function refreshDrafts() {
     try {
@@ -68,6 +70,14 @@ export default function DesignerPage() {
     }
   }
 
+  if (isPreviewing) {
+    return (
+      <main className="flex h-screen bg-bg p-4">
+        <DesignerPreview steps={designer.steps} set={designer.set} onExit={() => setIsPreviewing(false)} />
+      </main>
+    )
+  }
+
   return (
     <main className="flex flex-col md:flex-row h-screen bg-bg">
       <div className="w-full md:w-[65%] h-full p-4">
@@ -83,6 +93,7 @@ export default function DesignerPage() {
           draftNames={draftNames}
           onLoadDraft={handleLoadDraft}
           onDeleteDraft={handleDeleteDraft}
+          onPreview={() => setIsPreviewing(true)}
         />
         {status && <p className="text-sm text-text-muted">{status}</p>}
       </aside>
