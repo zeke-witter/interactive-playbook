@@ -11,9 +11,10 @@ type PlayerTokenProps = {
   enterIndex: number
   label: string
   pathPoints?: { px: number; py: number }[]
+  onClick?: () => void
 }
 
-export function PlayerToken({ player, isYou, dimmed, enterIndex, label, pathPoints }: PlayerTokenProps) {
+export function PlayerToken({ player, isYou, dimmed, enterIndex, label, pathPoints, onClick }: PlayerTokenProps) {
   const { px, py } = toPixel(player.x, player.y)
   const fill = player.isDefense ? '#dc2626' : '#2563eb'
   const [entering, setEntering] = useState(true)
@@ -39,6 +40,8 @@ export function PlayerToken({ player, isYou, dimmed, enterIndex, label, pathPoin
           : { duration: 0.3 },
         opacity: { duration: 0.3, delay: entering ? enterDelay : 0 },
       }}
+      onClick={onClick}
+      style={onClick ? { cursor: 'pointer' } : undefined}
     >
       <circle r={3.2} fill={fill} />
       {isYou && <circle r={4.2} fill="none" stroke="white" strokeWidth={0.6} />}

@@ -15,16 +15,17 @@ type FieldCanvasProps = {
   roster: Record<Position, string>
   onThrowComplete?: () => void
   highlightZone?: { x: number; y: number; width: number; height: number } | null
+  onSelectPosition?: (position: Position) => void
 }
 
-export function FieldCanvas({ step, selectedPosition, playCategory, playSet, roster, onThrowComplete, highlightZone }: FieldCanvasProps) {
+export function FieldCanvas({ step, selectedPosition, playCategory, playSet, roster, onThrowComplete, highlightZone, onSelectPosition }: FieldCanvasProps) {
   const isEndzone = playSet === 'endzone'
   return (
     <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} className="w-full h-full" role="img" aria-label={step.label}>
       <FieldBackground showEndzone={isEndzone} />
       <StallCounter startAt={step.stallCount} active={true} />
       <PathPreviews paths={step.pathPreviews} />
-      <PlayerTokens players={step.players} selectedPosition={selectedPosition} playCategory={playCategory} roster={roster} pathPreviews={step.pathPreviews} />
+      <PlayerTokens players={step.players} selectedPosition={selectedPosition} playCategory={playCategory} roster={roster} pathPreviews={step.pathPreviews} onSelectPosition={onSelectPosition} />
       <Disc step={step} onThrowComplete={onThrowComplete} />
       {highlightZone && (
         <rect

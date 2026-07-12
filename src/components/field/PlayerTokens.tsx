@@ -9,9 +9,10 @@ type PlayerTokensProps = {
   playCategory: 'offense' | 'defense'
   roster: Record<Position, string>
   pathPreviews: PlayerPath[]
+  onSelectPosition?: (position: Position) => void
 }
 
-export function PlayerTokens({ players, selectedPosition, playCategory, roster, pathPreviews }: PlayerTokensProps) {
+export function PlayerTokens({ players, selectedPosition, playCategory, roster, pathPreviews, onSelectPosition }: PlayerTokensProps) {
   return (
     <g>
       {players.map((player, i) => {
@@ -31,6 +32,7 @@ export function PlayerTokens({ players, selectedPosition, playCategory, roster, 
             enterIndex={i}
             label={label}
             pathPoints={pathPoints}
+            onClick={!dimmed && onSelectPosition ? () => onSelectPosition(player.id) : undefined}
           />
         )
       })}

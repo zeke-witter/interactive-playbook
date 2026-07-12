@@ -37,7 +37,15 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
     <main className="flex flex-col md:flex-row h-screen">
       <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto md:h-full p-4">
         <div className="relative w-full h-full rounded-xl border border-border bg-surface overflow-hidden">
-          <FieldCanvas step={step} selectedPosition={selectedPosition} playCategory={play.category} playSet={play.set} roster={roster} highlightZone={highlightZone} />
+          <FieldCanvas
+            step={step}
+            selectedPosition={selectedPosition}
+            playCategory={play.category}
+            playSet={play.set}
+            roster={roster}
+            highlightZone={highlightZone}
+            onSelectPosition={setSelectedPosition}
+          />
           <PickerDrawer currentPlay={play} />
         </div>
       </div>
