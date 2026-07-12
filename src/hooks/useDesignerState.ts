@@ -193,6 +193,14 @@ export function useDesignerState() {
     setInProgressPath(null)
   }
 
+  function removePath(playerId: Position, isDefense: boolean) {
+    pushHistory()
+    updateCurrentStep((step) => ({
+      ...step,
+      pathPreviews: step.pathPreviews.filter((p) => !(p.playerId === playerId && !!p.isDefense === !!isDefense)),
+    }))
+  }
+
   function setDiscHolder(index: number) {
     pushHistory()
     updateCurrentStep((step) => ({
@@ -360,6 +368,7 @@ export function useDesignerState() {
     addWaypoint,
     finishPath,
     cancelPath,
+    removePath,
     setDiscHolder,
     setThrow,
     clearDiscHolder,

@@ -4,6 +4,7 @@ import type { useDesignerState } from '@/hooks/useDesignerState'
 import type { PlayerPath } from '@/types/play'
 import type { DesignerMode, DesignerStep, StepPath } from '@/types/designer'
 import { PATH_COLOR } from '@/lib/pathColors'
+import { GENERIC_DEFENDER_LABELS } from '@/lib/names'
 import { CATEGORY_LABELS, SET_LABELS, ALL_CATEGORIES, ALL_SETS } from '@/lib/playLabels'
 
 type DesignerToolbarProps = {
@@ -22,7 +23,7 @@ const MODES: DesignerMode[] = ['position', 'path', 'throw']
 export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onDeleteDraft, onPreview }: DesignerToolbarProps) {
   const {
     steps, currentPath, currentStep, mode, setMode, selectedIndex,
-    pathType, setPathType, inProgressPath, finishPath, cancelPath,
+    pathType, setPathType, inProgressPath, finishPath, cancelPath, removePath,
     setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep, category, setCategory, set, setSet,
     addBranch, addAnotherBranch, removeBranch, undo, redo, canUndo, canRedo, newPlay,
   } = designer
@@ -129,6 +130,30 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
               </button>
             </>
           )}
+        </div>
+      )}
+
+      {mode === 'path' && currentStep.pathPreviews.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs uppercase tracking-wide text-text-muted">Paths on This Step</span>
+          {currentStep.pathPreviews.map((path, i) => (
+            <div key={`${path.playerId}-${path.isDefense ? 'd' : 'o'}-${i}`} className="flex items-center gap-2">
+              <span
+                className="w-3 h-3 rounded-full border border-border shrink-0"
+                style={{ backgroundColor: PATH_COLOR[path.type] }}
+              />
+              <span className="flex-1 text-sm text-text">
+                {path.isDefense ? GENERIC_DEFENDER_LABELS[path.playerId] : path.playerId}
+              </span>
+              <button
+                onClick={() => removePath(path.playerId, !!path.isDefense)}
+                aria-label={`Remove path for ${path.playerId}`}
+                className="text-xs text-text-muted hover:text-danger-border"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
