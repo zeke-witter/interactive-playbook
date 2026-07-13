@@ -14,7 +14,7 @@ const PATH_TYPES: PlayerPath['type'][] = ['primary', 'secondary', 'clear', 'rese
 export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useDesignerState> }) {
   const [expanded, setExpanded] = useState(false)
   const {
-    steps, currentStep, currentPath, mode, selectedIndex,
+    steps, currentStep, currentPath, mode, selectedIndex, multiSelected, setMultiSelected,
     pathType, setPathType, inProgressPath, finishPath, cancelPath, removePath,
     setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep,
     category, setCategory, set, setSet, addBranch, addAnotherBranch, removeBranch,
@@ -93,6 +93,17 @@ export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useD
                     </div>
                   ))}
                 </div>
+              )}
+            </div>
+          )}
+
+          {mode === 'select' && (
+            <div className="flex items-center gap-2 self-start px-2 py-1 rounded-full border border-border text-xs text-text-muted">
+              <span>{multiSelected.length === 0 ? 'No players selected' : `${multiSelected.length} player${multiSelected.length === 1 ? '' : 's'} selected`}</span>
+              {multiSelected.length > 0 && (
+                <button onClick={() => setMultiSelected([])} className="min-h-11 flex items-center text-text-muted hover:text-danger-border">
+                  Clear
+                </button>
               )}
             </div>
           )}

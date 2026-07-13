@@ -27,11 +27,16 @@ function freshStepFrom(step: DesignerStep): DesignerStep {
 
 type InProgressPath = { playerIndex: number; points: { x: number; y: number }[] }
 
+function clamp01(v: number): number {
+  return Math.min(1, Math.max(0, v))
+}
+
 export function useDesignerState() {
   const [rootSteps, setRootSteps] = useState<DesignerStep[]>([defaultStep('ho-stack')])
   const [currentPath, setCurrentPath] = useState<StepPath>([0])
   const [modeState, setModeState] = useState<DesignerMode>('position')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+  const [multiSelected, setMultiSelected] = useState<number[]>([])
   const [pathType, setPathType] = useState<PlayerPath['type']>('primary')
   const [inProgressPath, setInProgressPath] = useState<InProgressPath | null>(null)
   const [category, setCategoryState] = useState<Play['category']>('offense')
@@ -53,6 +58,7 @@ export function useDesignerState() {
     setCategoryState(snap.category)
     setSetState(snap.set)
     setSelectedIndex(null)
+    setMultiSelected([])
   }
 
   function pushHistory() {
@@ -107,13 +113,15 @@ export function useDesignerState() {
   function setSet(newSet: Play['set']) {
     pushHistory()
     setSetState(newSet)
-    // Only reposition players when the play is still untouched (a single,
-    // branchless step) — once real design work exists, switching sets
-    // should just relabel the play, not discard placed steps/paths.
-    const isFreshPlay = rootSteps.length === 1 && !rootSteps[0].branches
-    if (isFreshPlay) {
-      setRootSteps([defaultStep(newSet)])
-    }
+    // Reposition the step currently being viewed to the new set's canonical
+    // formation. Only this one step's players/paths/throw reset — other
+    // steps, and the step tree itself, are untouched.
+    updateCurrentStep((step) => ({
+      ...step,
+      players: defaultFormationFor(newSet),
+      pathPreviews: [],
+      throw: undefined,
+    }))
   }
 
   useEffect(() => {
@@ -149,6 +157,7 @@ export function useDesignerState() {
   function setMode(newMode: DesignerMode) {
     setModeState(newMode)
     setSelectedIndex(null)
+    setMultiSelected([])
     setInProgressPath(null)
   }
 
@@ -160,6 +169,22 @@ export function useDesignerState() {
     updateCurrentStep((step) => ({
       ...step,
       players: step.players.map((p, i) => (i === index ? { ...p, x, y } : p)),
+    }))
+  }
+
+  // Moves every selected player by the same delta, applied against each
+  // player's position at the start of the drag (`origin`) rather than their
+  // current position — origin is a fixed snapshot captured once at
+  // pointerdown, so deltas don't compound across the many pointermove
+  // events a single drag gesture fires.
+  function moveMultiSelection(deltaX: number, deltaY: number, origin: { index: number; x: number; y: number }[]) {
+    updateCurrentStep((step) => ({
+      ...step,
+      players: step.players.map((p, i) => {
+        const start = origin.find((o) => o.index === i)
+        if (!start) return p
+        return { ...p, x: clamp01(start.x + deltaX), y: clamp01(start.y + deltaY) }
+      }),
     }))
   }
 
@@ -266,6 +291,7 @@ export function useDesignerState() {
     setRootSteps((prev) => replaceSequenceAtPath(prev, currentPath, (seq) => [...seq, duplicated]))
     setCurrentPath([...currentPath.slice(0, -1), newIndex])
     setSelectedIndex(null)
+    setMultiSelected([])
   }
 
   function deleteStep(path: StepPath) {
@@ -276,11 +302,13 @@ export function useDesignerState() {
     setRootSteps((prev) => replaceSequenceAtPath(prev, path, (seq) => seq.filter((_, i) => i !== indexToDelete)))
     setCurrentPath([0])
     setSelectedIndex(null)
+    setMultiSelected([])
   }
 
   function goToStep(path: StepPath) {
     setCurrentPath(path)
     setSelectedIndex(null)
+    setMultiSelected([])
   }
 
   function addBranch(label1: string, label2: string) {
@@ -303,6 +331,7 @@ export function useDesignerState() {
     })
     setCurrentPath([...currentPath, 1, 0])
     setSelectedIndex(null)
+    setMultiSelected([])
   }
 
   function addAnotherBranch(label: string) {
@@ -313,6 +342,7 @@ export function useDesignerState() {
     setRootSteps((prev) => replaceStepAtPath(prev, currentPath, (step) => ({ ...step, branches: newBranches })))
     setCurrentPath([...currentPath, newBranchIndex, 0])
     setSelectedIndex(null)
+    setMultiSelected([])
   }
 
   function removeBranch(stepPath: StepPath, branchIndex: number) {
@@ -326,6 +356,7 @@ export function useDesignerState() {
     })))
     setCurrentPath([0])
     setSelectedIndex(null)
+    setMultiSelected([])
   }
 
   function newPlay() {
@@ -335,6 +366,7 @@ export function useDesignerState() {
     setCategoryState('offense')
     setSetState('ho-stack')
     setSelectedIndex(null)
+    setMultiSelected([])
     setModeState('position')
     setInProgressPath(null)
   }
@@ -347,6 +379,7 @@ export function useDesignerState() {
     if (data.set) setSetState(data.set)
     setCurrentPath([0])
     setSelectedIndex(null)
+    setMultiSelected([])
     setModeState('position')
     setInProgressPath(null)
     return true
@@ -360,6 +393,8 @@ export function useDesignerState() {
     setMode,
     selectedIndex,
     selectToken,
+    multiSelected,
+    setMultiSelected,
     pathType,
     setPathType,
     inProgressPath,
@@ -368,6 +403,7 @@ export function useDesignerState() {
     set,
     setSet,
     moveToken,
+    moveMultiSelection,
     startPath,
     addWaypoint,
     finishPath,

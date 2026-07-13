@@ -23,19 +23,29 @@ const TOUCH_CATCH_RADIUS = 7.5
 const TOUCH_DISC_LIFT = 8
 const HOLDER_RING = '#a3e635'
 const RECEIVER_RING = '#4ade80'
+// Below this (in normalized 0-1 field units), a marquee drag is treated as
+// a plain click on empty canvas rather than a deliberate selection box.
+const MARQUEE_MIN_SIZE = 0.01
 const MODE_HINTS: Record<DesignerMode, string> = {
   position: 'Click and drag any player to reposition',
   path: 'Click a player, then click to lay path waypoints',
   throw: 'Click and drag disc to the receiver',
+  select: 'Drag a box to select players, then drag any of them to move the group',
 }
 
 type DiscDrag = { holderIndex: number; cursorPx: number; cursorPy: number; hoverIndex: number | null; pointerType: string }
+type MarqueePoint = { x: number; y: number }
+type GroupDragOrigin = { index: number; x: number; y: number }[]
 
 export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [discDrag, setDiscDrag] = useState<DiscDrag | null>(null)
+  const [marqueeStart, setMarqueeStart] = useState<MarqueePoint | null>(null)
+  const [marqueeEnd, setMarqueeEnd] = useState<MarqueePoint | null>(null)
+  const groupDragOriginRef = useRef<GroupDragOrigin | null>(null)
   const {
     currentStep, mode, selectedIndex, selectToken, moveToken,
+    multiSelected, setMultiSelected, moveMultiSelection,
     inProgressPath, startPath, addWaypoint, setThrow, set, category, pathType,
     beginDrag, endDrag, cancelDrag,
   } = designer
@@ -69,9 +79,42 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
   }
 
   function handleBackgroundPointerDown(e: React.PointerEvent<SVGSVGElement>) {
-    if (mode !== 'path' || !inProgressPath) return
+    if (mode === 'path' && inProgressPath) {
+      const point = toSvgPoint(e.clientX, e.clientY)
+      addWaypoint(Math.min(1, Math.max(0, point.x)), Math.min(1, Math.max(0, point.y)))
+      return
+    }
+    if (mode === 'select') {
+      const point = toSvgPoint(e.clientX, e.clientY)
+      const clamped = { x: Math.min(1, Math.max(0, point.x)), y: Math.min(1, Math.max(0, point.y)) }
+      setMarqueeStart(clamped)
+      setMarqueeEnd(clamped)
+    }
+  }
+
+  function handleBackgroundPointerMove(e: React.PointerEvent<SVGSVGElement>) {
+    if (mode !== 'select' || !marqueeStart) return
     const point = toSvgPoint(e.clientX, e.clientY)
-    addWaypoint(Math.min(1, Math.max(0, point.x)), Math.min(1, Math.max(0, point.y)))
+    setMarqueeEnd({ x: Math.min(1, Math.max(0, point.x)), y: Math.min(1, Math.max(0, point.y)) })
+  }
+
+  function handleBackgroundPointerUp() {
+    if (mode !== 'select' || !marqueeStart || !marqueeEnd) return
+    const x1 = Math.min(marqueeStart.x, marqueeEnd.x)
+    const x2 = Math.max(marqueeStart.x, marqueeEnd.x)
+    const y1 = Math.min(marqueeStart.y, marqueeEnd.y)
+    const y2 = Math.max(marqueeStart.y, marqueeEnd.y)
+    if (x2 - x1 < MARQUEE_MIN_SIZE && y2 - y1 < MARQUEE_MIN_SIZE) {
+      setMultiSelected([])
+    } else {
+      const matched = currentStep.players
+        .map((p, i) => ({ p, i }))
+        .filter(({ p }) => p.x >= x1 && p.x <= x2 && p.y >= y1 && p.y <= y2)
+        .map(({ i }) => i)
+      setMultiSelected(matched)
+    }
+    setMarqueeStart(null)
+    setMarqueeEnd(null)
   }
 
   function handleTokenClick(index: number) {
@@ -107,6 +150,31 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
     onPositionDragComplete?.()
   }
 
+  function handleSelectDragStart(index: number) {
+    const group = multiSelected.includes(index) ? multiSelected : [index]
+    if (group !== multiSelected) setMultiSelected(group)
+    groupDragOriginRef.current = group.map((i) => ({ index: i, x: currentStep.players[i].x, y: currentStep.players[i].y }))
+    beginDrag()
+  }
+
+  function handleSelectDragMove(index: number, x: number, y: number) {
+    const origin = groupDragOriginRef.current
+    if (!origin) return
+    const self = origin.find((o) => o.index === index)
+    if (!self) return
+    moveMultiSelection(x - self.x, y - self.y, origin)
+  }
+
+  function handleSelectDragEnd() {
+    groupDragOriginRef.current = null
+    endDrag()
+  }
+
+  function handleSelectDragCancel() {
+    groupDragOriginRef.current = null
+    cancelDrag()
+  }
+
   function ringColorFor(index: number): string | null {
     if (mode === 'throw') {
       if (discDrag) {
@@ -118,6 +186,9 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
       const player = currentStep.players[index]
       if (!player.isDefense && currentStep.throw?.to === player.id) return RECEIVER_RING
       return selectedIndex === index ? 'white' : null
+    }
+    if (mode === 'select') {
+      return multiSelected.includes(index) ? 'white' : null
     }
     return selectedIndex === index ? 'white' : null
   }
@@ -153,6 +224,24 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
     />
   )
 
+  const marqueeRect = marqueeStart && marqueeEnd && (() => {
+    const start = toPixel(Math.min(marqueeStart.x, marqueeEnd.x), Math.min(marqueeStart.y, marqueeEnd.y))
+    const end = toPixel(Math.max(marqueeStart.x, marqueeEnd.x), Math.max(marqueeStart.y, marqueeEnd.y))
+    return (
+      <rect
+        x={start.px}
+        y={start.py}
+        width={end.px - start.px}
+        height={end.py - start.py}
+        fill="rgba(163,230,53,0.15)"
+        stroke="#a3e635"
+        strokeWidth={0.4}
+        strokeDasharray="1.5,1"
+        pointerEvents="none"
+      />
+    )
+  })()
+
   return (
     <>
       <svg
@@ -161,6 +250,8 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
         className="w-full h-full"
         style={{ touchAction: 'none' }}
         onPointerDown={handleBackgroundPointerDown}
+        onPointerMove={handleBackgroundPointerMove}
+        onPointerUp={handleBackgroundPointerUp}
       >
         <FieldBackground showEndzone={showEndzone} />
         {finishedPaths}
@@ -175,21 +266,31 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
             playCategory={category}
             ringColor={ringColorFor(i)}
             isDiscHolder={!!player.hasDisc}
-            draggable={mode === 'position' || (mode === 'throw' && i === holderIndex)}
+            draggable={mode === 'position' || (mode === 'throw' && i === holderIndex) || mode === 'select'}
             toSvgPoint={toSvgPoint}
             onMove={(x, y, pointerType) => {
               if (mode === 'throw' && i === holderIndex) {
                 handleHolderDragMove(x, y, pointerType)
               } else if (mode === 'position') {
                 moveToken(i, x, y)
+              } else if (mode === 'select') {
+                handleSelectDragMove(i, x, y)
               }
             }}
-            onDragStart={mode === 'position' ? beginDrag : undefined}
+            onDragStart={
+              mode === 'position'
+                ? beginDrag
+                : mode === 'select'
+                ? () => handleSelectDragStart(i)
+                : undefined
+            }
             onDragEnd={
               mode === 'throw' && i === holderIndex
                 ? handleHolderDragEnd
                 : mode === 'position'
                 ? handlePositionDragEnd
+                : mode === 'select'
+                ? handleSelectDragEnd
                 : undefined
             }
             onDragCancel={
@@ -197,11 +298,14 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
                 ? () => setDiscDrag(null)
                 : mode === 'position'
                 ? cancelDrag
+                : mode === 'select'
+                ? handleSelectDragCancel
                 : undefined
             }
             onClick={() => handleTokenClick(i)}
           />
         ))}
+        {marqueeRect}
         {discDrag && (
           <>
             {discDrag.pointerType === 'touch' && (

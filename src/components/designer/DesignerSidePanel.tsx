@@ -11,7 +11,7 @@ const PATH_TYPES: PlayerPath['type'][] = ['primary', 'secondary', 'clear', 'rese
 
 export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof useDesignerState> }) {
   const {
-    steps, currentStep, currentPath, mode, selectedIndex,
+    steps, currentStep, currentPath, mode, selectedIndex, multiSelected, setMultiSelected,
     pathType, setPathType, inProgressPath, finishPath, cancelPath, removePath,
     setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep,
     category, setCategory, set, setSet, addBranch, addAnotherBranch, removeBranch,
@@ -68,6 +68,17 @@ export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof us
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      )}
+
+      {mode === 'select' && (
+        <div className="flex items-center gap-2 self-start px-2 py-1 rounded-full border border-border text-xs text-text-muted">
+          <span>{multiSelected.length === 0 ? 'No players selected' : `${multiSelected.length} player${multiSelected.length === 1 ? '' : 's'} selected`}</span>
+          {multiSelected.length > 0 && (
+            <button onClick={() => setMultiSelected([])} className="text-text-muted hover:text-danger-border">
+              Clear
+            </button>
           )}
         </div>
       )}

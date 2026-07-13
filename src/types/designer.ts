@@ -12,6 +12,6 @@ export type DesignerStep = {
   branches?: DesignerBranch[]
 }
 
-export type DesignerMode = 'position' | 'path' | 'throw'
+export type DesignerMode = 'position' | 'path' | 'throw' | 'select'
 
 export type StepPath = number[]

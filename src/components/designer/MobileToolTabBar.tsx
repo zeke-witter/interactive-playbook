@@ -2,8 +2,8 @@
 import { ModeIcon } from './ModeIcon'
 import type { DesignerMode } from '@/types/designer'
 
-const MODES: DesignerMode[] = ['position', 'path', 'throw']
-const MODE_LABELS: Record<DesignerMode, string> = { position: 'Position', path: 'Draw Path', throw: 'Mark Throw' }
+const MODES: DesignerMode[] = ['position', 'path', 'throw', 'select']
+const MODE_LABELS: Record<DesignerMode, string> = { position: 'Position', path: 'Draw Path', throw: 'Mark Throw', select: 'Select' }
 
 export function MobileToolTabBar({ mode, onSelect }: { mode: DesignerMode; onSelect: (m: DesignerMode) => void }) {
   return (

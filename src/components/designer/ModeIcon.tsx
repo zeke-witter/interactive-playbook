@@ -16,6 +16,15 @@ export function ModeIcon({ mode, className }: { mode: DesignerMode; className?: 
       </svg>
     )
   }
+  if (mode === 'select') {
+    return (
+      <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.6">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="1.5" strokeDasharray="2.5,2" />
+        <circle cx="3.5" cy="3.5" r="1.4" fill="currentColor" stroke="none" />
+        <circle cx="20.5" cy="20.5" r="1.4" fill="currentColor" stroke="none" />
+      </svg>
+    )
+  }
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
       <circle cx="12" cy="12" r="8" />
