@@ -13,7 +13,14 @@ type DesignerCanvasProps = {
   onPositionDragComplete?: () => void
 }
 
-const DISC_HOVER_RADIUS = 4.5
+// Catch radius for the "nearest eligible token" search while dragging the
+// disc — generous enough for a fingertip's imprecision on touch, tighter
+// for pointer-precise mouse/pen input.
+const POINTER_CATCH_RADIUS = 4.5
+const TOUCH_CATCH_RADIUS = 7.5
+// How far above the actual touch point to draw the dragged disc, so a
+// finger never covers the disc or the highlighted candidate underneath it.
+const TOUCH_DISC_LIFT = 8
 const HOLDER_RING = '#a3e635'
 const RECEIVER_RING = '#4ade80'
 const MODE_HINTS: Record<DesignerMode, string> = {
@@ -22,7 +29,7 @@ const MODE_HINTS: Record<DesignerMode, string> = {
   throw: 'Click and drag disc to the receiver',
 }
 
-type DiscDrag = { holderIndex: number; cursorPx: number; cursorPy: number; hoverIndex: number | null }
+type DiscDrag = { holderIndex: number; cursorPx: number; cursorPy: number; hoverIndex: number | null; pointerType: string }
 
 export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -47,14 +54,14 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
     return { x: transformed.x / FIELD_WIDTH, y: transformed.y / FIELD_HEIGHT }
   }
 
-  function findHoverTarget(cursorPx: number, cursorPy: number): number | null {
+  function findHoverTarget(cursorPx: number, cursorPy: number, radius: number): number | null {
     let closest: { index: number; dist: number } | null = null
     for (let i = 0; i < currentStep.players.length; i++) {
       const p = currentStep.players[i]
       if (i === holderIndex || p.isDefense) continue
       const target = toPixel(p.x, p.y)
       const dist = Math.hypot(target.px - cursorPx, target.py - cursorPy)
-      if (dist <= DISC_HOVER_RADIUS && (!closest || dist < closest.dist)) {
+      if (dist <= radius && (!closest || dist < closest.dist)) {
         closest = { index: i, dist }
       }
     }
@@ -82,9 +89,10 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
     }
   }
 
-  function handleHolderDragMove(fieldX: number, fieldY: number) {
+  function handleHolderDragMove(fieldX: number, fieldY: number, pointerType: string) {
     const { px, py } = toPixel(fieldX, fieldY)
-    setDiscDrag({ holderIndex, cursorPx: px, cursorPy: py, hoverIndex: findHoverTarget(px, py) })
+    const radius = pointerType === 'touch' ? TOUCH_CATCH_RADIUS : POINTER_CATCH_RADIUS
+    setDiscDrag({ holderIndex, cursorPx: px, cursorPy: py, hoverIndex: findHoverTarget(px, py, radius), pointerType })
   }
 
   function handleHolderDragEnd() {
@@ -151,6 +159,7 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
         ref={svgRef}
         viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`}
         className="w-full h-full"
+        style={{ touchAction: 'none' }}
         onPointerDown={handleBackgroundPointerDown}
       >
         <FieldBackground showEndzone={showEndzone} />
@@ -167,9 +176,9 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
             isDiscHolder={!!player.hasDisc}
             draggable={mode === 'position' || (mode === 'throw' && i === holderIndex)}
             toSvgPoint={toSvgPoint}
-            onMove={(x, y) => {
+            onMove={(x, y, pointerType) => {
               if (mode === 'throw' && i === holderIndex) {
-                handleHolderDragMove(x, y)
+                handleHolderDragMove(x, y, pointerType)
               } else if (mode === 'position') {
                 moveToken(i, x, y)
               }
@@ -193,15 +202,28 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
           />
         ))}
         {discDrag && (
-          <circle
-            cx={discDrag.cursorPx}
-            cy={discDrag.cursorPy}
-            r={1.4}
-            fill="white"
-            stroke="black"
-            strokeWidth={0.2}
-            pointerEvents="none"
-          />
+          <>
+            {discDrag.pointerType === 'touch' && (
+              <ellipse
+                cx={discDrag.cursorPx}
+                cy={discDrag.cursorPy}
+                rx={2}
+                ry={1}
+                fill="black"
+                opacity={0.35}
+                pointerEvents="none"
+              />
+            )}
+            <circle
+              cx={discDrag.cursorPx}
+              cy={discDrag.pointerType === 'touch' ? discDrag.cursorPy - TOUCH_DISC_LIFT : discDrag.cursorPy}
+              r={1.4}
+              fill="white"
+              stroke="black"
+              strokeWidth={0.2}
+              pointerEvents="none"
+            />
+          </>
         )}
       </svg>
       <div className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-surface-raised/90 border border-accent text-xs text-text pointer-events-none">

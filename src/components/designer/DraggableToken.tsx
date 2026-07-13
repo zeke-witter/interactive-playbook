@@ -11,7 +11,7 @@ type DraggableTokenProps = {
   isDiscHolder: boolean
   draggable: boolean
   toSvgPoint: (clientX: number, clientY: number) => { x: number; y: number }
-  onMove: (x: number, y: number) => void
+  onMove: (x: number, y: number, pointerType: string) => void
   onDragStart?: () => void
   onDragEnd?: () => void
   onDragCancel?: () => void
@@ -38,7 +38,7 @@ export function DraggableToken({
     if (!draggingRef.current) return
     movedRef.current = true
     const point = toSvgPoint(e.clientX, e.clientY)
-    onMove(Math.min(1, Math.max(0, point.x)), Math.min(1, Math.max(0, point.y)))
+    onMove(Math.min(1, Math.max(0, point.x)), Math.min(1, Math.max(0, point.y)), e.pointerType)
   }
 
   function handlePointerUp(e: React.PointerEvent<SVGGElement>) {
@@ -76,7 +76,7 @@ export function DraggableToken({
       onPointerCancel={handlePointerCancel}
       onPointerEnter={() => setIsHovering(true)}
       onPointerLeave={() => setIsHovering(false)}
-      style={{ cursor: draggable ? 'grab' : 'pointer' }}
+      style={{ cursor: draggable ? 'grab' : 'pointer', touchAction: 'none' }}
     >
       <circle r={3.2} fill={fill} />
       {ringColor ? (
