@@ -2,6 +2,13 @@
 
 This doc exists to brief a UI/UX brainstorming session (e.g. Claude Design) on the current state of the app, who it's for, and what "more intuitive" should mean for this round of work. It's context and constraints, not a rulebook — the point is to give whoever's exploring UI approaches everything they'd need to propose changes that actually fit the product, instead of guessing.
 
+## How to use this doc with Claude Design
+
+1. **Attach this doc** (and the screenshots below) to your Claude Design session as reference material — it covers the design system (real color/type tokens) and current-state visuals it asks for.
+2. **Link the codebase**: `github.com/zeke-witter/interactive-playbook` (private repo). This lets it see the actual component structure (`src/components/designer/`, `src/components/field/`, `src/components/sidebar/`) instead of just the screenshots.
+3. **Work through the prompts below** one at a time rather than all at once — each targets one design principle or open question, and they'll go better as separate conversations/canvases than one giant ask.
+4. **Loop back to Claude Code when a direction feels right.** Claude Design can hand a design off to Claude Code directly — bring (or export) whatever you land on back into a session here and I'll turn it into an actual implementation plan against the real components, the same way every other feature in this project has gone from spec to shipped.
+
 ## What this product is
 
 Mousetrap Playbook is a two-tool app for an ultimate frisbee team:
@@ -108,3 +115,161 @@ Current state, captured alongside this doc, in `docs/design/screenshots/`:
 - Should the Designer eventually get real touch/pointer support for tablets, given the mobile-first design lens already being applied?
 - What should "quiz mode" actually look like once it returns — a separate route, a toggle within the Viewer, something else?
 - As the Designer's audience widens beyond one person, does anything about the current file-based (no accounts, no sharing) model need to change, or does that stay out of scope for the UI work specifically?
+
+## Ready-to-use prompts
+
+One prompt per design principle and per open question, meant to be pasted into Claude Design as-is (attach this doc + the screenshots first so the color/type tokens and current layout are already in context). Each is scoped to one topic on purpose — work through them as separate explorations rather than one combined ask.
+
+### 1. Whiteboarding-tool conventions (Designer)
+
+```
+Redesign the Play Designer's canvas and toolbar to feel immediately
+familiar to someone who has used Figma, Miro, Excalidraw, or Google
+Jamboard, even if they've never seen this specific tool before.
+
+Goal: cut onboarding friction to near zero for a future audience of
+ultimate frisbee coaches and captains who are not professional
+designers, but likely have some passing experience with a
+whiteboarding or slide tool.
+
+Current layout: see designer-desktop-position-mode.png and
+designer-branching.png. Current interactions: mode-switching via a
+button row (Position / Draw Path / Mark Throw), a text-based step-tree
+list for navigating steps and branches, drag gestures for drawing a
+cutting path and for marking a throw.
+
+Keep: the step-based authoring model (a play is a sequence of
+steps/branches, not freeform layers), the existing dark color system,
+and both drag gestures already in place.
+
+Propose 2-3 layout directions that borrow established conventions
+(tool rail placement, canvas pan/zoom, selection/multi-select
+affordances, alignment or spacing guides) for organizing the canvas
+and controls, without changing what the tool fundamentally does.
+```
+
+### 2. Mobile-first as a mental model (Designer)
+
+```
+Audit every interaction in the Play Designer as if it had to work by
+touch on a tablet, even though it only needs to support mouse today.
+
+Goal: validate (or challenge) the two interactions already built with
+this lens in mind — click-and-drag to draw a cutting path, and
+press-and-drag from the disc holder to mark a throw (see
+designer-mark-throw-mode.png) — and propose how the remaining
+interactions (selecting a player, switching modes, navigating the step
+tree, adding a branch) would need to change to hold up under touch,
+without breaking how they work with a mouse right now.
+
+Audience: same as above — non-designer coaches/captains, likely on a
+laptop today but possibly a tablet in the future.
+
+Content: walk through each of the three modes (Position, Draw Path,
+Mark Throw) and the step-tree/branch-management UI, and flag anything
+that currently depends on hover, right-click, or a small tap target
+that would fail on touch.
+```
+
+### 3. Discoverability through convention (Designer)
+
+```
+Design a first-time-use experience for the Play Designer that needs
+no onboarding, tutorial, or tooltip walkthrough for someone who has
+used a whiteboarding tool before.
+
+Goal: a brand-new coach with zero context should be able to look at
+the empty/default state and correctly guess how to place a player,
+draw a path, and mark a throw, purely from visual convention.
+
+Current state: designer-desktop-position-mode.png shows the default
+(empty-ish) canvas and the current toolbar. Current mode labels are
+literally "Position" / "Draw Path" / "Mark Throw."
+
+Propose: an empty-state / first-run layout, and any changes to
+labeling, iconography, or affordances (e.g. cursor states, hover
+hints) that make the three modes and the step-tree self-explanatory
+without added instructional text.
+```
+
+### 4. Continuous, specific visual feedback (Designer + Viewer)
+
+```
+Design a complete visual "state language" for both the Play Designer
+and Play Viewer: hover, selected, draggable, dragging, disabled,
+confirmed/success, and error/destructive states.
+
+Goal: at any moment, a user should be able to tell what's interactive,
+what's currently selected or active, and what just happened, at a
+glance, without reading text.
+
+Design system: dark theme, background #0b0d11, surface #15181f,
+border #262b35, text #f4f4f5 / muted #9aa0ac, accent lime #a3e635,
+success green #4ade80, danger red #f87171. Oswald for
+headers/labels, Geist Sans for body.
+
+Current examples already using this pattern: a colored ring around
+the currently-selected or active field token (accent = holder, white
+= live drag-hover target, green = confirmed receiver — see
+designer-mark-throw-mode.png), and small pill-shaped status chips
+like "Has disc" / "Receiving disc."
+
+Propose a small, consistent component set (buttons, chips, rings,
+disabled states) that covers both tools, building on the existing
+color meanings rather than introducing new ones.
+```
+
+### 5. Touch/pointer support for tablets (open question)
+
+```
+Propose a concrete touch interaction spec for the Play Designer's two
+drag gestures, assuming a future tablet target.
+
+Goal: answer whether "click and drag to draw a path" and "press and
+drag from the disc holder to mark a throw" (designer-mark-throw-mode.png)
+translate directly to touch, or need adjustment — e.g. for the case
+where a finger obscures what it's dragging, or where a hover-preview
+state (used today to highlight a potential throw receiver while
+dragging) has no true equivalent on touch.
+
+Content: cover at minimum: starting a drag from a small circular
+token, seeing a live preview of a not-yet-committed path or throw
+target, and canceling a drag partway through.
+```
+
+### 6. What "quiz mode" should look like (open question)
+
+```
+Brainstorm 2-3 concrete concepts for how quizzing could work in the
+Play Viewer as a separate, optional thing — not blocking the main
+step-through flow the way it used to.
+
+Goal: today, stepping through a play is Prev/Next plus narrative text
+per position (see viewer-desktop.png, viewer-mobile.png). Quizzing
+used to gate the "Next" button with a question; that's being removed.
+Propose how quizzing could return without that blocking behavior —
+options might include a separate mode/route entered deliberately, an
+end-of-play recap, or per-step optional questions that never block
+progress.
+
+Audience: players reviewing a play on their own time (phone, tablet,
+or desktop), not in a live game context.
+```
+
+### 7. Does the file-based model constrain the UI? (open question)
+
+```
+Given the Play Designer and Viewer are single-user and file-based
+today (no accounts, no sharing, no backend — plays and drafts are
+files on one person's machine), sanity-check whether any of the UI
+directions from the other prompts assume something that isn't true
+yet (e.g. multi-user editing, cloud save, sharing a draft with a
+teammate).
+
+Goal: flag anywhere a proposed design implies functionality the app
+doesn't have, and note whether that's a reason to simplify the design
+now or a reason to flag it as a near-term follow-up feature — this
+project's audience is explicitly expected to widen beyond one person
+eventually, so "share this play" and "who else can edit this" are
+fair things to raise even if they're not being designed yet.
+```
