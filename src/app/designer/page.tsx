@@ -9,7 +9,10 @@ import { DesignerSidePanel } from '@/components/designer/DesignerSidePanel'
 import { FileSwitcher } from '@/components/designer/FileSwitcher'
 import { MobileToolTabBar } from '@/components/designer/MobileToolTabBar'
 import { MobileStepSheet } from '@/components/designer/MobileStepSheet'
+import { CoachMark } from '@/components/designer/CoachMark'
 import type { Play } from '@/types/play'
+
+const COACH_MARK_KEY = 'mousetrap-designer-coachmark-dismissed'
 
 export default function DesignerPage() {
   const designer = useDesignerState()
@@ -17,6 +20,19 @@ export default function DesignerPage() {
   const [draftNames, setDraftNames] = useState<string[]>([])
   const [isPreviewing, setIsPreviewing] = useState(false)
   const [currentFileName, setCurrentFileName] = useState<string | null>(null)
+  const [coachDismissed, setCoachDismissed] = useState(true)
+
+  useEffect(() => {
+    setCoachDismissed(localStorage.getItem(COACH_MARK_KEY) === '1')
+  }, [])
+
+  function dismissCoachMark() {
+    localStorage.setItem(COACH_MARK_KEY, '1')
+    setCoachDismissed(true)
+  }
+
+  const showCoachMark = !coachDismissed && designer.mode === 'position'
+    && designer.steps.length === 1 && !designer.steps[0].branches
 
   async function refreshDrafts() {
     try {
@@ -158,9 +174,11 @@ export default function DesignerPage() {
             </div>
           )}
           <div className="relative w-full h-full rounded-xl border border-border bg-surface overflow-hidden">
-            <DesignerCanvas designer={designer} />
+            <DesignerCanvas designer={designer} onPositionDragComplete={dismissCoachMark} />
           </div>
         </div>
+
+        {showCoachMark && <CoachMark variant="mobile" />}
 
         <MobileStepSheet designer={designer} />
         <MobileToolTabBar mode={designer.mode} onSelect={designer.setMode} />
@@ -181,14 +199,15 @@ export default function DesignerPage() {
           onRedo={designer.redo}
           onPreview={() => setIsPreviewing(true)}
         />
-        <div className="flex-1 min-h-0 flex">
+        <div className="relative flex-1 min-h-0 flex">
           <ToolRail mode={designer.mode} onSelect={designer.setMode} />
           <div className="flex-1 min-w-0 flex items-center justify-center p-6 bg-[#0d0f13]">
             <div className="relative h-full aspect-[5/6] max-w-full rounded-xl border border-border bg-surface overflow-hidden">
-              <DesignerCanvas designer={designer} />
+              <DesignerCanvas designer={designer} onPositionDragComplete={dismissCoachMark} />
             </div>
           </div>
           <DesignerSidePanel designer={designer} />
+          {showCoachMark && <CoachMark variant="desktop" />}
         </div>
         {status && <p className="flex-none px-4 py-2 text-sm text-text-muted border-t border-border">{status}</p>}
       </div>

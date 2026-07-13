@@ -10,6 +10,7 @@ import type { DesignerMode } from '@/types/designer'
 
 type DesignerCanvasProps = {
   designer: ReturnType<typeof useDesignerState>
+  onPositionDragComplete?: () => void
 }
 
 const DISC_HOVER_RADIUS = 4.5
@@ -23,7 +24,7 @@ const MODE_HINTS: Record<DesignerMode, string> = {
 
 type DiscDrag = { holderIndex: number; cursorPx: number; cursorPy: number; hoverIndex: number | null }
 
-export function DesignerCanvas({ designer }: DesignerCanvasProps) {
+export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [discDrag, setDiscDrag] = useState<DiscDrag | null>(null)
   const {
@@ -91,6 +92,11 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
       setThrow(holderIndex, discDrag.hoverIndex)
     }
     setDiscDrag(null)
+  }
+
+  function handlePositionDragEnd() {
+    endDrag()
+    onPositionDragComplete?.()
   }
 
   function ringColorFor(index: number): string | null {
@@ -173,7 +179,7 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
               mode === 'throw' && i === holderIndex
                 ? handleHolderDragEnd
                 : mode === 'position'
-                ? endDrag
+                ? handlePositionDragEnd
                 : undefined
             }
             onDragCancel={

@@ -18,34 +18,42 @@ export function StepTree({ steps, pathPrefix, currentPath, onSelect, onDelete, o
       {steps.map((step, i) => {
         const path = [...pathPrefix, i]
         const isCurrent = path.length === currentPath.length && path.every((v, idx) => v === currentPath[idx])
+        const isEmptyFirstStep = depth === 0 && i === 0 && steps.length === 1
         return (
           <div key={i} className="flex flex-col gap-1">
-            <div className="relative flex items-center gap-2 pl-4">
-              <span
-                className={`absolute left-0 w-[7px] h-[7px] rounded-full border ${
-                  isCurrent ? 'bg-accent border-accent' : 'bg-surface border-border'
-                }`}
-              />
-              <button
-                onClick={() => onSelect(path)}
-                className={`flex-1 min-h-11 md:min-h-0 text-left px-2 py-1 rounded-md border text-sm transition-colors ${
-                  isCurrent ? 'border-accent text-accent' : 'border-border text-text hover:border-[#3a4152]'
-                }`}
-              >
-                Step {i + 1}
-              </button>
-              {steps.length > 1 && (
-                <button onClick={() => {
-                  const hasBranches = step.branches && step.branches.length > 0
-                  const message = hasBranches ? 'Delete this step and all its branches?' : 'Delete this step?'
-                  if (window.confirm(message)) {
-                    onDelete(path)
-                  }
-                }} className="min-h-11 md:min-h-0 px-2 text-xs text-text-muted hover:text-danger-border">
-                  Remove
+            {isEmptyFirstStep ? (
+              <div className="rounded-md border border-dashed border-accent bg-surface-raised px-3 py-2.5 text-center">
+                <p className="text-sm text-text">Step 1</p>
+                <p className="mt-1 text-xs text-text-muted">This is where it starts, add a step once you&apos;re happy with the setup</p>
+              </div>
+            ) : (
+              <div className="relative flex items-center gap-2 pl-4">
+                <span
+                  className={`absolute left-0 w-[7px] h-[7px] rounded-full border ${
+                    isCurrent ? 'bg-accent border-accent' : 'bg-surface border-border'
+                  }`}
+                />
+                <button
+                  onClick={() => onSelect(path)}
+                  className={`flex-1 min-h-11 md:min-h-0 text-left px-2 py-1 rounded-md border text-sm transition-colors ${
+                    isCurrent ? 'border-accent text-accent' : 'border-border text-text hover:border-[#3a4152]'
+                  }`}
+                >
+                  Step {i + 1}
                 </button>
-              )}
-            </div>
+                {steps.length > 1 && (
+                  <button onClick={() => {
+                    const hasBranches = step.branches && step.branches.length > 0
+                    const message = hasBranches ? 'Delete this step and all its branches?' : 'Delete this step?'
+                    if (window.confirm(message)) {
+                      onDelete(path)
+                    }
+                  }} className="min-h-11 md:min-h-0 px-2 text-xs text-text-muted hover:text-danger-border">
+                    Remove
+                  </button>
+                )}
+              </div>
+            )}
             {step.branches?.map((branch, b) => (
               <div key={b} className="flex flex-col gap-1" style={{ marginLeft: 12 }}>
                 <div className="flex items-center gap-2 text-xs text-text-muted uppercase tracking-wide">
