@@ -79,7 +79,7 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
               <div key={name} className="flex items-center gap-2">
                 <button
                   onClick={() => onLoadDraft(name)}
-                  className="flex-1 text-left px-2 py-1 rounded-md border border-border text-text text-sm"
+                  className="flex-1 text-left px-2 py-1 rounded-md border border-border text-text text-sm transition-colors hover:border-[#3a4152]"
                 >
                   {name}
                 </button>
@@ -100,8 +100,10 @@ export function DesignerToolbar({ designer, onSave, draftNames, onLoadDraft, onD
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`px-3 py-1 rounded-md border text-sm ${
-              mode === m ? 'border-accent bg-accent text-accent-foreground' : 'border-border text-text'
+            className={`px-3 py-1 rounded-md border text-sm transition-colors ${
+              mode === m
+                ? 'border-accent bg-accent text-accent-foreground'
+                : 'border-border bg-transparent text-text-muted hover:bg-surface-raised hover:text-text'
             }`}
           >
             {MODE_LABELS[m]}
@@ -265,8 +267,8 @@ function StepTree({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => onSelect(path)}
-                className={`flex-1 text-left px-2 py-1 rounded-md border text-sm ${
-                  isCurrent ? 'border-accent text-accent' : 'border-border text-text'
+                className={`flex-1 text-left px-2 py-1 rounded-md border text-sm transition-colors ${
+                  isCurrent ? 'border-accent text-accent' : 'border-border text-text hover:border-[#3a4152]'
                 }`}
               >
                 Step {i + 1}

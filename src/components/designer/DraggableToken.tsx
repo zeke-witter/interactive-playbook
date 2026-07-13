@@ -1,5 +1,5 @@
 'use client'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { toPixel } from '@/lib/field'
 
 type DraggableTokenProps = {
@@ -23,6 +23,7 @@ export function DraggableToken({
 }: DraggableTokenProps) {
   const draggingRef = useRef(false)
   const movedRef = useRef(false)
+  const [isHovering, setIsHovering] = useState(false)
 
   function handlePointerDown(e: React.PointerEvent<SVGGElement>) {
     e.stopPropagation()
@@ -73,10 +74,16 @@ export function DraggableToken({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
+      onPointerEnter={() => setIsHovering(true)}
+      onPointerLeave={() => setIsHovering(false)}
       style={{ cursor: draggable ? 'grab' : 'pointer' }}
     >
       <circle r={3.2} fill={fill} />
-      {ringColor && <circle r={4.2} fill="none" stroke={ringColor} strokeWidth={0.6} />}
+      {ringColor ? (
+        <circle r={4.2} fill="none" stroke={ringColor} strokeWidth={0.6} />
+      ) : (
+        isHovering && <circle r={4.2} fill="none" stroke="#f4f4f5" strokeOpacity={0.25} strokeWidth={0.6} />
+      )}
       {isDiscHolder && <circle cx={2.4} cy={-2.4} r={1} fill="white" stroke="black" strokeWidth={0.2} />}
       <text y={1} fontSize={2.6} fill="white" textAnchor="middle" fontWeight="bold">
         {label}
