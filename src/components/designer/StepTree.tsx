@@ -28,7 +28,7 @@ export function StepTree({ steps, pathPrefix, currentPath, onSelect, onDelete, o
               />
               <button
                 onClick={() => onSelect(path)}
-                className={`flex-1 text-left px-2 py-1 rounded-md border text-sm transition-colors ${
+                className={`flex-1 min-h-11 md:min-h-0 text-left px-2 py-1 rounded-md border text-sm transition-colors ${
                   isCurrent ? 'border-accent text-accent' : 'border-border text-text hover:border-[#3a4152]'
                 }`}
               >
@@ -41,7 +41,7 @@ export function StepTree({ steps, pathPrefix, currentPath, onSelect, onDelete, o
                   if (window.confirm(message)) {
                     onDelete(path)
                   }
-                }} className="text-xs text-text-muted hover:text-danger-border">
+                }} className="min-h-11 md:min-h-0 px-2 text-xs text-text-muted hover:text-danger-border">
                   Remove
                 </button>
               )}
@@ -54,7 +54,7 @@ export function StepTree({ steps, pathPrefix, currentPath, onSelect, onDelete, o
                     if (window.confirm('Delete this branch and everything in it?')) {
                       onRemoveBranch(path, b)
                     }
-                  }} className="hover:text-danger-border normal-case">
+                  }} className="min-h-11 md:min-h-0 flex items-center hover:text-danger-border normal-case">
                     Remove Branch
                   </button>
                 </div>

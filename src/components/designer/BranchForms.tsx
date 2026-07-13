@@ -5,7 +5,7 @@ export function AddBranchForm({ onAdd }: { onAdd: (label1: string, label2: strin
   const [open, setOpen] = useState(false)
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="px-2 py-1 text-sm rounded-md border border-dashed border-accent text-accent">
+      <button onClick={() => setOpen(true)} className="min-h-11 md:min-h-0 px-2 py-1 text-sm rounded-md border border-dashed border-accent text-accent">
         + Add Branch
       </button>
     )
@@ -38,7 +38,7 @@ export function AddAnotherBranchForm({ onAdd }: { onAdd: (label: string) => void
   const [open, setOpen] = useState(false)
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="px-2 py-1 text-sm rounded-md border border-dashed border-accent text-accent">
+      <button onClick={() => setOpen(true)} className="min-h-11 md:min-h-0 px-2 py-1 text-sm rounded-md border border-dashed border-accent text-accent">
         + Add Another Branch
       </button>
     )

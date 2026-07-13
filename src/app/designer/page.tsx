@@ -2,11 +2,13 @@
 import { useEffect, useState } from 'react'
 import { useDesignerState } from '@/hooks/useDesignerState'
 import { DesignerCanvas } from '@/components/designer/DesignerCanvas'
-import { DesignerToolbar } from '@/components/designer/DesignerToolbar'
 import { DesignerPreview } from '@/components/designer/DesignerPreview'
 import { DesignerTopBar } from '@/components/designer/DesignerTopBar'
 import { ToolRail } from '@/components/designer/ToolRail'
 import { DesignerSidePanel } from '@/components/designer/DesignerSidePanel'
+import { FileSwitcher } from '@/components/designer/FileSwitcher'
+import { MobileToolTabBar } from '@/components/designer/MobileToolTabBar'
+import { MobileStepSheet } from '@/components/designer/MobileStepSheet'
 import type { Play } from '@/types/play'
 
 export default function DesignerPage() {
@@ -113,25 +115,55 @@ export default function DesignerPage() {
 
   return (
     <main className="h-screen overflow-hidden bg-bg">
-      {/* Mobile layout — unchanged pending its own dedicated redesign pass */}
-      <div className="md:hidden flex flex-col h-full">
-        <div className="w-full h-full p-4">
+      {/* Mobile layout — bottom tab bar + swipe-up step sheet, mirroring the desktop shell */}
+      <div className="md:hidden relative h-full">
+        <div className="h-[46px] flex-none flex items-center gap-2 px-3 border-b border-border bg-surface-raised">
+          <FileSwitcher
+            currentFileName={currentFileName}
+            draftNames={draftNames}
+            onSave={handleSave}
+            onLoadDraft={handleLoadDraft}
+            onDeleteDraft={handleDeleteDraft}
+            onNewPlay={handleNewPlay}
+          />
+          <div className="flex-1" />
+          <button
+            onClick={designer.undo}
+            disabled={!designer.canUndo}
+            title="Undo"
+            className="w-7 h-7 flex items-center justify-center rounded-md border border-border text-text disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ↺
+          </button>
+          <button
+            onClick={designer.redo}
+            disabled={!designer.canRedo}
+            title="Redo"
+            className="w-7 h-7 flex items-center justify-center rounded-md border border-border text-text disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ↻
+          </button>
+          <button
+            onClick={() => setIsPreviewing(true)}
+            className="h-7 px-2.5 rounded-md bg-accent text-accent-foreground text-sm font-medium"
+          >
+            ▶
+          </button>
+        </div>
+
+        <div className="absolute top-[46px] left-0 right-0 bottom-0 pb-[126px] p-3 bg-[#0d0f13]">
+          {status && (
+            <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 px-3 py-1 rounded-full bg-surface-raised/95 border border-accent text-xs text-text whitespace-nowrap">
+              {status}
+            </div>
+          )}
           <div className="relative w-full h-full rounded-xl border border-border bg-surface overflow-hidden">
             <DesignerCanvas designer={designer} />
           </div>
         </div>
-        <aside className="w-full flex flex-col gap-4 p-4 overflow-y-auto">
-          <h1 className="font-display text-lg font-bold uppercase tracking-wide text-text">Play Designer</h1>
-          <DesignerToolbar
-            designer={designer}
-            onSave={handleSave}
-            draftNames={draftNames}
-            onLoadDraft={handleLoadDraft}
-            onDeleteDraft={handleDeleteDraft}
-            onPreview={() => setIsPreviewing(true)}
-          />
-          {status && <p className="text-sm text-text-muted">{status}</p>}
-        </aside>
+
+        <MobileStepSheet designer={designer} />
+        <MobileToolTabBar mode={designer.mode} onSelect={designer.setMode} />
       </div>
 
       {/* Desktop layout — whiteboarding-tool structure: top bar, tool rail, canvas, formation/steps panel */}
