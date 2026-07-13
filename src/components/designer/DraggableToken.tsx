@@ -7,6 +7,7 @@ type DraggableTokenProps = {
   y: number
   label: string
   isDefense: boolean
+  playCategory: 'offense' | 'defense'
   ringColor: string | null
   isDiscHolder: boolean
   draggable: boolean
@@ -19,7 +20,7 @@ type DraggableTokenProps = {
 }
 
 export function DraggableToken({
-  x, y, label, isDefense, ringColor, isDiscHolder, draggable, toSvgPoint, onMove, onDragStart, onDragEnd, onDragCancel, onClick,
+  x, y, label, isDefense, playCategory, ringColor, isDiscHolder, draggable, toSvgPoint, onMove, onDragStart, onDragEnd, onDragCancel, onClick,
 }: DraggableTokenProps) {
   const draggingRef = useRef(false)
   const movedRef = useRef(false)
@@ -65,7 +66,8 @@ export function DraggableToken({
   }
 
   const { px, py } = toPixel(x, y)
-  const fill = isDefense ? '#dc2626' : '#2563eb'
+  const isOwnSide = isDefense ? playCategory === 'defense' : playCategory === 'offense'
+  const fill = isOwnSide ? '#2563eb' : '#dc2626'
 
   return (
     <g

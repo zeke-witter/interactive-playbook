@@ -36,7 +36,7 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
   const [discDrag, setDiscDrag] = useState<DiscDrag | null>(null)
   const {
     currentStep, mode, selectedIndex, selectToken, moveToken,
-    inProgressPath, startPath, addWaypoint, setThrow, set, pathType,
+    inProgressPath, startPath, addWaypoint, setThrow, set, category, pathType,
     beginDrag, endDrag, cancelDrag,
   } = designer
   const showEndzone = set === 'endzone'
@@ -172,6 +172,7 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
             y={player.y}
             label={player.isDefense ? GENERIC_DEFENDER_LABELS[player.id] : player.id}
             isDefense={!!player.isDefense}
+            playCategory={category}
             ringColor={ringColorFor(i)}
             isDiscHolder={!!player.hasDisc}
             draggable={mode === 'position' || (mode === 'throw' && i === holderIndex)}

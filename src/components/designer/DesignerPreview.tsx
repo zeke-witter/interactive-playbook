@@ -12,6 +12,7 @@ import type { Play } from '@/types/play'
 
 type DesignerPreviewProps = {
   steps: DesignerStep[]
+  category: Play['category']
   set: Play['set']
   onExit: () => void
 }
@@ -39,7 +40,7 @@ function stepNumberFor(path: StepPath): number {
   return total
 }
 
-export function DesignerPreview({ steps, set, onExit }: DesignerPreviewProps) {
+export function DesignerPreview({ steps, category, set, onExit }: DesignerPreviewProps) {
   const [previewPath, setPreviewPath] = useState<StepPath>([0])
 
   const previewStep = getStepAtPath(steps, previewPath)
@@ -108,6 +109,7 @@ export function DesignerPreview({ steps, set, onExit }: DesignerPreviewProps) {
                 enterIndex={i}
                 label={label}
                 pathPoints={pathPoints}
+                playCategory={category}
               />
             )
           })}

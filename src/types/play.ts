@@ -38,7 +38,6 @@ export type Quiz = {
 export type PlayStep = {
   id: string
   label: string
-  stallCount?: number
   force: Force
   players: PlayerState[]
   pathPreviews: PlayerPath[]

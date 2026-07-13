@@ -21,7 +21,7 @@ export function ToolRail({ mode, onSelect }: { mode: DesignerMode; onSelect: (m:
             }`}
           >
             <ModeIcon mode={m} className="w-5 h-5" />
-            <span className="text-[8.5px] leading-none text-center whitespace-pre-line">{MODE_LABELS[m]}</span>
+            <span className="text-[10.5px] leading-none text-center whitespace-pre-line">{MODE_LABELS[m]}</span>
           </button>
         )
       })}

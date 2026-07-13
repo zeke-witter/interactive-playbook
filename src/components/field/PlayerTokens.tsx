@@ -27,11 +27,12 @@ export function PlayerTokens({ players, selectedPosition, playCategory, roster, 
           <PlayerToken
             key={`${player.id}-${player.isDefense ? 'd' : 'o'}-${i}`}
             player={player}
-            isYou={!player.isDefense && player.id === selectedPosition}
+            isYou={!dimmed && player.id === selectedPosition}
             dimmed={dimmed}
             enterIndex={i}
             label={label}
             pathPoints={pathPoints}
+            playCategory={playCategory}
             onClick={!dimmed && onSelectPosition ? () => onSelectPosition(player.id) : undefined}
           />
         )

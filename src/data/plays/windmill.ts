@@ -143,7 +143,6 @@ export const windmill: Play = {
     {
       id: 'windmill-5-throw-to-c4',
       label: 'H1 Hits C4 Underneath',
-      stallCount: 3,
       force: 'none',
       players: [
         { id: 'H1', x: 0.4975627136230469, y: 0.8253968556722006, hasDisc: true },

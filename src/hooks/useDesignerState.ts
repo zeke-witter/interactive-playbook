@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { DesignerStep, DesignerBranch, DesignerMode, StepPath } from '@/types/designer'
 import type { PlayerPath, Position, Play } from '@/types/play'
 import { getStepAtPath, getSequenceAtPath, replaceStepAtPath, replaceSequenceAtPath } from '@/lib/designerSteps'
+import { defaultFormationFor } from '@/lib/defaultFormations'
 
 type HistorySnapshot = {
   rootSteps: DesignerStep[]
@@ -11,15 +12,11 @@ type HistorySnapshot = {
   set: Play['set']
 }
 
-const OFFENSE_ORDER: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
 const AUTOSAVE_KEY = 'mousetrap-designer-autosave'
 
-function defaultStep(): DesignerStep {
+function defaultStep(set: Play['set']): DesignerStep {
   return {
-    players: [
-      ...OFFENSE_ORDER.map((id, i) => ({ id, x: 0.1 + i * 0.13, y: 0.4 })),
-      ...OFFENSE_ORDER.map((id, i) => ({ id, x: 0.1 + i * 0.13, y: 0.5, isDefense: true })),
-    ],
+    players: defaultFormationFor(set),
     pathPreviews: [],
   }
 }
@@ -31,7 +28,7 @@ function freshStepFrom(step: DesignerStep): DesignerStep {
 type InProgressPath = { playerIndex: number; points: { x: number; y: number }[] }
 
 export function useDesignerState() {
-  const [rootSteps, setRootSteps] = useState<DesignerStep[]>([defaultStep()])
+  const [rootSteps, setRootSteps] = useState<DesignerStep[]>([defaultStep('ho-stack')])
   const [currentPath, setCurrentPath] = useState<StepPath>([0])
   const [modeState, setModeState] = useState<DesignerMode>('position')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -110,6 +107,13 @@ export function useDesignerState() {
   function setSet(newSet: Play['set']) {
     pushHistory()
     setSetState(newSet)
+    // Only reposition players when the play is still untouched (a single,
+    // branchless step) — once real design work exists, switching sets
+    // should just relabel the play, not discard placed steps/paths.
+    const isFreshPlay = rootSteps.length === 1 && !rootSteps[0].branches
+    if (isFreshPlay) {
+      setRootSteps([defaultStep(newSet)])
+    }
   }
 
   useEffect(() => {
@@ -326,7 +330,7 @@ export function useDesignerState() {
 
   function newPlay() {
     pushHistory()
-    setRootSteps([defaultStep()])
+    setRootSteps([defaultStep('ho-stack')])
     setCurrentPath([0])
     setCategoryState('offense')
     setSetState('ho-stack')

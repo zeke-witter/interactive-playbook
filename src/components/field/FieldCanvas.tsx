@@ -1,7 +1,6 @@
 'use client'
 import { FIELD_WIDTH, FIELD_HEIGHT } from '@/lib/field'
 import { FieldBackground } from './FieldBackground'
-import { StallCounter } from './StallCounter'
 import { PathPreviews } from './PathPreviews'
 import { PlayerTokens } from './PlayerTokens'
 import { Disc } from './Disc'
@@ -23,7 +22,6 @@ export function FieldCanvas({ step, selectedPosition, playCategory, playSet, ros
   return (
     <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} className="w-full h-full" role="img" aria-label={step.label}>
       <FieldBackground showEndzone={isEndzone} />
-      <StallCounter startAt={step.stallCount} active={true} />
       <PathPreviews paths={step.pathPreviews} />
       <PlayerTokens players={step.players} selectedPosition={selectedPosition} playCategory={playCategory} roster={roster} pathPreviews={step.pathPreviews} onSelectPosition={onSelectPosition} />
       <Disc step={step} onThrowComplete={onThrowComplete} />

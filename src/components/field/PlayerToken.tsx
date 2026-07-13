@@ -12,11 +12,13 @@ type PlayerTokenProps = {
   label: string
   pathPoints?: { px: number; py: number }[]
   onClick?: () => void
+  playCategory?: 'offense' | 'defense'
 }
 
-export function PlayerToken({ player, isYou, dimmed, enterIndex, label, pathPoints, onClick }: PlayerTokenProps) {
+export function PlayerToken({ player, isYou, dimmed, enterIndex, label, pathPoints, onClick, playCategory = 'offense' }: PlayerTokenProps) {
   const { px, py } = toPixel(player.x, player.y)
-  const fill = player.isDefense ? '#dc2626' : '#2563eb'
+  const isOwnSide = player.isDefense ? playCategory === 'defense' : playCategory === 'offense'
+  const fill = isOwnSide ? '#2563eb' : '#dc2626'
   const [entering, setEntering] = useState(true)
   const enterDelay = enterIndex * 0.035
 

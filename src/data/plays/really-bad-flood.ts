@@ -82,7 +82,6 @@ export const reallyBadFlood: Play = {
     {
       id: 'really-bad-flood-3-hits-c1-under',
       label: 'H2 Hits C1 Under',
-      stallCount: 3,
       force: 'none',
       players: [
         { id: 'H1', x: 0.10616486549377441, y: 0.7583205540974934 },
