@@ -11,7 +11,7 @@ export function PickerDrawer({ currentPlay }: { currentPlay: Play }) {
       <button
         onClick={() => setOpen(true)}
         aria-label="Open play picker"
-        className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-text shadow-lg"
+        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-surface text-text"
       >
         ☰
       </button>

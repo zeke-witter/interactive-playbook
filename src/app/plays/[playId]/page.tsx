@@ -3,8 +3,6 @@ import { use, useEffect, useState } from 'react'
 import { notFound } from 'next/navigation'
 import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { Sidebar } from '@/components/sidebar/Sidebar'
-import { PlayControls } from '@/components/sidebar/PlayControls'
-import { PickerDrawer } from '@/components/sidebar/PickerDrawer'
 import { usePlayStep } from '@/hooks/usePlayStep'
 import { useProgress } from '@/hooks/useProgress'
 import { useRoster } from '@/hooks/useRoster'
@@ -34,8 +32,8 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
   const quiz = step.quiz?.[selectedPosition]
 
   return (
-    <main className="flex flex-col md:flex-row h-screen">
-      <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto md:h-full p-4">
+    <main className="flex flex-col md:flex-row h-screen overflow-hidden">
+      <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto shrink-0 md:h-full p-4">
         <div className="relative w-full h-full rounded-xl border border-border bg-surface overflow-hidden">
           <FieldCanvas
             step={step}
@@ -46,21 +44,8 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
             highlightZone={highlightZone}
             onSelectPosition={setSelectedPosition}
           />
-          <PickerDrawer currentPlay={play} />
         </div>
       </div>
-      <PlayControls
-        step={step}
-        stepIndex={stepIndex}
-        totalSteps={play.steps.length}
-        isFirst={isFirst}
-        isLast={isLast}
-        nextDisabled={!!quiz && !quizPassed}
-        onPrev={prev}
-        onNext={next}
-        onChooseBranch={(branch) => goToStep(branch.nextStepId)}
-        className="md:hidden px-4"
-      />
       <Sidebar
         play={play}
         step={step}

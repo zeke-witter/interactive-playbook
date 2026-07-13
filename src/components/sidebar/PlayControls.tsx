@@ -12,17 +12,16 @@ type PlayControlsProps = {
   onPrev: () => void
   onNext: () => void
   onChooseBranch: (branch: PlayBranch) => void
-  className?: string
 }
 
 export function PlayControls({
-  step, stepIndex, totalSteps, isFirst, isLast, nextDisabled, onPrev, onNext, onChooseBranch, className,
+  step, stepIndex, totalSteps, isFirst, isLast, nextDisabled, onPrev, onNext, onChooseBranch,
 }: PlayControlsProps) {
   return (
-    <div className={className}>
+    <div>
       {step.branches?.length ? (
         <div className="flex flex-col gap-2">
-          <button onClick={onPrev} disabled={isFirst} className="self-start px-3 py-1 rounded-md border border-border bg-surface text-text hover:bg-surface-raised disabled:opacity-30">
+          <button onClick={onPrev} disabled={isFirst} className="min-h-11 flex items-center justify-center self-start px-3 py-1 rounded-md border border-border bg-surface text-text hover:bg-surface-raised disabled:opacity-30">
             ◀ Prev
           </button>
           <BranchChoice branches={step.branches} onChoose={onChooseBranch} />
