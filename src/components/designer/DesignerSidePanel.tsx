@@ -21,7 +21,7 @@ export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof us
   const holderIndex = currentStep.players.findIndex((p) => p.hasDisc)
 
   return (
-    <aside className="w-[260px] flex-none border-l border-border bg-surface overflow-y-auto p-4 flex flex-col gap-5">
+    <aside className="w-[260px] lg:w-[320px] xl:w-[380px] flex-none border-l border-border bg-surface overflow-y-auto p-4 lg:p-6 flex flex-col gap-5">
       {mode === 'path' && (
         <div className="flex flex-col gap-2">
           <span className="text-xs uppercase tracking-wide text-text-muted">Path Type</span>
