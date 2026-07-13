@@ -12,6 +12,10 @@ type NarrativePanelProps = {
   position: Position
 }
 
+// Matches the API route's own gate: editing writes directly to the play's
+// source file on disk, which only exists on a local checkout. Run `npm run
+// dev` locally to see and use this button — it's intentionally hidden on
+// the deployed site.
 const CAN_EDIT_NARRATIVE = process.env.NODE_ENV === 'development'
 
 export function NarrativePanel({ text, onHighlightZone, roster, playId, stepId, position }: NarrativePanelProps) {

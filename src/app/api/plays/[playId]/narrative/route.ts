@@ -3,6 +3,11 @@ import path from 'path'
 import { Project, SyntaxKind } from 'ts-morph'
 import { sanitizeSlug } from '@/lib/slug'
 
+// Writes edits directly into the play's source .ts file via ts-morph, so it
+// only works against a local filesystem. The deployed Vercel instance's
+// filesystem is read-only in production, and any write that did succeed
+// would vanish on the next deploy anyway — to edit narrative, run the app
+// with `npm run dev` locally, edit there, then commit the change.
 export async function PATCH(request: Request, { params }: { params: Promise<{ playId: string }> }) {
   if (process.env.NODE_ENV !== 'development') {
     return NextResponse.json({ error: 'Narrative editing is only available in local development' }, { status: 403 })
