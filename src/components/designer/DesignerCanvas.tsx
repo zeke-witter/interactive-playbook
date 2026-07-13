@@ -6,6 +6,7 @@ import { GENERIC_DEFENDER_LABELS } from '@/lib/names'
 import { FIELD_WIDTH, FIELD_HEIGHT, toPixel } from '@/lib/field'
 import { DraggableToken } from './DraggableToken'
 import type { useDesignerState } from '@/hooks/useDesignerState'
+import type { DesignerMode } from '@/types/designer'
 
 type DesignerCanvasProps = {
   designer: ReturnType<typeof useDesignerState>
@@ -14,6 +15,11 @@ type DesignerCanvasProps = {
 const DISC_HOVER_RADIUS = 4.5
 const HOLDER_RING = '#a3e635'
 const RECEIVER_RING = '#4ade80'
+const MODE_HINTS: Record<DesignerMode, string> = {
+  position: 'Click and drag any player to reposition',
+  path: 'Click a player, then click to lay path waypoints',
+  throw: 'Click and drag disc to the receiver',
+}
 
 type DiscDrag = { holderIndex: number; cursorPx: number; cursorPy: number; hoverIndex: number | null }
 
@@ -192,11 +198,9 @@ export function DesignerCanvas({ designer }: DesignerCanvasProps) {
           />
         )}
       </svg>
-      {mode === 'throw' && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-surface-raised/90 border border-accent text-xs text-text pointer-events-none">
-          Click and drag disc to the receiver
-        </div>
-      )}
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-surface-raised/90 border border-accent text-xs text-text pointer-events-none">
+        {MODE_HINTS[mode]}
+      </div>
     </>
   )
 }
