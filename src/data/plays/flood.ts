@@ -137,7 +137,7 @@ export const flood: Play = {
         H2: 'Throw it now. C1 is open underneath, get it there quickly.',
         C1: "You're open. Catch and look upfield right away.",
         C2: 'Hold your deep position.',
-        C3: 'Hold your deep position.',
+        C3: "Keep an eye on the play. The under has gone up to C1. C4 is on stage next, then it'll be your turn. Get ready to push down field.",
         C4: "The throw goes up to C1. You're on stage next.",
         H1: 'Reset the shape now.',
         H3: 'Reset the shape now.',
