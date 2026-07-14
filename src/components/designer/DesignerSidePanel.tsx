@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { useDesignerState } from '@/hooks/useDesignerState'
 import type { PlayerPath, Position } from '@/types/play'
 import { PATH_COLOR } from '@/lib/pathColors'
@@ -23,6 +23,14 @@ export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof us
 
   const isBranchPoint = !!currentStep.branches && currentStep.branches.length > 0
   const holderIndex = currentStep.players.findIndex((p) => p.hasDisc)
+
+  // Keep the Narrative section in sync with whichever offensive player is
+  // selected on the field, so it doesn't silently show a stale position.
+  useEffect(() => {
+    if (selectedIndex === null) return
+    const player = currentStep.players[selectedIndex]
+    if (player && !player.isDefense) setNarrativePosition(player.id)
+  }, [selectedIndex, currentStep])
 
   return (
     <aside className="w-[260px] lg:w-[320px] xl:w-[380px] flex-none border-l border-border bg-surface overflow-y-auto p-4 lg:p-6 flex flex-col gap-5">

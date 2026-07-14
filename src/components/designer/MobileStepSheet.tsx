@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { useDesignerState } from '@/hooks/useDesignerState'
 import type { PlayerPath, Position } from '@/types/play'
 import { PATH_COLOR } from '@/lib/pathColors'
@@ -28,6 +28,14 @@ export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useD
   const sequence = getSequenceAtPath(steps, currentPath)
   const currentIndex = currentPath[currentPath.length - 1]
   const branchCount = currentStep.branches?.length ?? 0
+
+  // Keep the Narrative section in sync with whichever offensive player is
+  // selected on the field, so it doesn't silently show a stale position.
+  useEffect(() => {
+    if (selectedIndex === null) return
+    const player = currentStep.players[selectedIndex]
+    if (player && !player.isDefense) setNarrativePosition(player.id)
+  }, [selectedIndex, currentStep])
   const summary = `Step ${currentIndex + 1} of ${sequence.length}${branchCount > 0 ? ` · ${branchCount} branch${branchCount === 1 ? '' : 'es'}` : ''}`
 
   return (
