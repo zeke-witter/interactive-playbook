@@ -131,7 +131,7 @@ export function DesignerPreview({ steps, category, set, onExit }: DesignerPrevie
               <button
                 key={i}
                 onClick={() => chooseBranch(i)}
-                className="px-3 py-1 text-sm rounded-md border border-accent text-accent"
+                className="px-3 py-1 text-sm rounded-md border border-accent text-accent uppercase tracking-wide"
               >
                 {branch.label}
               </button>

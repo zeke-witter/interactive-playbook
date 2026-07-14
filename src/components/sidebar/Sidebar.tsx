@@ -62,6 +62,7 @@ export function Sidebar({
           onPrev={onPrev}
           onNext={onNext}
           onChooseBranch={onChooseBranch}
+          roster={roster}
         />
       </div>
 

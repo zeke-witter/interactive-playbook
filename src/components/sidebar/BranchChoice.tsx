@@ -1,6 +1,7 @@
-import type { PlayBranch } from '@/types/play'
+import type { PlayBranch, Position } from '@/types/play'
+import { substituteNames } from '@/lib/names'
 
-export function BranchChoice({ branches, onChoose }: { branches: PlayBranch[]; onChoose: (branch: PlayBranch) => void }) {
+export function BranchChoice({ branches, onChoose, roster }: { branches: PlayBranch[]; onChoose: (branch: PlayBranch) => void; roster: Record<Position, string> }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm text-text-muted">What happens next?</p>
@@ -8,9 +9,9 @@ export function BranchChoice({ branches, onChoose }: { branches: PlayBranch[]; o
         <button
           key={branch.id}
           onClick={() => onChoose(branch)}
-          className="rounded-md border border-border bg-surface px-3 py-2 text-left text-text hover:bg-surface-raised hover:border-accent transition-colors"
+          className="min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-left uppercase tracking-wide text-text hover:bg-surface-raised hover:border-accent transition-colors"
         >
-          {branch.label}
+          {substituteNames(branch.label, roster)}
         </button>
       ))}
     </div>
