@@ -18,7 +18,7 @@ export function StepTree({ steps, pathPrefix, currentPath, onSelect, onDelete, o
       {steps.map((step, i) => {
         const path = [...pathPrefix, i]
         const isCurrent = path.length === currentPath.length && path.every((v, idx) => v === currentPath[idx])
-        const isEmptyFirstStep = depth === 0 && i === 0 && steps.length === 1
+        const isEmptyFirstStep = depth === 0 && i === 0 && steps.length === 1 && !step.branches
         return (
           <div key={i} className="flex flex-col gap-1">
             {isEmptyFirstStep ? (
