@@ -10,8 +10,6 @@ export const ALL_PLAYS: Play[] = [windmill, backZipper, reverseFlood, flood, gar
 
 export const PLAYS: Record<string, Play> = Object.fromEntries(ALL_PLAYS.map((play) => [play.id, play]))
 
-export const DEFAULT_PLAY_ID: string | undefined = ALL_PLAYS[0]?.id
-
 export function categoriesWithPlays(): Play['category'][] {
   return Array.from(new Set(ALL_PLAYS.map((p) => p.category)))
 }

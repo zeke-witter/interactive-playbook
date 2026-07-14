@@ -12,13 +12,13 @@ type PickerLevel =
 
 const ROW_CLASS = 'text-left rounded-md border px-3 py-2 border-border bg-surface text-text hover:bg-surface-raised transition-colors'
 
-export function PlayPicker({ currentPlay }: { currentPlay: Play }) {
+export function PlayPicker({ currentPlay }: { currentPlay?: Play }) {
   const router = useRouter()
-  const [level, setLevel] = useState<PickerLevel>({
-    view: 'plays',
-    category: currentPlay.category,
-    set: currentPlay.set,
-  })
+  const [level, setLevel] = useState<PickerLevel>(
+    currentPlay
+      ? { view: 'plays', category: currentPlay.category, set: currentPlay.set }
+      : { view: 'categories' }
+  )
 
   return (
     <div className="flex flex-col gap-2">
@@ -63,7 +63,7 @@ export function PlayPicker({ currentPlay }: { currentPlay: Play }) {
               key={play.id}
               onClick={() => router.push(`/plays/${play.id}`)}
               className={
-                play.id === currentPlay.id
+                play.id === currentPlay?.id
                   ? 'text-left rounded-md border px-3 py-2 border-accent bg-surface-raised text-accent'
                   : ROW_CLASS
               }
