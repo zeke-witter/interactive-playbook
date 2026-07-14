@@ -1,4 +1,4 @@
-import type { PlayerState, PlayerPath, ThrowArc } from './play'
+import type { PlayerState, PlayerPath, ThrowArc, Position } from './play'
 
 export type DesignerBranch = {
   label: string
@@ -10,6 +10,7 @@ export type DesignerStep = {
   pathPreviews: PlayerPath[]
   throw?: ThrowArc
   branches?: DesignerBranch[]
+  narrative?: Partial<Record<Position, string>>
 }
 
 export type DesignerMode = 'position' | 'path' | 'throw' | 'select'

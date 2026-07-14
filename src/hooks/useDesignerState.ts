@@ -262,6 +262,13 @@ export function useDesignerState() {
     updateCurrentStep((step) => ({ ...step, throw: undefined }))
   }
 
+  function setNarrative(position: Position, text: string) {
+    updateCurrentStep((step) => ({
+      ...step,
+      narrative: { ...step.narrative, [position]: text },
+    }))
+  }
+
   function addStep() {
     pushHistory()
     let duplicated = freshStepFrom(currentStep)
@@ -413,6 +420,7 @@ export function useDesignerState() {
     setThrow,
     clearDiscHolder,
     clearThrow,
+    setNarrative,
     addStep,
     deleteStep,
     goToStep,

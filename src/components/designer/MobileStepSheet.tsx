@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import type { useDesignerState } from '@/hooks/useDesignerState'
-import type { PlayerPath } from '@/types/play'
+import type { PlayerPath, Position } from '@/types/play'
 import { PATH_COLOR } from '@/lib/pathColors'
 import { GENERIC_DEFENDER_LABELS } from '@/lib/names'
 import { CATEGORY_LABELS, SET_LABELS, ALL_CATEGORIES, ALL_SETS } from '@/lib/playLabels'
@@ -10,14 +10,17 @@ import { StepTree } from './StepTree'
 import { AddBranchForm, AddAnotherBranchForm } from './BranchForms'
 
 const PATH_TYPES: PlayerPath['type'][] = ['primary', 'secondary', 'clear', 'reset']
+const NARRATIVE_POSITIONS: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
 
 export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useDesignerState> }) {
   const [expanded, setExpanded] = useState(false)
+  const [narrativePosition, setNarrativePosition] = useState<Position>('H1')
   const {
     steps, currentStep, currentPath, mode, selectedIndex, multiSelected, setMultiSelected,
     pathType, setPathType, inProgressPath, finishPath, cancelPath, removePath,
     setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep,
     category, setCategory, set, setSet, addBranch, addAnotherBranch, removeBranch,
+    setNarrative,
   } = designer
 
   const isBranchPoint = !!currentStep.branches && currentStep.branches.length > 0
@@ -167,6 +170,26 @@ export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useD
                 ))}
               </select>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-xs uppercase tracking-wide text-text-muted">Narrative</span>
+            <select
+              value={narrativePosition}
+              onChange={(e) => setNarrativePosition(e.target.value as Position)}
+              className="min-h-11 px-2 py-1 rounded-md border border-border bg-bg text-text text-sm"
+            >
+              {NARRATIVE_POSITIONS.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+            <textarea
+              value={currentStep.narrative?.[narrativePosition] ?? ''}
+              onChange={(e) => setNarrative(narrativePosition, e.target.value)}
+              rows={4}
+              placeholder={`Narrative for ${narrativePosition} on this step...`}
+              className="w-full px-2 py-1 rounded-md border border-border bg-bg text-text text-sm resize-y"
+            />
           </div>
 
           <div className="flex flex-col gap-2">
