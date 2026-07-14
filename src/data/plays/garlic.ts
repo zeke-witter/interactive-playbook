@@ -235,7 +235,7 @@ export const garlic: Play = {
       throw: { from: 'H3', to: 'C3' },
       narrative: {
         H3: 'Throw it deep now. C3 is open, get it there.',
-        C3: "You're open deep. Catch it and look upfield.",
+        C3: "The huck goes up. Chase it down.",
         C4: 'Reset your spacing, ready to support the new flow.',
         C1: 'Reset your spacing.',
         C2: 'Reset your spacing.',
@@ -270,7 +270,7 @@ export const garlic: Play = {
       narrative: {
         H3: 'Pump fake toward the deep look, then come back to C4, who is cutting all the way across underneath.',
         C4: 'Keep cutting hard across underneath, all the way to the far side. This is the real look.',
-        C3: 'Hold your depth, staying a decoy for the pump fake.',
+        C3: "H3 pump faked you. Make a hard under cut.",
         C1: 'Hold your spacing.',
         C2: 'Hold your spacing.',
         H1: 'Hold width.',
@@ -305,7 +305,7 @@ export const garlic: Play = {
       narrative: {
         H3: "Throw it under now. C4 is open on the far side, get it there.",
         C4: "You're open. Catch it and look upfield right away.",
-        C3: 'Reset your spacing, ready to support the new flow.',
+        C3: "You're open under and the throw goes up.",
         C1: 'Reset your spacing.',
         C2: 'Reset your spacing.',
         H1: 'Reset the shape now.',
