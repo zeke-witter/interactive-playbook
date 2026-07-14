@@ -56,13 +56,13 @@ export function StepTree({ steps, pathPrefix, currentPath, onSelect, onDelete, o
             )}
             {step.branches?.map((branch, b) => (
               <div key={b} className="flex flex-col gap-1" style={{ marginLeft: 12 }}>
-                <div className="flex items-center gap-2 text-xs text-text-muted uppercase tracking-wide">
+                <div className="flex items-center gap-2 text-xs text-text-muted">
                   <span>{branch.label}</span>
                   <button onClick={() => {
                     if (window.confirm('Delete this branch and everything in it?')) {
                       onRemoveBranch(path, b)
                     }
-                  }} className="min-h-11 md:min-h-0 flex items-center hover:text-danger-border normal-case">
+                  }} className="min-h-11 md:min-h-0 flex items-center hover:text-danger-border">
                     Remove Branch
                   </button>
                 </div>

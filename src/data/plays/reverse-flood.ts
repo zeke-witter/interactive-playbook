@@ -107,8 +107,8 @@ export const reverseFlood: Play = {
         H3: 'Hold width.',
       },
       branches: [
-        { id: 'open-deep', label: 'C1 Gets Open Deep', nextStepId: 'reverse-flood-4a-c1-secures-it' },
-        { id: 'covered', label: 'C1 Is Covered, Reset the Flow', nextStepId: 'reverse-flood-4b-reset' },
+        { id: 'open-deep', label: 'C1 gets open deep', nextStepId: 'reverse-flood-4a-c1-secures-it' },
+        { id: 'covered', label: 'C1 is covered, reset the flow', nextStepId: 'reverse-flood-4b-reset' },
       ],
     },
     {

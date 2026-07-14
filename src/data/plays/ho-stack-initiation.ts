@@ -104,8 +104,8 @@ export const hoStackInitiation: Play = {
         H3: 'Hold width.',
       },
       branches: [
-        { id: 'under-c3', label: 'Throw Under to C3', nextStepId: 'hsi-4a-throw-to-c3' },
-        { id: 'pump-fake', label: 'Pump Fake the Under', nextStepId: 'hsi-4b-pump-fake' },
+        { id: 'under-c3', label: 'Throw under to C3', nextStepId: 'hsi-4a-throw-to-c3' },
+        { id: 'pump-fake', label: 'Pump fake the under', nextStepId: 'hsi-4b-pump-fake' },
       ],
     },
     {
@@ -273,8 +273,8 @@ export const hoStackInitiation: Play = {
         H3: 'Hold width.',
       },
       branches: [
-        { id: 'skinny-break', label: 'Throw the Skinny Break', nextStepId: 'hsi-6b1-throw-skinny-break' },
-        { id: 'long-under', label: 'Throw the Long Under', nextStepId: 'hsi-6b2-c3-c2-continue' },
+        { id: 'skinny-break', label: 'Throw the skinny break', nextStepId: 'hsi-6b1-throw-skinny-break' },
+        { id: 'long-under', label: 'Throw the long under', nextStepId: 'hsi-6b2-c3-c2-continue' },
       ],
     },
     {

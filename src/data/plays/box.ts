@@ -70,8 +70,8 @@ export const box: Play = {
         H3: 'Hold width.',
       },
       branches: [
-        { id: 'c4-slash', label: 'C4 Initiates with Slash Under', nextStepId: 'box-3a-c4-cuts-under' },
-        { id: 'c3-under', label: 'C3 Initiates Under', nextStepId: 'box-3b-c3-cuts-under' },
+        { id: 'c4-slash', label: 'C4 initiates with slash under', nextStepId: 'box-3a-c4-cuts-under' },
+        { id: 'c3-under', label: 'C3 initiates under', nextStepId: 'box-3b-c3-cuts-under' },
       ],
     },
     {
@@ -139,8 +139,8 @@ export const box: Play = {
         H3: 'Hold width.',
       },
       branches: [
-        { id: 'skinny-break', label: 'Throw the Skinny Break', nextStepId: 'box-5a1-throw-to-c4' },
-        { id: 'look-off-skinny', label: 'Look Off the Skinny, Throw the Under', nextStepId: 'box-5a2-c4-continues-under' },
+        { id: 'skinny-break', label: 'Throw the skinny break', nextStepId: 'box-5a1-throw-to-c4' },
+        { id: 'look-off-skinny', label: 'Look off the skinny, throw the under', nextStepId: 'box-5a2-c4-continues-under' },
       ],
     },
     {

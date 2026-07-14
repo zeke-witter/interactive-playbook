@@ -9,7 +9,7 @@ export function BranchChoice({ branches, onChoose, roster }: { branches: PlayBra
         <button
           key={branch.id}
           onClick={() => onChoose(branch)}
-          className="min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-left uppercase tracking-wide text-text hover:bg-surface-raised hover:border-accent transition-colors"
+          className="min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-left text-text hover:bg-surface-raised hover:border-accent transition-colors"
         >
           {substituteNames(branch.label, roster)}
         </button>
