@@ -180,7 +180,7 @@ export const windmill: Play = {
         { id: 'H1', x: 0.4975627136230469, y: 0.8253968556722006 },
         { id: 'H2', x: 0.6757501220703125, y: 0.9503328323364257 },
         { id: 'H3', x: 0.4379621124267578, y: 0.4219149907430013 },
-        { id: 'C1', x: 0.4668407440185547, y: 0.009728622436523438 },
+        { id: 'C1', x: 0.79, y: 0.13 },
         { id: 'C2', x: 0.4477931213378906, y: 0.3343573888142904 },
         { id: 'C3', x: 0.44902198791503906, y: 0.25704045295715333 },
         { id: 'C4', x: 0.7543983459472656, y: 0.4311315854390462, hasDisc: true },
@@ -192,7 +192,9 @@ export const windmill: Play = {
         { id: 'C3', x: 0.6966410827636719, y: 0.39119304021199547, isDefense: true },
         { id: 'C4', x: 0.5190680694580078, y: 0.44905274709065757, isDefense: true },
       ],
-      pathPreviews: [],
+      pathPreviews: [
+        { playerId: 'C1', points: [{ x: 0.4668407440185547, y: 0.009728622436523438 }, { x: 0.79, y: 0.13 }], type: 'primary' },
+      ],
       throw: { from: 'C4', to: 'C1' },
       narrative: {
         C4: "C1 made a continuation cut with perfect timing. Reward them by giving them the gift of the disc.",
