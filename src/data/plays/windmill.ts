@@ -33,7 +33,7 @@ export const windmill: Play = {
         H1: "You've got the disc. C1 has set the stack and is about to shift break side before cutting deep. C4, at the back, will wait for that cut to develop before coming underneath.",
         H2: "You're the open side reset. Let the play develop and be ready to move if H1 activates you.",
         H3: "You're the second handler reset look. For now, be patient and let the play develop. ",
-        C1: "You're the initiator. On a centering pass or \"go,\" you'll shift toward the break side, then explode deep. The goal is to pull your defender away from the space C4 is about to attack.",
+        C1: "You're the initiator. On a centering pass or \"go,\" you'll shift toward the break side, then explode deep. The goal is to force C4's defender to peel off and cover you, leaving C4 free for a wide open under cut.",
         C2: "Be patient and maintain spacing while the play develops.",
         C3: "Be patient as the play develops.",
         C4: "Stay put as C1 initiates the play. You can push into your defender or make small movements to keep them engaged.",
