@@ -36,7 +36,7 @@ export const garlic: Play = {
         C1: "You're the break side rail cutter. You're unlikely to get involved early in the play, but you're always looking for an opportunity to be a bail-out option or react as the offense flows.",
         C2: "You're in the middle of the stack and not a primary option at the moment. Be ready to react as the play develops.",
         C3: "H3 has called \"Garlic.\" You're one of two primary looks to initiate the play. When the disc is checked in (or on \"Go\"), set up your cut based on what the defense is giving you. You can push deep and continue deep, or you can push deep and then come under once C4 has cleared the open side space.",
-        C4: 'On the call, cut underneath.',
+        C4: "H3 has called \"Garlic.\" You're the initiator. Start you cut right before the disc is checked in.",
       },
     },
     {
@@ -66,7 +66,7 @@ export const garlic: Play = {
       narrative: {
         H3: "C4 has initiated the play with a hard slash cut to the break side. This is a viable look if it's open.",
         C3: "As C4 makes their slash cut to the break side, you cut deep hard, drawing your defender with you.",
-        C4: 'Cut underneath, look to get moving into open space.',
+        C4: "Make a hard slash cut to the break side. Do not set up this cut with a fake deep or under the open side. Your goal is to clear space. Getting open for the skinny break is a bonus.",
         C1: "C4 initiates with a hard slash cut to the break side.",
         C2: "C4 initiates with a hard slash cut to the break side.",
         H1: "C4 initiates with a hard slash cut to the break side.",
