@@ -104,9 +104,9 @@ export const garlic: Play = {
         H2: 'Hold width.',
       },
       branches: [
-        { id: 'skinny-break', label: 'Throw the Skinny Break', nextStepId: 'garlic-4a-throw-to-c4' },
-        { id: 'deep', label: 'Throw Deep', nextStepId: 'garlic-4b-c3-continues-deep' },
-        { id: 'pump-fake', label: 'Pump Fake, Throw Under', nextStepId: 'garlic-4c-c4-cuts-across' },
+        { id: 'skinny-break', label: 'Throw the skinny break', nextStepId: 'garlic-4a-throw-to-c4' },
+        { id: 'deep', label: 'Throw deep', nextStepId: 'garlic-4b-c3-continues-deep' },
+        { id: 'pump-fake', label: 'Pump fake, throw under', nextStepId: 'garlic-4c-c4-cuts-across' },
       ],
     },
     {
@@ -202,7 +202,7 @@ export const garlic: Play = {
       ],
       narrative: {
         H3: 'C3 is still working deep and getting open. C4 is clearing further underneath. Get ready for the deep shot.',
-        C3: "Keep going deep. You're pulling away from your defender.",
+        C3: "The skinny went up and H3 has FIRE IN THEIR EYES. Keep going.",
         C4: 'Clear further underneath, out of the deep throwing lane.',
         C1: 'Hold your spacing.',
         C2: 'Hold your spacing.',
