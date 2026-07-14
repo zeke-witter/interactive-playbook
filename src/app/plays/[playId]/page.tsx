@@ -15,7 +15,7 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
   if (!play) notFound()
 
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
-  const { step, stepIndex, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
+  const { step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
   const { markComplete } = useProgress()
   const roster = useRoster()
   const [quizPassed, setQuizPassed] = useState(false)
@@ -51,6 +51,9 @@ export default function PlayPage({ params }: { params: Promise<{ playId: string 
         step={step}
         roster={roster}
         stepIndex={stepIndex}
+        stepperIndex={stepperIndex}
+        stepperTotal={stepperTotal}
+        showMoreIndicator={showMoreIndicator}
         selectedPosition={selectedPosition}
         onPositionChange={setSelectedPosition}
         isFirst={isFirst}

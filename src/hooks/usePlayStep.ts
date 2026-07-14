@@ -11,6 +11,24 @@ export function usePlayStep(play: Play) {
   const isFirst = history.length === 1
   const isLast = step.isEnding === true || (!step.branches?.length && linearIndex === play.steps.length - 1)
 
+  // Steps are stored as one flat array, but each branch's steps are laid out
+  // contiguously right after their fork point — so a forward scan from the
+  // current step, stopping at the first step that itself branches (or the
+  // end of the array), gives exactly the steps reachable on this segment
+  // without ever wandering into a sibling branch's steps.
+  let aheadCount = 0
+  let showMoreIndicator = false
+  for (let i = linearIndex; i < play.steps.length; i++) {
+    aheadCount++
+    if (play.steps[i].branches?.length) {
+      showMoreIndicator = true
+      break
+    }
+  }
+  const stepsBeforeCurrent = history.length - 1
+  const stepperTotal = stepsBeforeCurrent + aheadCount
+  const stepperIndex = stepsBeforeCurrent
+
   function next() {
     if (step.branches?.length) return
     const nextStep = play.steps[linearIndex + 1]
@@ -29,5 +47,18 @@ export function usePlayStep(play: Play) {
     setHistory([play.steps[0].id])
   }
 
-  return { step, stepIndex: linearIndex, totalSteps: play.steps.length, isFirst, isLast, next, prev, goToStep, reset }
+  return {
+    step,
+    stepIndex: linearIndex,
+    totalSteps: play.steps.length,
+    stepperTotal,
+    stepperIndex,
+    showMoreIndicator,
+    isFirst,
+    isLast,
+    next,
+    prev,
+    goToStep,
+    reset,
+  }
 }

@@ -4,8 +4,9 @@ import { BranchChoice } from './BranchChoice'
 
 type PlayControlsProps = {
   step: PlayStep
-  stepIndex: number
-  totalSteps: number
+  stepperIndex: number
+  stepperTotal: number
+  showMoreIndicator: boolean
   isFirst: boolean
   isLast: boolean
   nextDisabled: boolean
@@ -16,7 +17,7 @@ type PlayControlsProps = {
 }
 
 export function PlayControls({
-  step, stepIndex, totalSteps, isFirst, isLast, nextDisabled, onPrev, onNext, onChooseBranch, roster,
+  step, stepperIndex, stepperTotal, showMoreIndicator, isFirst, isLast, nextDisabled, onPrev, onNext, onChooseBranch, roster,
 }: PlayControlsProps) {
   return (
     <div>
@@ -29,8 +30,9 @@ export function PlayControls({
         </div>
       ) : (
         <StepControls
-          stepIndex={stepIndex}
-          totalSteps={totalSteps}
+          stepperIndex={stepperIndex}
+          stepperTotal={stepperTotal}
+          showMoreIndicator={showMoreIndicator}
           isFirst={isFirst}
           isLast={isLast}
           nextDisabled={nextDisabled}

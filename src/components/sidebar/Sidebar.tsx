@@ -11,6 +11,9 @@ type SidebarProps = {
   play: Play
   step: PlayStep
   stepIndex: number
+  stepperIndex: number
+  stepperTotal: number
+  showMoreIndicator: boolean
   selectedPosition: Position
   onPositionChange: (p: Position) => void
   isFirst: boolean
@@ -26,20 +29,20 @@ type SidebarProps = {
 }
 
 export function Sidebar({
-  play, step, stepIndex, selectedPosition, onPositionChange,
+  play, step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, selectedPosition, onPositionChange,
   isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered, onHighlightZone, roster,
 }: SidebarProps) {
   return (
     <aside className="w-full md:w-[35%] flex-1 min-h-0 md:flex-none md:h-full flex flex-col overflow-hidden border-t md:border-t-0 md:border-l border-border">
       <div className="flex-none p-4 flex flex-col gap-4">
         <div className="flex items-start justify-between gap-3">
-          <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepIndex} totalSteps={play.steps.length} roster={roster} />
+          <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepperIndex} totalSteps={stepperTotal} roster={roster} />
           <PickerDrawer currentPlay={play} />
         </div>
         <PositionSelector value={selectedPosition} onChange={onPositionChange} roster={roster} />
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto border-t border-b border-border px-4 py-4 flex flex-col gap-4">
+      <div className="flex-1 min-h-0 overflow-y-auto border-t border-b border-border px-4 py-4 flex flex-col gap-4 lg:max-h-[33vh]">
         <NarrativePanel
           text={step.narrative[selectedPosition]}
           onHighlightZone={onHighlightZone}
@@ -54,8 +57,9 @@ export function Sidebar({
       <div className="flex-none p-4">
         <PlayControls
           step={step}
-          stepIndex={stepIndex}
-          totalSteps={play.steps.length}
+          stepperIndex={stepperIndex}
+          stepperTotal={stepperTotal}
+          showMoreIndicator={showMoreIndicator}
           isFirst={isFirst}
           isLast={isLast}
           nextDisabled={!!quiz && !quizPassed}
