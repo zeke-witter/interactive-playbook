@@ -11,6 +11,7 @@ import { MobileToolTabBar } from '@/components/designer/MobileToolTabBar'
 import { MobileStepSheet } from '@/components/designer/MobileStepSheet'
 import { CoachMark } from '@/components/designer/CoachMark'
 import type { Play } from '@/types/play'
+import { sanitizeSlug } from '@/lib/slug'
 
 const COACH_MARK_KEY = 'mousetrap-designer-coachmark-dismissed'
 
@@ -85,6 +86,17 @@ export default function DesignerPage() {
     }
   }
 
+  function handleExport(name: string) {
+    const data = { name, category: designer.category, set: designer.set, steps: designer.steps }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${sanitizeSlug(name)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   async function handleLoadDraft(name: string) {
     if (!window.confirm(`Load "${name}"? This will replace your current in-progress work.`)) return
     try {
@@ -138,6 +150,7 @@ export default function DesignerPage() {
             currentFileName={currentFileName}
             draftNames={draftNames}
             onSave={handleSave}
+            onExport={handleExport}
             onLoadDraft={handleLoadDraft}
             onDeleteDraft={handleDeleteDraft}
             onNewPlay={handleNewPlay}
@@ -190,6 +203,7 @@ export default function DesignerPage() {
           currentFileName={currentFileName}
           draftNames={draftNames}
           onSave={handleSave}
+          onExport={handleExport}
           onLoadDraft={handleLoadDraft}
           onDeleteDraft={handleDeleteDraft}
           onNewPlay={handleNewPlay}

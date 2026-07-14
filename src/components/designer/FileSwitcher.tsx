@@ -5,17 +5,19 @@ type FileSwitcherProps = {
   currentFileName: string | null
   draftNames: string[]
   onSave: (name: string) => void
+  onExport: (name: string) => void
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
   onNewPlay: () => void
 }
 
 function FileSwitcherFields({
-  name, setName, onSave, draftNames, currentFileName, onLoadDraft, onDeleteDraft, onNewPlay,
+  name, setName, onSave, onExport, draftNames, currentFileName, onLoadDraft, onDeleteDraft, onNewPlay,
 }: {
   name: string
   setName: (v: string) => void
   onSave: () => void
+  onExport: () => void
   draftNames: string[]
   currentFileName: string | null
   onLoadDraft: (name: string) => void
@@ -39,6 +41,12 @@ function FileSwitcherFields({
             Save
           </button>
         </div>
+        <button
+          onClick={onExport}
+          className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-border text-text text-sm"
+        >
+          Export to File
+        </button>
       </div>
 
       {draftNames.length > 0 && (
@@ -91,7 +99,7 @@ function FileSwitcherFields({
   )
 }
 
-export function FileSwitcher({ currentFileName, draftNames, onSave, onLoadDraft, onDeleteDraft, onNewPlay }: FileSwitcherProps) {
+export function FileSwitcher({ currentFileName, draftNames, onSave, onExport, onLoadDraft, onDeleteDraft, onNewPlay }: FileSwitcherProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(currentFileName ?? '')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -111,6 +119,10 @@ export function FileSwitcher({ currentFileName, draftNames, onSave, onLoadDraft,
 
   function handleSave() {
     if (name.trim()) onSave(name.trim())
+  }
+
+  function handleExport() {
+    if (name.trim()) onExport(name.trim())
   }
 
   function handleLoadDraft(draft: string) {
@@ -141,6 +153,7 @@ export function FileSwitcher({ currentFileName, draftNames, onSave, onLoadDraft,
               name={name}
               setName={setName}
               onSave={handleSave}
+              onExport={handleExport}
               draftNames={draftNames}
               currentFileName={currentFileName}
               onLoadDraft={handleLoadDraft}
@@ -160,6 +173,7 @@ export function FileSwitcher({ currentFileName, draftNames, onSave, onLoadDraft,
                 name={name}
                 setName={setName}
                 onSave={handleSave}
+                onExport={handleExport}
                 draftNames={draftNames}
                 currentFileName={currentFileName}
                 onLoadDraft={handleLoadDraft}

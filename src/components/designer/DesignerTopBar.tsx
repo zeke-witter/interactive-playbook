@@ -5,6 +5,7 @@ type DesignerTopBarProps = {
   currentFileName: string | null
   draftNames: string[]
   onSave: (name: string) => void
+  onExport: (name: string) => void
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
   onNewPlay: () => void
@@ -16,7 +17,7 @@ type DesignerTopBarProps = {
 }
 
 export function DesignerTopBar({
-  currentFileName, draftNames, onSave, onLoadDraft, onDeleteDraft, onNewPlay,
+  currentFileName, draftNames, onSave, onExport, onLoadDraft, onDeleteDraft, onNewPlay,
   canUndo, canRedo, onUndo, onRedo, onPreview,
 }: DesignerTopBarProps) {
   return (
@@ -27,6 +28,7 @@ export function DesignerTopBar({
         currentFileName={currentFileName}
         draftNames={draftNames}
         onSave={onSave}
+        onExport={onExport}
         onLoadDraft={onLoadDraft}
         onDeleteDraft={onDeleteDraft}
         onNewPlay={onNewPlay}
