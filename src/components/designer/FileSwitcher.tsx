@@ -2,6 +2,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Play } from '@/types/play'
 
+// Loading/editing/publishing an already-published play writes straight to
+// its source file on disk, same as the narrative editor — only meaningful
+// on a local checkout. Hidden on the deployed site until there's a real
+// backend (accounts, an admin role) to gate this properly.
+const CAN_MANAGE_PUBLISHED_PLAYS = process.env.NODE_ENV === 'development'
+
 type FileSwitcherProps = {
   currentFileName: string | null
   draftNames: string[]
@@ -51,13 +57,15 @@ function FileSwitcherFields({
             Save
           </button>
         </div>
-        <button
-          onClick={onPublish}
-          title={publishedPlayId ? `Overwrites the published "${publishedPlayId}" play` : 'Creates a new published play'}
-          className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm"
-        >
-          {publishedPlayId ? 'Publish (Update)' : 'Publish (New)'}
-        </button>
+        {CAN_MANAGE_PUBLISHED_PLAYS && (
+          <button
+            onClick={onPublish}
+            title={publishedPlayId ? `Overwrites the published "${publishedPlayId}" play` : 'Creates a new published play'}
+            className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm"
+          >
+            {publishedPlayId ? 'Publish (Update)' : 'Publish (New)'}
+          </button>
+        )}
         <button
           onClick={onExport}
           className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-border text-text text-sm"
@@ -66,7 +74,7 @@ function FileSwitcherFields({
         </button>
       </div>
 
-      {existingPlays.length > 0 && (
+      {CAN_MANAGE_PUBLISHED_PLAYS && existingPlays.length > 0 && (
         <>
           <div className="border-t border-border" />
           <div className="flex flex-col gap-1.5">
