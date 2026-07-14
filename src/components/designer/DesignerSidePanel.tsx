@@ -17,8 +17,8 @@ export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof us
     steps, currentStep, currentPath, mode, selectedIndex, multiSelected, setMultiSelected,
     pathType, setPathType, inProgressPath, finishPath, cancelPath, removePath,
     setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep,
-    category, setCategory, set, setSet, addBranch, addAnotherBranch, removeBranch,
-    setNarrative,
+    category, setCategory, set, setSet, description, setDescription, addBranch, addAnotherBranch, removeBranch,
+    setNarrative, setLabel,
   } = designer
 
   const isBranchPoint = !!currentStep.branches && currentStep.branches.length > 0
@@ -154,6 +154,23 @@ export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof us
             ))}
           </select>
         </div>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+          placeholder="Play description..."
+          className="w-full px-2 py-1 rounded-md border border-border bg-bg text-text text-sm resize-y"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-xs uppercase tracking-wide text-text-muted">Step Label</span>
+        <input
+          value={currentStep.label ?? ''}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="e.g. C4 Cuts Under"
+          className="px-2 py-1 rounded-md border border-border bg-bg text-text text-sm"
+        />
       </div>
 
       <div className="flex flex-col gap-2">

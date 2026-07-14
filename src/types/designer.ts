@@ -1,4 +1,4 @@
-import type { PlayerState, PlayerPath, ThrowArc, Position } from './play'
+import type { PlayerState, PlayerPath, ThrowArc, Position, Quiz } from './play'
 
 export type DesignerBranch = {
   label: string
@@ -11,6 +11,11 @@ export type DesignerStep = {
   throw?: ThrowArc
   branches?: DesignerBranch[]
   narrative?: Partial<Record<Position, string>>
+  label?: string
+  // Not authorable in the Designer UI yet — carried through opaquely so
+  // loading an already-published play with quizzes and republishing it
+  // doesn't silently drop them.
+  quiz?: Partial<Record<Position, Quiz>>
 }
 
 export type DesignerMode = 'position' | 'path' | 'throw' | 'select'

@@ -4,12 +4,14 @@ import type { DesignerStep, DesignerBranch, DesignerMode, StepPath } from '@/typ
 import type { PlayerPath, Position, Play } from '@/types/play'
 import { getStepAtPath, getSequenceAtPath, replaceStepAtPath, replaceSequenceAtPath } from '@/lib/designerSteps'
 import { defaultFormationFor } from '@/lib/defaultFormations'
+import { playToDesignerSteps } from '@/lib/playDesignerConvert'
 
 type HistorySnapshot = {
   rootSteps: DesignerStep[]
   currentPath: StepPath
   category: Play['category']
   set: Play['set']
+  description: string
 }
 
 const AUTOSAVE_KEY = 'mousetrap-designer-autosave'
@@ -41,6 +43,11 @@ export function useDesignerState() {
   const [inProgressPath, setInProgressPath] = useState<InProgressPath | null>(null)
   const [category, setCategoryState] = useState<Play['category']>('offense')
   const [set, setSetState] = useState<Play['set']>('ho-stack')
+  const [description, setDescriptionState] = useState('')
+  // Set when the current content was loaded from an already-published play,
+  // so Publish knows to overwrite that play's file instead of creating a new
+  // one. Cleared by New Play and Load Draft (a draft isn't a published play).
+  const [publishedPlayId, setPublishedPlayId] = useState<string | null>(null)
   const [hasHydrated, setHasHydrated] = useState(false)
   const [undoStack, setUndoStack] = useState<HistorySnapshot[]>([])
   const [redoStack, setRedoStack] = useState<HistorySnapshot[]>([])
@@ -49,7 +56,7 @@ export function useDesignerState() {
   const currentStep = getStepAtPath(rootSteps, currentPath)
 
   function currentSnapshot(): HistorySnapshot {
-    return { rootSteps, currentPath, category, set }
+    return { rootSteps, currentPath, category, set, description }
   }
 
   function applySnapshot(snap: HistorySnapshot) {
@@ -57,6 +64,7 @@ export function useDesignerState() {
     setCurrentPath(snap.currentPath)
     setCategoryState(snap.category)
     setSetState(snap.set)
+    setDescriptionState(snap.description)
     setSelectedIndex(null)
     setMultiSelected([])
   }
@@ -124,15 +132,22 @@ export function useDesignerState() {
     }))
   }
 
+  function setDescription(text: string) {
+    setDescriptionState(text)
+  }
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(AUTOSAVE_KEY)
       if (raw) {
-        const data = JSON.parse(raw) as { category?: Play['category']; set?: Play['set']; steps?: DesignerStep[] }
+        const data = JSON.parse(raw) as {
+          category?: Play['category']; set?: Play['set']; description?: string; steps?: DesignerStep[]
+        }
         if (Array.isArray(data.steps) && data.steps.length > 0) {
           setRootSteps(data.steps)
           if (data.category) setCategoryState(data.category)
           if (data.set) setSetState(data.set)
+          if (data.description) setDescriptionState(data.description)
           setCurrentPath([0])
         }
       }
@@ -147,8 +162,8 @@ export function useDesignerState() {
   // doesn't immediately overwrite a just-restored draft with default state.
   useEffect(() => {
     if (!hasHydrated) return
-    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ category, set, steps: rootSteps }))
-  }, [hasHydrated, rootSteps, category, set])
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ category, set, description, steps: rootSteps }))
+  }, [hasHydrated, rootSteps, category, set, description])
 
   function updateCurrentStep(updater: (step: DesignerStep) => DesignerStep) {
     setRootSteps((prev) => replaceStepAtPath(prev, currentPath, updater))
@@ -269,6 +284,17 @@ export function useDesignerState() {
     }))
   }
 
+  function setLabel(text: string) {
+    updateCurrentStep((step) => ({ ...step, label: text }))
+  }
+
+  // Records that the current content now corresponds to a published play
+  // with this id, so a subsequent Publish overwrites it instead of creating
+  // a new file. Called after a successful publish of a brand-new play.
+  function markPublished(id: string) {
+    setPublishedPlayId(id)
+  }
+
   function addStep() {
     pushHistory()
     let duplicated = freshStepFrom(currentStep)
@@ -372,6 +398,8 @@ export function useDesignerState() {
     setCurrentPath([0])
     setCategoryState('offense')
     setSetState('ho-stack')
+    setDescriptionState('')
+    setPublishedPlayId(null)
     setSelectedIndex(null)
     setMultiSelected([])
     setModeState('position')
@@ -384,12 +412,31 @@ export function useDesignerState() {
     setRootSteps(data.steps as DesignerStep[])
     if (data.category) setCategoryState(data.category)
     if (data.set) setSetState(data.set)
+    setPublishedPlayId(null)
     setCurrentPath([0])
     setSelectedIndex(null)
     setMultiSelected([])
     setModeState('position')
     setInProgressPath(null)
     return true
+  }
+
+  // Reopens an already-published play in the Designer, rebuilding its nested
+  // branch tree from the flat published steps array. Publishing afterward
+  // will overwrite that same play's file (tracked via publishedPlayId)
+  // rather than creating a new one.
+  function loadExistingPlay(play: Play) {
+    pushHistory()
+    setRootSteps(playToDesignerSteps(play))
+    setCategoryState(play.category)
+    setSetState(play.set)
+    setDescriptionState(play.description)
+    setPublishedPlayId(play.id)
+    setCurrentPath([0])
+    setSelectedIndex(null)
+    setMultiSelected([])
+    setModeState('position')
+    setInProgressPath(null)
   }
 
   return {
@@ -409,6 +456,10 @@ export function useDesignerState() {
     setCategory,
     set,
     setSet,
+    description,
+    setDescription,
+    publishedPlayId,
+    markPublished,
     moveToken,
     moveMultiSelection,
     startPath,
@@ -421,6 +472,7 @@ export function useDesignerState() {
     clearDiscHolder,
     clearThrow,
     setNarrative,
+    setLabel,
     addStep,
     deleteStep,
     goToStep,
@@ -429,6 +481,7 @@ export function useDesignerState() {
     removeBranch,
     newPlay,
     loadDraft,
+    loadExistingPlay,
     undo,
     redo,
     canUndo: undoStack.length > 0,

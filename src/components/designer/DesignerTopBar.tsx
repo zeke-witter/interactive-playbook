@@ -1,13 +1,18 @@
 'use client'
 import { FileSwitcher } from './FileSwitcher'
+import type { Play } from '@/types/play'
 
 type DesignerTopBarProps = {
   currentFileName: string | null
   draftNames: string[]
+  existingPlays: Play[]
+  publishedPlayId: string | null
   onSave: (name: string) => void
   onExport: (name: string) => void
+  onPublish: (name: string) => void
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
+  onLoadExistingPlay: (play: Play) => void
   onNewPlay: () => void
   canUndo: boolean
   canRedo: boolean
@@ -17,7 +22,8 @@ type DesignerTopBarProps = {
 }
 
 export function DesignerTopBar({
-  currentFileName, draftNames, onSave, onExport, onLoadDraft, onDeleteDraft, onNewPlay,
+  currentFileName, draftNames, existingPlays, publishedPlayId, onSave, onExport, onPublish,
+  onLoadDraft, onDeleteDraft, onLoadExistingPlay, onNewPlay,
   canUndo, canRedo, onUndo, onRedo, onPreview,
 }: DesignerTopBarProps) {
   return (
@@ -27,10 +33,14 @@ export function DesignerTopBar({
       <FileSwitcher
         currentFileName={currentFileName}
         draftNames={draftNames}
+        existingPlays={existingPlays}
+        publishedPlayId={publishedPlayId}
         onSave={onSave}
         onExport={onExport}
+        onPublish={onPublish}
         onLoadDraft={onLoadDraft}
         onDeleteDraft={onDeleteDraft}
+        onLoadExistingPlay={onLoadExistingPlay}
         onNewPlay={onNewPlay}
       />
       <div className="flex-1" />

@@ -1,27 +1,37 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import type { Play } from '@/types/play'
 
 type FileSwitcherProps = {
   currentFileName: string | null
   draftNames: string[]
+  existingPlays: Play[]
+  publishedPlayId: string | null
   onSave: (name: string) => void
   onExport: (name: string) => void
+  onPublish: (name: string) => void
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
+  onLoadExistingPlay: (play: Play) => void
   onNewPlay: () => void
 }
 
 function FileSwitcherFields({
-  name, setName, onSave, onExport, draftNames, currentFileName, onLoadDraft, onDeleteDraft, onNewPlay,
+  name, setName, onSave, onExport, onPublish, draftNames, currentFileName, onLoadDraft, onDeleteDraft,
+  existingPlays, publishedPlayId, onLoadExistingPlay, onNewPlay,
 }: {
   name: string
   setName: (v: string) => void
   onSave: () => void
   onExport: () => void
+  onPublish: () => void
   draftNames: string[]
   currentFileName: string | null
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
+  existingPlays: Play[]
+  publishedPlayId: string | null
+  onLoadExistingPlay: (play: Play) => void
   onNewPlay: () => void
 }) {
   return (
@@ -42,12 +52,49 @@ function FileSwitcherFields({
           </button>
         </div>
         <button
+          onClick={onPublish}
+          title={publishedPlayId ? `Overwrites the published "${publishedPlayId}" play` : 'Creates a new published play'}
+          className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm"
+        >
+          {publishedPlayId ? 'Publish (Update)' : 'Publish (New)'}
+        </button>
+        <button
           onClick={onExport}
           className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-border text-text text-sm"
         >
           Export to File
         </button>
       </div>
+
+      {existingPlays.length > 0 && (
+        <>
+          <div className="border-t border-border" />
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs uppercase tracking-wide text-text-muted">Load Existing Play</span>
+            <div className="flex flex-col gap-1 max-h-48 md:max-h-48 overflow-y-auto">
+              {existingPlays.map((play) => {
+                const isCurrent = play.id === publishedPlayId
+                return (
+                  <div
+                    key={play.id}
+                    className={`flex items-center justify-between gap-2 px-2 py-1.5 min-h-11 md:min-h-0 rounded-md border text-sm ${
+                      isCurrent ? 'border-accent' : 'border-border'
+                    }`}
+                  >
+                    <button
+                      onClick={() => onLoadExistingPlay(play)}
+                      className="flex-1 min-w-0 truncate text-left text-text hover:text-accent"
+                    >
+                      {play.name}
+                    </button>
+                    {isCurrent && <span className="shrink-0 text-xs text-text-muted">current</span>}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {draftNames.length > 0 && (
         <>
@@ -99,7 +146,10 @@ function FileSwitcherFields({
   )
 }
 
-export function FileSwitcher({ currentFileName, draftNames, onSave, onExport, onLoadDraft, onDeleteDraft, onNewPlay }: FileSwitcherProps) {
+export function FileSwitcher({
+  currentFileName, draftNames, existingPlays, publishedPlayId, onSave, onExport, onPublish,
+  onLoadDraft, onDeleteDraft, onLoadExistingPlay, onNewPlay,
+}: FileSwitcherProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(currentFileName ?? '')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -125,8 +175,17 @@ export function FileSwitcher({ currentFileName, draftNames, onSave, onExport, on
     if (name.trim()) onExport(name.trim())
   }
 
+  function handlePublish() {
+    if (name.trim()) onPublish(name.trim())
+  }
+
   function handleLoadDraft(draft: string) {
     onLoadDraft(draft)
+    setOpen(false)
+  }
+
+  function handleLoadExistingPlay(play: Play) {
+    onLoadExistingPlay(play)
     setOpen(false)
   }
 
@@ -154,10 +213,14 @@ export function FileSwitcher({ currentFileName, draftNames, onSave, onExport, on
               setName={setName}
               onSave={handleSave}
               onExport={handleExport}
+              onPublish={handlePublish}
               draftNames={draftNames}
               currentFileName={currentFileName}
               onLoadDraft={handleLoadDraft}
               onDeleteDraft={onDeleteDraft}
+              existingPlays={existingPlays}
+              publishedPlayId={publishedPlayId}
+              onLoadExistingPlay={handleLoadExistingPlay}
               onNewPlay={handleNewPlay}
             />
           </div>
@@ -174,10 +237,14 @@ export function FileSwitcher({ currentFileName, draftNames, onSave, onExport, on
                 setName={setName}
                 onSave={handleSave}
                 onExport={handleExport}
+                onPublish={handlePublish}
                 draftNames={draftNames}
                 currentFileName={currentFileName}
                 onLoadDraft={handleLoadDraft}
                 onDeleteDraft={onDeleteDraft}
+                existingPlays={existingPlays}
+                publishedPlayId={publishedPlayId}
+                onLoadExistingPlay={handleLoadExistingPlay}
                 onNewPlay={handleNewPlay}
               />
             </div>

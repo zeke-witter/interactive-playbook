@@ -12,6 +12,7 @@ import { MobileStepSheet } from '@/components/designer/MobileStepSheet'
 import { CoachMark } from '@/components/designer/CoachMark'
 import type { Play } from '@/types/play'
 import { sanitizeSlug } from '@/lib/slug'
+import { ALL_PLAYS } from '@/data/plays'
 
 const COACH_MARK_KEY = 'mousetrap-designer-coachmark-dismissed'
 
@@ -97,6 +98,41 @@ export default function DesignerPage() {
     URL.revokeObjectURL(url)
   }
 
+  async function handlePublish(name: string) {
+    setStatus('Publishing...')
+    try {
+      const res = await fetch('/api/designer/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: designer.publishedPlayId,
+          name,
+          category: designer.category,
+          set: designer.set,
+          description: designer.description,
+          steps: designer.steps,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setStatus(`Error: ${data.error}`)
+        return
+      }
+      designer.markPublished(data.id)
+      setCurrentFileName(name)
+      setStatus(data.isNew ? `Published new play "${data.id}"` : `Published (updated "${data.id}")`)
+    } catch {
+      setStatus('Error: failed to publish')
+    }
+  }
+
+  function handleLoadExistingPlay(play: Play) {
+    if (!window.confirm(`Load "${play.name}"? This will replace your current in-progress work.`)) return
+    designer.loadExistingPlay(play)
+    setCurrentFileName(play.name)
+    setStatus(`Loaded "${play.name}" from the published catalog`)
+  }
+
   async function handleLoadDraft(name: string) {
     if (!window.confirm(`Load "${name}"? This will replace your current in-progress work.`)) return
     try {
@@ -149,10 +185,14 @@ export default function DesignerPage() {
           <FileSwitcher
             currentFileName={currentFileName}
             draftNames={draftNames}
+            existingPlays={ALL_PLAYS}
+            publishedPlayId={designer.publishedPlayId}
             onSave={handleSave}
             onExport={handleExport}
+            onPublish={handlePublish}
             onLoadDraft={handleLoadDraft}
             onDeleteDraft={handleDeleteDraft}
+            onLoadExistingPlay={handleLoadExistingPlay}
             onNewPlay={handleNewPlay}
           />
           <div className="flex-1" />
@@ -202,10 +242,14 @@ export default function DesignerPage() {
         <DesignerTopBar
           currentFileName={currentFileName}
           draftNames={draftNames}
+          existingPlays={ALL_PLAYS}
+          publishedPlayId={designer.publishedPlayId}
           onSave={handleSave}
           onExport={handleExport}
+          onPublish={handlePublish}
           onLoadDraft={handleLoadDraft}
           onDeleteDraft={handleDeleteDraft}
+          onLoadExistingPlay={handleLoadExistingPlay}
           onNewPlay={handleNewPlay}
           canUndo={designer.canUndo}
           canRedo={designer.canRedo}
