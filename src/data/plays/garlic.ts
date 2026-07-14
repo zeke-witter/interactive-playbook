@@ -96,7 +96,7 @@ export const garlic: Play = {
       pathPreviews: [],
       narrative: {
         H3: "You've got three looks here: the skinny break to C4, the deep shot to C3, or a pump fake C3 and throw the long under. Read the defense and make a choice.",
-        C4: "You're underneath. Stay ready, there's a look coming your way one way or another.",
+        C4: "It's stall 1-2 and you're partway through your cut. H3's body language will tell you what to do next.",
         C3: "After your first ~5 steps, check over your shoulder to see how the play is developing. By now one of a few things should happen. (1) H3 throws a skinny break to C4. (2) H3 lets a huck loose because you're so open. (3) H3 pump fakes you to come back under.",
         C1: 'Hold your spacing.',
         C2: 'Hold your spacing.',
@@ -133,7 +133,7 @@ export const garlic: Play = {
       throw: { from: 'H3', to: 'C4' },
       narrative: {
         H3: "C4 is open and your mark is lazy. Throw the skinny.",
-        C4: "You're open on the break side. Catch it and look upfield right away.",
+        C4: "You're so open that H3 can't resist throwing you the skinny break. Secure the disc and immediately turn to look for a continuation down field.",
         C3: "The skinny break went up. You're now the primary continuation look. ",
         C1: 'Hold your spacing.',
         C2: 'Hold your spacing.',
@@ -167,7 +167,7 @@ export const garlic: Play = {
         { playerId: 'C3', points: [{ x: 0.6776543426513671, y: 0.30214179356892906 }, { x: 0.61718017578125, y: 0.10743327935536702 }, { x: 0.7601191711425781, y: 0.19791547457377115 }], type: 'clear', isDefense: true },
       ],
       narrative: {
-        C4: 'Disc secured on the break. Reset the count and look for the next opportunity.',
+        C4: "C3 was watching the play while making their cut. As soon as you caught the disc and looked down field, they chopped their feet to give you an easy continuation option. ",
         C3: "Read the defense and make a cut to get open for C4. Meanwhile, the rest of the offense pushes down field to flow.",
         H1: 'Reset your spacing.',
         H2: 'Reset your spacing.',
@@ -203,7 +203,7 @@ export const garlic: Play = {
       narrative: {
         H3: 'C3 is still working deep and getting open. C4 is clearing further underneath. Get ready for the deep shot.',
         C3: "The skinny went up and H3 has FIRE IN THEIR EYES. Keep going.",
-        C4: 'Clear further underneath, out of the deep throwing lane.',
+        C4: "H3 looked you off. You know this because they signaled with their body (pump fake, head shake) or their words (no, get out, gtfo). Continue your break side cut to clear the throwing lane.",
         C1: 'Hold your spacing.',
         C2: 'Hold your spacing.',
         H1: 'Hold width.',
@@ -236,7 +236,7 @@ export const garlic: Play = {
       narrative: {
         H3: 'Throw it deep now. C3 is open, get it there.',
         C3: "The huck goes up. Chase it down.",
-        C4: 'Reset your spacing, ready to support the new flow.',
+        C4: "Clear all the way to the break side rail, calling yourself \"out\" so your fellow cutters know to activate. ",
         C1: 'Reset your spacing.',
         C2: 'Reset your spacing.',
         H1: 'Reset the shape now.',
@@ -269,7 +269,7 @@ export const garlic: Play = {
       ],
       narrative: {
         H3: 'Pump fake toward the deep look, then come back to C4, who is cutting all the way across underneath.',
-        C4: 'Keep cutting hard across underneath, all the way to the far side. This is the real look.',
+        C4: "Lily looked you off. You know this because they signaled with their body (pump fake, head shake) or their words (no, get out, gtfo). Continue your break side cut to clear the throwing lane.",
         C3: "H3 pump faked you. Make a hard under cut.",
         C1: 'Hold your spacing.',
         C2: 'Hold your spacing.',
@@ -304,7 +304,7 @@ export const garlic: Play = {
       throw: { from: 'H3', to: 'C4' },
       narrative: {
         H3: "Throw it under now. C4 is open on the far side, get it there.",
-        C4: "You're open. Catch it and look upfield right away.",
+        C4: "Clear all the way to the break side rail, calling yourself \"out\" so your fellow cutters know to shift over and activate. Push down field as the offense flows.",
         C3: "You're open under and the throw goes up.",
         C1: 'Reset your spacing.',
         C2: 'Reset your spacing.',
