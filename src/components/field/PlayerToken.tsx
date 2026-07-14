@@ -1,7 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { toPixel } from '@/lib/field'
+import { playBubblePop } from '@/lib/sound'
 import type { PlayerState } from '@/types/play'
 
 type PlayerTokenProps = {
@@ -21,6 +22,16 @@ export function PlayerToken({ player, isYou, dimmed, enterIndex, label, pathPoin
   const fill = isOwnSide ? '#2563eb' : '#dc2626'
   const [entering, setEntering] = useState(true)
   const enterDelay = enterIndex * 0.035
+
+  // Synced to the entrance scale animation's overshoot peak (0.35 of its
+  // 0.5s duration, after this token's own stagger delay) rather than the
+  // moment it starts growing, so the "pop" lands where the token visually
+  // pops.
+  useEffect(() => {
+    const timer = setTimeout(playBubblePop, enterDelay * 1000 + 175)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const xTarget = !entering && pathPoints ? pathPoints.map((p) => p.px) : px
   const yTarget = !entering && pathPoints ? pathPoints.map((p) => p.py) : py
