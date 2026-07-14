@@ -26,8 +26,10 @@ const RECEIVER_RING = '#4ade80'
 // Below this (in normalized 0-1 field units), a marquee drag is treated as
 // a plain click on empty canvas rather than a deliberate selection box.
 const MARQUEE_MIN_SIZE = 0.01
+const PATH_TYPES = ['primary', 'secondary', 'clear', 'reset'] as const
 const MODE_HINTS: Record<DesignerMode, string> = {
   position: 'Click and drag any player to reposition',
+  possession: 'Click a player to set who has possession of the disc',
   path: 'Click a player, then click to lay path waypoints',
   throw: 'Click and drag disc to the receiver',
   select: 'Drag a box to select players, then drag any of them to move the group',
@@ -46,7 +48,8 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
   const {
     currentStep, mode, selectedIndex, selectToken, moveToken,
     multiSelected, setMultiSelected, moveMultiSelection,
-    inProgressPath, startPath, addWaypoint, setThrow, set, category, pathType,
+    inProgressPath, startPath, addWaypoint, finishPath, cancelPath, setThrow, set, category,
+    pathType, setPathType, setDiscHolder,
     beginDrag, endDrag, cancelDrag,
   } = designer
   const showEndzone = set === 'endzone'
@@ -122,6 +125,11 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
       selectToken(index)
       return
     }
+    if (mode === 'possession') {
+      // Offense-only for now (will expand to defense later).
+      if (!currentStep.players[index].isDefense) setDiscHolder(index)
+      return
+    }
     if (mode === 'path') {
       if (!inProgressPath) startPath(index)
       return
@@ -189,6 +197,9 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
     }
     if (mode === 'select') {
       return multiSelected.includes(index) ? 'white' : null
+    }
+    if (mode === 'possession') {
+      return index === holderIndex ? HOLDER_RING : null
     }
     return selectedIndex === index ? 'white' : null
   }
@@ -331,9 +342,30 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
           </>
         )}
       </svg>
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-surface-raised/90 border border-accent text-xs text-text pointer-events-none">
-        {MODE_HINTS[mode]}
-      </div>
+      {mode === 'path' && inProgressPath ? (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full bg-surface-raised/90 border border-white text-xs text-text">
+          {PATH_TYPES.map((t) => (
+            <button
+              key={t}
+              onClick={() => setPathType(t)}
+              title={t}
+              aria-label={`${t} path`}
+              className="w-6 h-6 rounded-full border-2"
+              style={{ backgroundColor: PATH_COLOR[t], borderColor: pathType === t ? 'white' : 'transparent' }}
+            />
+          ))}
+          <button onClick={finishPath} className="px-2.5 py-1 rounded-md border border-accent text-accent">
+            Finish Path
+          </button>
+          <button onClick={cancelPath} className="px-2.5 py-1 rounded-md border border-border text-text-muted">
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-surface-raised/90 border border-white text-xs text-text text-center pointer-events-none">
+          {MODE_HINTS[mode]}
+        </div>
+      )}
     </>
   )
 }

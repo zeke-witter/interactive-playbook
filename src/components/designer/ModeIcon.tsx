@@ -16,6 +16,16 @@ export function ModeIcon({ mode, className }: { mode: DesignerMode; className?: 
       </svg>
     )
   }
+  if (mode === 'possession') {
+    // A frisbee/disc seen at a slight angle — the flattened ellipse shape
+    // reads as a disc, distinct from Mark Throw's concentric circles.
+    return (
+      <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+        <ellipse cx="12" cy="13" rx="9" ry="4.3" />
+        <ellipse cx="12" cy="11.2" rx="4.8" ry="2" />
+      </svg>
+    )
+  }
   if (mode === 'select') {
     return (
       <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.6">

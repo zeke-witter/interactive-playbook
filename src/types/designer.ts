@@ -18,6 +18,6 @@ export type DesignerStep = {
   quiz?: Partial<Record<Position, Quiz>>
 }
 
-export type DesignerMode = 'position' | 'path' | 'throw' | 'select'
+export type DesignerMode = 'position' | 'possession' | 'path' | 'throw' | 'select'
 
 export type StepPath = number[]

@@ -1,22 +1,21 @@
 'use client'
 import { useEffect, useState } from 'react'
 import type { useDesignerState } from '@/hooks/useDesignerState'
-import type { PlayerPath, Position } from '@/types/play'
+import type { Position } from '@/types/play'
 import { PATH_COLOR } from '@/lib/pathColors'
 import { GENERIC_DEFENDER_LABELS } from '@/lib/names'
 import { CATEGORY_LABELS, SET_LABELS, ALL_CATEGORIES, ALL_SETS } from '@/lib/playLabels'
 import { StepTree } from './StepTree'
 import { AddBranchForm, AddAnotherBranchForm } from './BranchForms'
 
-const PATH_TYPES: PlayerPath['type'][] = ['primary', 'secondary', 'clear', 'reset']
 const NARRATIVE_POSITIONS: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
 
 export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof useDesignerState> }) {
   const [narrativePosition, setNarrativePosition] = useState<Position>('H1')
   const {
     steps, currentStep, currentPath, mode, selectedIndex, multiSelected, setMultiSelected,
-    pathType, setPathType, inProgressPath, finishPath, cancelPath, removePath,
-    setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep,
+    inProgressPath, removePath,
+    clearDiscHolder, clearThrow, addStep, deleteStep, goToStep,
     category, setCategory, set, setSet, description, setDescription, addBranch, addAnotherBranch, removeBranch,
     setNarrative, setLabel,
   } = designer
@@ -34,53 +33,27 @@ export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof us
 
   return (
     <aside className="w-[260px] lg:w-[320px] xl:w-[380px] flex-none border-l border-border bg-surface overflow-y-auto p-4 lg:p-6 flex flex-col gap-5">
-      {mode === 'path' && (
-        <div className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-wide text-text-muted">Path Type</span>
-          <div className="flex items-center gap-2">
-            {PATH_TYPES.map((t) => (
-              <button
-                key={t}
-                onClick={() => setPathType(t)}
-                title={t}
-                className="w-5 h-5 rounded-full border-2"
-                style={{ backgroundColor: PATH_COLOR[t], borderColor: pathType === t ? 'white' : 'transparent' }}
+      {mode === 'path' && currentStep.pathPreviews.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs uppercase tracking-wide text-text-muted">Paths on This Step</span>
+          {currentStep.pathPreviews.map((path, i) => (
+            <div key={`${path.playerId}-${path.isDefense ? 'd' : 'o'}-${i}`} className="flex items-center gap-2">
+              <span
+                className="w-3 h-3 rounded-full border border-border shrink-0"
+                style={{ backgroundColor: PATH_COLOR[path.type] }}
               />
-            ))}
-            {inProgressPath && (
-              <>
-                <button onClick={finishPath} className="px-2 py-1 text-sm rounded-md border border-accent text-accent">
-                  Finish Path
-                </button>
-                <button onClick={cancelPath} className="px-2 py-1 text-sm rounded-md border border-border text-text-muted">
-                  Cancel
-                </button>
-              </>
-            )}
-          </div>
-          {currentStep.pathPreviews.length > 0 && (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs uppercase tracking-wide text-text-muted">Paths on This Step</span>
-              {currentStep.pathPreviews.map((path, i) => (
-                <div key={`${path.playerId}-${path.isDefense ? 'd' : 'o'}-${i}`} className="flex items-center gap-2">
-                  <span
-                    className="w-3 h-3 rounded-full border border-border shrink-0"
-                    style={{ backgroundColor: PATH_COLOR[path.type] }}
-                  />
-                  <span className="flex-1 text-sm text-text">
-                    {path.isDefense ? GENERIC_DEFENDER_LABELS[path.playerId] : path.playerId}
-                  </span>
-                  <button
-                    onClick={() => removePath(path.playerId, !!path.isDefense)}
-                    aria-label={`Remove path for ${path.playerId}`}
-                    className="text-xs text-text-muted hover:text-danger-border"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
+              <span className="flex-1 text-sm text-text">
+                {path.isDefense ? GENERIC_DEFENDER_LABELS[path.playerId] : path.playerId}
+              </span>
+              <button
+                onClick={() => removePath(path.playerId, !!path.isDefense)}
+                aria-label={`Remove path for ${path.playerId}`}
+                className="text-xs text-text-muted hover:text-danger-border"
+              >
+                Remove
+              </button>
             </div>
-          )}
+          ))}
         </div>
       )}
 
@@ -93,15 +66,6 @@ export function DesignerSidePanel({ designer }: { designer: ReturnType<typeof us
             </button>
           )}
         </div>
-      )}
-
-      {mode === 'position' && selectedIndex !== null && (
-        <button
-          onClick={() => setDiscHolder(selectedIndex)}
-          className="px-2 py-1 text-sm rounded-md border border-border text-text self-start"
-        >
-          {currentStep.players[selectedIndex].hasDisc ? 'Has Disc ✓' : 'Set as Disc Holder'}
-        </button>
       )}
 
       {mode === 'throw' && selectedIndex !== null && (() => {

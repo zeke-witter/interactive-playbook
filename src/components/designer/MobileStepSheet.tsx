@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import type { useDesignerState } from '@/hooks/useDesignerState'
-import type { PlayerPath, Position } from '@/types/play'
+import type { Position } from '@/types/play'
 import { PATH_COLOR } from '@/lib/pathColors'
 import { GENERIC_DEFENDER_LABELS } from '@/lib/names'
 import { CATEGORY_LABELS, SET_LABELS, ALL_CATEGORIES, ALL_SETS } from '@/lib/playLabels'
@@ -9,7 +9,6 @@ import { getSequenceAtPath } from '@/lib/designerSteps'
 import { StepTree } from './StepTree'
 import { AddBranchForm, AddAnotherBranchForm } from './BranchForms'
 
-const PATH_TYPES: PlayerPath['type'][] = ['primary', 'secondary', 'clear', 'reset']
 const NARRATIVE_POSITIONS: Position[] = ['H1', 'H2', 'H3', 'C1', 'C2', 'C3', 'C4']
 
 export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useDesignerState> }) {
@@ -17,8 +16,8 @@ export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useD
   const [narrativePosition, setNarrativePosition] = useState<Position>('H1')
   const {
     steps, currentStep, currentPath, mode, selectedIndex, multiSelected, setMultiSelected,
-    pathType, setPathType, inProgressPath, finishPath, cancelPath, removePath,
-    setDiscHolder, clearDiscHolder, clearThrow, addStep, deleteStep, goToStep,
+    inProgressPath, removePath,
+    clearDiscHolder, clearThrow, addStep, deleteStep, goToStep,
     category, setCategory, set, setSet, description, setDescription, addBranch, addAnotherBranch, removeBranch,
     setNarrative, setLabel,
   } = designer
@@ -45,14 +44,40 @@ export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useD
         className="w-full flex items-center gap-2.5 px-3 h-[62px]"
       >
         <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-hidden">
-          {sequence.map((_, i) => (
-            <div
-              key={i}
-              className={`w-9 h-[30px] rounded-md border shrink-0 ${
-                i === currentIndex ? 'bg-surface-raised border-accent' : 'bg-bg border-border'
-              }`}
-            />
-          ))}
+          {sequence.map((step, i) => {
+            const isBranch = !!step.branches?.length
+            const isCurrent = i === currentIndex
+            return (
+              <div key={i} className="flex flex-col items-center gap-0.5 shrink-0">
+                <div
+                  className={`w-9 h-[30px] rounded-md border flex items-center justify-center ${
+                    isCurrent ? 'bg-surface-raised border-accent' : 'bg-bg border-border'
+                  }`}
+                >
+                  {isBranch && (
+                    <svg
+                      viewBox="0 0 16 16"
+                      className="w-4 h-4 text-accent"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.3}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M8 13.8V8M8 8L4 3.2M8 8L12 3.2" />
+                      <circle cx="8" cy="14" r="1.1" fill="currentColor" stroke="none" />
+                      <circle cx="4" cy="3" r="1.1" fill="currentColor" stroke="none" />
+                      <circle cx="12" cy="3" r="1.1" fill="currentColor" stroke="none" />
+                    </svg>
+                  )}
+                </div>
+                <span className="text-[9px] leading-none text-accent whitespace-nowrap">
+                  {isBranch ? 'Branch' : `Step ${i + 1}`}
+                </span>
+              </div>
+            )
+          })}
         </div>
         <span className="shrink-0 text-[9.5px] text-text-muted whitespace-nowrap">
           {summary} {expanded ? '▾' : '▴'}
@@ -61,50 +86,24 @@ export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useD
 
       {expanded && (
         <div className="max-h-[50vh] overflow-y-auto border-t border-border p-4 flex flex-col gap-5">
-          {mode === 'path' && (
-            <div className="flex flex-col gap-2">
-              <span className="text-xs uppercase tracking-wide text-text-muted">Path Type</span>
-              <div className="flex items-center gap-2">
-                {PATH_TYPES.map((t) => (
+          {mode === 'path' && currentStep.pathPreviews.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <span className="text-xs uppercase tracking-wide text-text-muted">Paths on This Step</span>
+              {currentStep.pathPreviews.map((path, i) => (
+                <div key={`${path.playerId}-${path.isDefense ? 'd' : 'o'}-${i}`} className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full border border-border shrink-0" style={{ backgroundColor: PATH_COLOR[path.type] }} />
+                  <span className="flex-1 text-sm text-text">
+                    {path.isDefense ? GENERIC_DEFENDER_LABELS[path.playerId] : path.playerId}
+                  </span>
                   <button
-                    key={t}
-                    onClick={() => setPathType(t)}
-                    title={t}
-                    className="w-6 h-6 rounded-full border-2"
-                    style={{ backgroundColor: PATH_COLOR[t], borderColor: pathType === t ? 'white' : 'transparent' }}
-                  />
-                ))}
-                {inProgressPath && (
-                  <>
-                    <button onClick={finishPath} className="min-h-11 px-2 py-1 text-sm rounded-md border border-accent text-accent">
-                      Finish Path
-                    </button>
-                    <button onClick={cancelPath} className="min-h-11 px-2 py-1 text-sm rounded-md border border-border text-text-muted">
-                      Cancel
-                    </button>
-                  </>
-                )}
-              </div>
-              {currentStep.pathPreviews.length > 0 && (
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs uppercase tracking-wide text-text-muted">Paths on This Step</span>
-                  {currentStep.pathPreviews.map((path, i) => (
-                    <div key={`${path.playerId}-${path.isDefense ? 'd' : 'o'}-${i}`} className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full border border-border shrink-0" style={{ backgroundColor: PATH_COLOR[path.type] }} />
-                      <span className="flex-1 text-sm text-text">
-                        {path.isDefense ? GENERIC_DEFENDER_LABELS[path.playerId] : path.playerId}
-                      </span>
-                      <button
-                        onClick={() => removePath(path.playerId, !!path.isDefense)}
-                        aria-label={`Remove path for ${path.playerId}`}
-                        className="min-h-11 flex items-center text-xs text-text-muted hover:text-danger-border"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                    onClick={() => removePath(path.playerId, !!path.isDefense)}
+                    aria-label={`Remove path for ${path.playerId}`}
+                    className="min-h-11 flex items-center text-xs text-text-muted hover:text-danger-border"
+                  >
+                    Remove
+                  </button>
                 </div>
-              )}
+              ))}
             </div>
           )}
 
@@ -117,15 +116,6 @@ export function MobileStepSheet({ designer }: { designer: ReturnType<typeof useD
                 </button>
               )}
             </div>
-          )}
-
-          {mode === 'position' && selectedIndex !== null && (
-            <button
-              onClick={() => setDiscHolder(selectedIndex)}
-              className="min-h-11 px-2 py-1 text-sm rounded-md border border-border text-text self-start"
-            >
-              {currentStep.players[selectedIndex].hasDisc ? 'Has Disc ✓' : 'Set as Disc Holder'}
-            </button>
           )}
 
           {mode === 'throw' && selectedIndex !== null && (() => {

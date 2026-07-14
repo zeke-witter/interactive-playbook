@@ -48,17 +48,19 @@ export function DesignerTopBar({
         onClick={onUndo}
         disabled={!canUndo}
         title="Undo (Ctrl/Cmd+Z)"
-        className="w-[30px] h-[30px] flex items-center justify-center rounded-md border border-border text-text disabled:opacity-40 disabled:cursor-not-allowed"
+        className="h-[30px] min-w-[30px] px-1.5 lg:px-2.5 flex items-center justify-center gap-1.5 rounded-md border border-border text-text text-sm disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        ↺
+        <span aria-hidden>↺</span>
+        <span className="hidden lg:inline">Undo</span>
       </button>
       <button
         onClick={onRedo}
         disabled={!canRedo}
         title="Redo (Ctrl/Cmd+Shift+Z)"
-        className="w-[30px] h-[30px] flex items-center justify-center rounded-md border border-border text-text disabled:opacity-40 disabled:cursor-not-allowed"
+        className="h-[30px] min-w-[30px] px-1.5 lg:px-2.5 flex items-center justify-center gap-1.5 rounded-md border border-border text-text text-sm disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        ↻
+        <span aria-hidden>↻</span>
+        <span className="hidden lg:inline">Redo</span>
       </button>
       <div className="w-px h-6 bg-border" />
       <button
