@@ -3,8 +3,10 @@ import { windmill } from './windmill'
 import { backZipper } from './back-zipper'
 import { reverseFlood } from './reverse-flood'
 import { flood } from './flood'
+import { garlic } from './garlic'
+import { box } from './box'
 
-export const ALL_PLAYS: Play[] = [windmill, backZipper, reverseFlood, flood]
+export const ALL_PLAYS: Play[] = [windmill, backZipper, reverseFlood, flood, garlic, box]
 
 export const PLAYS: Record<string, Play> = Object.fromEntries(ALL_PLAYS.map((play) => [play.id, play]))
 
