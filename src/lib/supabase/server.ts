@@ -44,6 +44,8 @@ export type CurrentProfile = {
   userId: string
   displayName: string
   isAdmin: boolean
+  /** Can reach team management: the global admin, or a captain of some team. */
+  canManage: boolean
 }
 
 /**
@@ -64,9 +66,22 @@ export async function getCurrentProfile(): Promise<CurrentProfile | null> {
     .eq('user_id', user.id)
     .maybeSingle()
 
+  const isAdmin = data?.is_admin ?? false
+  let canManage = isAdmin
+  if (!canManage) {
+    const { data: caps } = await supabase
+      .from('membership')
+      .select('team_id')
+      .eq('user_id', user.id)
+      .eq('role', 'captain')
+      .limit(1)
+    canManage = !!caps?.length
+  }
+
   return {
     userId: user.id,
     displayName: data?.display_name ?? user.email ?? 'Player',
-    isAdmin: data?.is_admin ?? false,
+    isAdmin,
+    canManage,
   }
 }

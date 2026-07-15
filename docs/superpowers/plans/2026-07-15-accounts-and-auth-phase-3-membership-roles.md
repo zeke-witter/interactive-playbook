@@ -158,3 +158,14 @@ on conflict (team_id, user_id) do nothing;
 - **RLS helpers in `private`** keep the SECURITY DEFINER surface off the public API (no advisor warnings) while remaining usable in policies; SECURITY DEFINER also avoids membership-policy recursion.
 - **Viewer unaffected** — public-read policy on published plays retained; `play` table untouched this phase.
 - **Deferred:** personal playbooks + DB authoring (Phase 4), submit/approve (Phase 5), team creation / multi-team switcher (Phase 7). Guards beyond last-captain (e.g. self-demotion nuances) can harden later.
+
+---
+
+## Execution notes (2026-07-15)
+
+Built on branch `feat/membership-phase-3`.
+
+- **Migration `0005_membership_roles`** applied: `coach`→`captain`; `private` helper fns; membership/team/pending_membership RLS; `pending_membership` table; both claim triggers; `handle_new_user` updated; grants. Admin seeded as captain of Mousetrap (via `execute_sql`, not a migration).
+- **App:** `getCurrentProfile()` now returns `canManage`; server actions in `src/app/team/actions.ts` (invite/setRole/remove/cancel, with last-captain + admin guards); `/team` page + `TeamPanel` client UI; "Manage team" link in `AuthButton` for admins/captains.
+- **Automated verification done:** `tsc` clean; production build OK (`/team` route present). **Claim triggers verified directly in the DB** — an invite to a non-existent email stays `pending`; an invite to an existing account (case-insensitive) is promoted to `membership` and the pending row deleted. `/team` returns 404 when signed out; Viewer still public. Advisors clean (only expected `draft`/`progress` INFOs; the `auth_leaked_password_protection` WARN is N/A — Google-only, no passwords).
+- **Remaining (manual, human-only):** in-browser two-account run — invite a second Google account from `/team`, sign in as them (auto-added as `player`, `/team` 404s for them), then promote→captain (gains `/team`) and demote back. I can confirm the resulting rows via MCP.

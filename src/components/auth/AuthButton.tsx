@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import { getBrowserSupabase } from '@/lib/supabase/client'
 import { signOut } from '@/app/auth/actions'
 import type { CurrentProfile } from '@/lib/supabase/server'
@@ -56,6 +57,14 @@ export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
         {profile.displayName}
         {profile.isAdmin && <span className="ml-1 font-medium text-accent">· admin</span>}
       </span>
+      {profile.canManage && (
+        <Link
+          href="/team"
+          className="whitespace-nowrap rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 hover:bg-surface hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+        >
+          Manage team
+        </Link>
+      )}
       <form action={signOut}>
         <button
           type="submit"
