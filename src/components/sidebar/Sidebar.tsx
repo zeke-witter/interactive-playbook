@@ -9,6 +9,7 @@ import { PickerDrawer } from './PickerDrawer'
 
 type SidebarProps = {
   play: Play
+  plays: Play[]
   step: PlayStep
   stepIndex: number
   stepperIndex: number
@@ -29,7 +30,7 @@ type SidebarProps = {
 }
 
 export function Sidebar({
-  play, step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, selectedPosition, onPositionChange,
+  play, plays, step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, selectedPosition, onPositionChange,
   isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered, onHighlightZone, roster,
 }: SidebarProps) {
   return (
@@ -37,7 +38,7 @@ export function Sidebar({
       <div className="flex-none p-4 flex flex-col gap-4">
         <div className="flex items-start justify-between gap-3">
           <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepperIndex} totalSteps={stepperTotal} roster={roster} />
-          <PickerDrawer currentPlay={play} />
+          <PickerDrawer plays={plays} currentPlay={play} />
         </div>
         <PositionSelector value={selectedPosition} onChange={onPositionChange} roster={roster} />
       </div>
@@ -71,7 +72,7 @@ export function Sidebar({
       </div>
 
       <div className="hidden md:block flex-none max-h-60 overflow-y-auto border-t border-border p-4">
-        <PlayPicker currentPlay={play} />
+        <PlayPicker plays={plays} currentPlay={play} />
       </div>
     </aside>
   )

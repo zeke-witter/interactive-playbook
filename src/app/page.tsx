@@ -1,7 +1,10 @@
 import { AmbientField } from '@/components/field/AmbientField'
 import { PlayPicker } from '@/components/sidebar/PlayPicker'
+import { getPublishedPlays } from '@/lib/playsRepo'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const plays = await getPublishedPlays()
+
   return (
     <main className="flex flex-col md:flex-row h-screen overflow-hidden bg-bg">
       <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto shrink-0 md:h-full p-4">
@@ -15,7 +18,7 @@ export default function HomePage() {
           <p className="mt-1 text-sm text-text-muted">Pick a play below to get started.</p>
         </div>
         <div className="rounded-xl border-2 border-accent bg-surface-raised p-4 shadow-[0_0_28px_rgba(163,230,53,0.28)]">
-          <PlayPicker />
+          <PlayPicker plays={plays} />
         </div>
       </aside>
     </main>
