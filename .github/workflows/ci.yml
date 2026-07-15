@@ -1,0 +1,39 @@
+name: CI
+
+# Safety gate: typecheck + production build on PRs into main (and on main itself).
+# Deploys are handled separately by Vercel's native Git integration, which builds
+# and deploys on push to main — this workflow does NOT deploy.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# One in-flight run per ref; a new push cancels the previous run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24 # match Vercel's Node 24.x runtime
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Production build
+        run: npm run build
+        env:
+          # Client-safe publishable values (RLS enforces access). Provided so the
+          # build matches production and doesn't silently inline `undefined`.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
