@@ -73,9 +73,11 @@ grant all on table profile to service_role;
 
 ---
 
-### Task 2: Supabase clients + session middleware
+### Task 2: Supabase clients + session proxy
 
-**Files:** create `src/lib/supabase/client.ts`, `src/middleware.ts`. (`src/lib/supabase/server.ts` already exists — its cookie wiring is ready.)
+> **Next 16 note:** the `middleware` file convention is deprecated and renamed to **`proxy`** — implemented as `src/proxy.ts` exporting `proxy()`, not `src/middleware.ts`. (Confirmed against `node_modules/next/dist/docs/.../proxy.md`; Proxy defaults to the Node.js runtime, which the Supabase client needs.)
+
+**Files:** create `src/lib/supabase/client.ts`, `src/proxy.ts`. (`src/lib/supabase/server.ts` already exists — its cookie wiring is ready.)
 
 - [ ] **Step 1: Browser client** (`client.ts`) — `createBrowserClient(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)` per the installed `@supabase/ssr` docs. `'use client'`-safe (used by the sign-in button).
 - [ ] **Step 2: Middleware** (`src/middleware.ts`) — refresh the auth session on each request per the `@supabase/ssr` App-Router guide (the `updateSession` pattern: create a server client bound to the request/response cookies, call `getUser()`, return the response so refreshed cookies are set). **Read the installed `@supabase/ssr` docs + Next 16 middleware docs first** — the cookie API and `matcher` config must match this version. Matcher should skip static assets and `/_next`.
@@ -121,9 +123,20 @@ grant all on table profile to service_role;
 
 ## Self-Review Notes
 
-- **No gating this phase** — RLS/roles/authoring are untouched; only identity is added. Rollback = remove middleware + AuthButton + callback; the `profile` table/trigger are inert without sign-in.
+- **No gating this phase** — RLS/roles/authoring are untouched; only identity is added. Rollback = remove the proxy + AuthButton + callback; the `profile` table/trigger are inert without sign-in.
 - **Trigger is minimal on purpose** — profile + admin flag only; the `pending_membership` claim is deliberately deferred to Phase 3 so the trigger doesn't reference a table that doesn't exist yet.
 - **Self-escalation guarded** — no user-facing write policy on `profile`, so a user cannot set their own `is_admin`; only the security-definer trigger and service_role write it.
 - **`getUser()` not `getSession()`** in server code (validates the JWT server-side).
 - **Admin identity** = `thevoiceofzeke@gmail.com` (per the design decision). If sign-in will use a different Google account, update the trigger's email literal before applying.
+
+---
+
+## Execution notes (2026-07-15)
+
+Built on branch `feat/auth-phase-2`.
+
+- **Tasks 1–4 done.** Migrations `0003_auth_profile` (profile + trigger + RLS + grants) and `0004_harden_trigger_fn` (revoke `EXECUTE` on the trigger fn from the API roles — closed a security-advisor WARN) applied via MCP; table/trigger/fn verified. Created `src/lib/supabase/client.ts`, `src/proxy.ts`, `src/app/auth/callback/route.ts`, `src/app/auth/actions.ts` (sign-out), `src/components/auth/AuthButton.tsx`, and `getCurrentProfile()` in `server.ts`; wired `AuthButton` into the home page.
+- **Deviation from plan:** used `src/proxy.ts` (Next 16 rename), not `src/middleware.ts`.
+- **Automated verification done:** `tsc` clean; production build succeeds (`/auth/callback` route + `Proxy` both present); against the dev server — signed-out home shows "Sign in with Google", `/plays/flood` still public (200), `/auth/callback` with no code → 307 → `/?auth_error=1`. Security advisors clean (only the expected policy-less-table INFOs).
+- **Remaining (manual, human-only):** the live Google sign-in click-through — can't be automated. Test on **localhost:3000** (the domain in Supabase's redirect allowlist + Google's JS origins; the Vercel preview domain is neither, and is behind deployment protection). After sign-in, verify the `profile` row (admin=true for the sole admin, false for a second account) — I can check this via MCP once you've signed in. Production sign-in works after merge (`playbook.thesiteofzeke.dev` is allowlisted).
 ```
