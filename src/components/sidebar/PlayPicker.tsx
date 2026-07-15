@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { categoriesWithPlays, setsInCategory, playsInSet } from '@/data/plays'
 import { CATEGORY_LABELS, SET_LABELS } from '@/lib/playLabels'
 import type { Play } from '@/types/play'
 
@@ -12,13 +11,22 @@ type PickerLevel =
 
 const ROW_CLASS = 'text-left rounded-md border px-3 py-2 border-border bg-surface text-text hover:bg-surface-raised transition-colors'
 
-export function PlayPicker({ currentPlay }: { currentPlay?: Play }) {
+// Grouping is computed inline from the passed-in `plays` (mirrors the pure
+// helpers in lib/playsRepo). PlayPicker is a client component, so it must not
+// import from playsRepo — that module pulls in the server-only Supabase client.
+export function PlayPicker({ plays, currentPlay }: { plays: Play[]; currentPlay?: Play }) {
   const router = useRouter()
   const [level, setLevel] = useState<PickerLevel>(
     currentPlay
       ? { view: 'plays', category: currentPlay.category, set: currentPlay.set }
       : { view: 'categories' }
   )
+
+  const categories = Array.from(new Set(plays.map((p) => p.category)))
+  const setsInCategory = (category: Play['category']) =>
+    Array.from(new Set(plays.filter((p) => p.category === category).map((p) => p.set)))
+  const playsInSet = (category: Play['category'], set: Play['set']) =>
+    plays.filter((p) => p.category === category && p.set === set)
 
   return (
     <div className="flex flex-col gap-2">
@@ -44,14 +52,14 @@ export function PlayPicker({ currentPlay }: { currentPlay?: Play }) {
 
       <div className="flex flex-col gap-1">
         {level.view === 'categories' &&
-          categoriesWithPlays().map((category) => (
+          categories.map((category) => (
             <button key={category} onClick={() => setLevel({ view: 'sets', category })} className={ROW_CLASS}>
               {CATEGORY_LABELS[category]}
             </button>
           ))}
 
         {level.view === 'sets' &&
-          setsInCategory(level.category).map((set) => (
+          setsInCategory(level.category).map((set: Play['set']) => (
             <button key={set} onClick={() => setLevel({ view: 'plays', category: level.category, set })} className={ROW_CLASS}>
               {SET_LABELS[set]}
             </button>
