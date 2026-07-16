@@ -12,11 +12,13 @@ import { PlaybookBreadcrumb } from '@/components/designer/PlaybookBreadcrumb'
 import { MobileToolTabBar } from '@/components/designer/MobileToolTabBar'
 import { MobileStepSheet } from '@/components/designer/MobileStepSheet'
 import { CoachMark } from '@/components/designer/CoachMark'
-import type { Play } from '@/types/play'
+import type { Play, PlayerState } from '@/types/play'
 import type { CurrentProfile } from '@/lib/supabase/server'
 import type { MemberTeam } from '@/lib/playsRepo'
 import { getBrowserSupabase } from '@/lib/supabase/client'
-import { saveDraft, loadDraft, deleteDraft, publishPersonalPlay, publishTeamPlay } from './actions'
+import { getStepAtPath } from '@/lib/designerSteps'
+import { SET_LABELS } from '@/lib/playLabels'
+import { saveDraft, loadDraft, deleteDraft, publishPersonalPlay, publishTeamPlay, saveFormation } from './actions'
 
 const COACH_MARK_KEY = 'mousetrap-designer-coachmark-dismissed'
 
@@ -28,6 +30,7 @@ type DesignerAppProps = {
   draftList: { name: string; scope: string }[]
   initialPlay: Play | null
   initialScope: string
+  formations: Record<Play['set'], PlayerState[]>
 }
 
 export function DesignerApp({
@@ -38,8 +41,9 @@ export function DesignerApp({
   draftList,
   initialPlay,
   initialScope,
+  formations,
 }: DesignerAppProps) {
-  const designer = useDesignerState()
+  const designer = useDesignerState(formations)
   const router = useRouter()
   const signedIn = profile !== null
   const [status, setStatus] = useState<string | null>(null)
@@ -181,6 +185,23 @@ export function DesignerApp({
       router.refresh()
     } catch {
       setStatus('Error: failed to publish')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleSaveFormation() {
+    if (busy) return
+    const current = getStepAtPath(designer.steps, designer.currentPath)
+    if (!current) return
+    setBusy(true)
+    setStatus(`Saving ${SET_LABELS[designer.set]} template…`)
+    try {
+      const result = await saveFormation(designer.set, current.players)
+      setStatus(result.error ? `Error: ${result.error}` : `Saved the ${SET_LABELS[designer.set]} template`)
+      if (!result.error) router.refresh()
+    } catch {
+      setStatus('Error: failed to save template')
     } finally {
       setBusy(false)
     }
@@ -360,6 +381,9 @@ export function DesignerApp({
         onDeleteDraft={handleDeleteDraft}
         onNewPlay={handleNewPlay}
         onSignIn={handleSignIn}
+        isAdmin={!!profile?.isAdmin}
+        setLabel={SET_LABELS[designer.set]}
+        onSaveFormation={handleSaveFormation}
       />
     </main>
   )

@@ -1,5 +1,7 @@
-import type { Play, PlayStep } from '@/types/play'
+import type { Play, PlayStep, PlayerState } from '@/types/play'
 import { getServerSupabase } from './supabase/server'
+import { defaultFormationFor } from './defaultFormations'
+import { ALL_SETS } from './playLabels'
 
 /**
  * Data-access layer for published plays. Maps `play` rows back to the existing
@@ -102,6 +104,20 @@ export async function getPersonalPlayBySlug(slug: string): Promise<Play | null> 
     .maybeSingle()
   if (error) throw error
   return data ? rowToPlay(data as PlayRow) : null
+}
+
+/**
+ * The per-set starting formations, with any admin overrides from the DB applied
+ * over the committed defaults. Always returns a complete map (falls back to
+ * `defaultFormationFor` for sets with no override row).
+ */
+export async function getFormations(): Promise<Record<Play['set'], PlayerState[]>> {
+  const sb = await getServerSupabase()
+  const { data } = await sb.from('formation').select('set_id, data')
+  const overrides = new Map((data ?? []).map((r: { set_id: string; data: unknown }) => [r.set_id, r.data as PlayerState[]]))
+  const out = {} as Record<Play['set'], PlayerState[]>
+  for (const s of ALL_SETS) out[s] = overrides.get(s) ?? defaultFormationFor(s)
+  return out
 }
 
 export type MemberTeam = { id: string; name: string; canPublish: boolean }

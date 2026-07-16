@@ -6,6 +6,7 @@ import {
   getDrafts,
   getPersonalPlayBySlug,
   getPlayBySlug,
+  getFormations,
 } from '@/lib/playsRepo'
 import { DesignerApp } from './DesignerApp'
 import type { Play } from '@/types/play'
@@ -25,11 +26,12 @@ export default async function DesignerPage({
 }) {
   const { play, scope } = await searchParams
 
-  const [profile, memberTeams, personalPlays, draftList] = await Promise.all([
+  const [profile, memberTeams, personalPlays, draftList, formations] = await Promise.all([
     getCurrentProfile(),
     getMemberTeams(),
     getPersonalPlays(),
     getDrafts(),
+    getFormations(),
   ])
 
   // One published-play list per member team, keyed by team id.
@@ -54,6 +56,7 @@ export default async function DesignerPage({
       draftList={draftList}
       initialPlay={initialPlay}
       initialScope={initialScope}
+      formations={formations}
     />
   )
 }

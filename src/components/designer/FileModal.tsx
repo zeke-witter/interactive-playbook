@@ -21,6 +21,9 @@ type FileModalProps = {
   onDeleteDraft: (name: string) => void
   onNewPlay: () => void
   onSignIn: () => void
+  isAdmin: boolean
+  setLabel: string
+  onSaveFormation: () => void
 }
 
 /**
@@ -50,6 +53,9 @@ export function FileModal({
   onDeleteDraft,
   onNewPlay,
   onSignIn,
+  isAdmin,
+  setLabel,
+  onSaveFormation,
 }: FileModalProps) {
   if (!open) return null
 
@@ -194,6 +200,23 @@ export function FileModal({
                   )
                 })}
               </div>
+            </div>
+          </>
+        )}
+
+        {isAdmin && (
+          <>
+            <div className="border-t border-border" />
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs uppercase tracking-wide text-text-muted">Admin</span>
+              <button
+                onClick={onSaveFormation}
+                disabled={busy}
+                title={`Save the current player layout as the default ${setLabel} formation`}
+                className="min-h-11 md:min-h-0 px-3 py-1.5 rounded-md border border-border text-text text-sm disabled:opacity-50 disabled:cursor-wait"
+              >
+                Save current layout as {setLabel} template
+              </button>
             </div>
           </>
         )}
