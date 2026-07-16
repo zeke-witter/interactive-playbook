@@ -8,6 +8,8 @@ type FileModalProps = {
   setName: (v: string) => void
   signedIn: boolean
   canPublishHere: boolean
+  busy: boolean
+  status: string | null
   loadablePlays: Play[]
   starterPlays: Play[]
   publishedPlayId: string | null
@@ -37,6 +39,8 @@ export function FileModal({
   setName,
   signedIn,
   canPublishHere,
+  busy,
+  status,
   loadablePlays,
   starterPlays,
   publishedPlayId,
@@ -72,6 +76,18 @@ export function FileModal({
           </button>
         </div>
 
+        {status && (
+          <p
+            className={`rounded-md px-3 py-2 text-sm text-text border ${
+              status.startsWith('Error')
+                ? 'border-danger-border bg-danger-bg'
+                : 'border-success-border bg-success-bg'
+            }`}
+          >
+            {status}
+          </p>
+        )}
+
         {/* Play name + primary actions */}
         <div className="flex flex-col gap-1.5">
           <span className="text-xs uppercase tracking-wide text-text-muted">Play Name</span>
@@ -86,18 +102,19 @@ export function FileModal({
               <div className="flex gap-2">
                 <button
                   onClick={onSave}
+                  disabled={busy}
                   title="Save a private draft you can reopen later"
-                  className="flex-1 min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-accent bg-accent text-accent-foreground text-sm font-medium"
+                  className="flex-1 min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-accent bg-accent text-accent-foreground text-sm font-medium disabled:opacity-50 disabled:cursor-wait"
                 >
                   Save draft
                 </button>
                 <button
                   onClick={onPublish}
-                  disabled={!canPublishHere}
+                  disabled={!canPublishHere || busy}
                   title={canPublishHere ? 'Add this play to the active playbook' : 'Captains can publish here'}
                   className="flex-1 min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Add to playbook
+                  {busy ? 'Working…' : 'Add to playbook'}
                 </button>
               </div>
               {!canPublishHere && (

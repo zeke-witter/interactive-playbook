@@ -51,7 +51,7 @@ export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
   }
 
   return (
-    <div className="flex shrink-0 items-center gap-2.5">
+    <div className="flex h-8 shrink-0 items-center gap-2.5">
       {profile.isAdmin && (
         <span
           title="Admin"
@@ -61,7 +61,7 @@ export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
           A
         </span>
       )}
-      <span className="hidden sm:inline text-sm text-text-muted">{profile.displayName}</span>
+      <span className="hidden sm:inline text-sm leading-none text-text-muted">{profile.displayName}</span>
       <form action={signOut}>
         <button
           type="submit"

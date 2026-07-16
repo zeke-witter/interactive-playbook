@@ -58,25 +58,40 @@ export async function getPlayBySlug(slug: string): Promise<Play | null> {
 
 // --- Personal playbooks + team management (RLS-enforced; server components) ---
 
-/** The signed-in user's personal plays (team_id null). RLS returns only theirs. */
+/**
+ * The current user's OWN personal plays. Must filter by owner_id explicitly:
+ * RLS lets an admin read *everyone's* personal plays, so relying on RLS alone
+ * would surface other users' plays under "My plays" (and they couldn't be
+ * deleted, since delete is owner-scoped).
+ */
 export async function getPersonalPlays(): Promise<Play[]> {
   const sb = await getServerSupabase()
+  const {
+    data: { user },
+  } = await sb.auth.getUser()
+  if (!user) return []
   const { data, error } = await sb
     .from('play')
     .select(PLAY_COLUMNS)
     .is('team_id', null)
+    .eq('owner_id', user.id)
     .order('name')
   if (error) throw error
   return (data ?? []).map((r) => rowToPlay(r as PlayRow))
 }
 
-/** A single personal play by slug, owner-only (RLS). Null if not found/allowed. */
+/** A single personal play by slug, restricted to the current user's own. */
 export async function getPersonalPlayBySlug(slug: string): Promise<Play | null> {
   const sb = await getServerSupabase()
+  const {
+    data: { user },
+  } = await sb.auth.getUser()
+  if (!user) return null
   const { data, error } = await sb
     .from('play')
     .select(PLAY_COLUMNS)
     .is('team_id', null)
+    .eq('owner_id', user.id)
     .eq('slug', slug)
     .maybeSingle()
   if (error) throw error
@@ -120,6 +135,27 @@ export async function getTeamPlays(teamId: string): Promise<Play[]> {
     .order('name')
   if (error) throw error
   return (data ?? []).map((r) => rowToPlay(r as PlayRow))
+}
+
+export type ManagedTeamPlay = {
+  slug: string
+  name: string
+  category: Play['category']
+  set: Play['set']
+  status: string
+}
+
+/** All of a team's plays (any status) for captain management. RLS lets captains
+ *  read every play in their team; a non-captain would only see published ones. */
+export async function getManagedTeamPlays(teamId: string): Promise<ManagedTeamPlay[]> {
+  const sb = await getServerSupabase()
+  const { data, error } = await sb
+    .from('play')
+    .select('slug,name,category,set,status')
+    .eq('team_id', teamId)
+    .order('name')
+  if (error) throw error
+  return (data ?? []) as ManagedTeamPlay[]
 }
 
 /** The caller's draft names tagged with their playbook scope ('personal' or a team id). */

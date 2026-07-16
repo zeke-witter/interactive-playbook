@@ -4,9 +4,10 @@ import { usePathname } from 'next/navigation'
 import { AuthButton } from '@/components/auth/AuthButton'
 import type { CurrentProfile } from '@/lib/supabase/server'
 
-/** Nav items render as soft-background buttons with lime text (light weight). */
+/** Nav items render as soft-background buttons with lime text (light weight).
+ *  Fixed height + inline-flex centering keeps them aligned with the auth cluster. */
 const LINK =
-  'rounded-md bg-surface-raised px-3 py-1.5 text-sm font-normal text-accent hover:bg-surface hover:text-accent-hover transition-colors'
+  'inline-flex items-center h-8 rounded-md bg-surface-raised px-3 text-sm font-normal leading-none text-accent hover:bg-surface hover:text-accent-hover transition-colors'
 
 /**
  * Global top nav. Brand (left) returns to the viewer/home. Right: lime text

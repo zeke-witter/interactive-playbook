@@ -19,7 +19,7 @@ export function PlaybookBrowser({ books }: { books: Playbook[] }) {
     <div className="flex flex-col gap-3">
       {books.length > 1 && (
         <label className="flex flex-col gap-1 text-xs uppercase tracking-wide text-text-muted">
-          Viewing
+          Playbook
           <select
             value={selected}
             onChange={(e) => setSelected(Number(e.target.value))}

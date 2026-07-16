@@ -46,6 +46,7 @@ export function DesignerApp({
   const router = useRouter()
   const signedIn = profile !== null
   const [status, setStatus] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
   const [isPreviewing, setIsPreviewing] = useState(false)
   const [fileModalOpen, setFileModalOpen] = useState(false)
   // The editable play name (breadcrumb part 2 + modal input).
@@ -118,12 +119,14 @@ export function DesignerApp({
   }
 
   async function handleSave() {
+    if (busy) return
     const name = playName.trim()
     if (!name) {
       setStatus('Name the play first.')
       return
     }
-    setStatus('Saving...')
+    setBusy(true)
+    setStatus('Saving…')
     try {
       const result = await saveDraft(
         name,
@@ -144,6 +147,8 @@ export function DesignerApp({
       router.refresh()
     } catch {
       setStatus('Error: failed to save')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -160,14 +165,15 @@ export function DesignerApp({
   }
 
   async function handlePublish() {
-    if (!canPublishHere) return
+    if (!canPublishHere || busy) return
     const name = playName.trim()
     if (!name) {
       setStatus('Name the play first.')
       return
     }
     const toPersonal = activePlaybook === 'personal'
-    setStatus(toPersonal ? 'Saving...' : 'Publishing...')
+    setBusy(true)
+    setStatus(toPersonal ? 'Saving…' : 'Publishing…')
     try {
       const session = {
         name,
@@ -190,6 +196,8 @@ export function DesignerApp({
       router.refresh()
     } catch {
       setStatus('Error: failed to publish')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -354,6 +362,8 @@ export function DesignerApp({
         setName={setPlayName}
         signedIn={signedIn}
         canPublishHere={canPublishHere}
+        busy={busy}
+        status={status}
         loadablePlays={loadablePlays}
         starterPlays={starterPlays}
         publishedPlayId={designer.publishedPlayId}
