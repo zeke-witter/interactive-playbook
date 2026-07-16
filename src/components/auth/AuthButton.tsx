@@ -51,15 +51,21 @@ export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
   }
 
   return (
-    <div className="flex shrink-0 items-center gap-3">
-      <span className="hidden sm:inline text-sm text-text-muted">
-        {profile.displayName}
-        {profile.isAdmin && <span className="ml-1 font-medium text-accent">· admin</span>}
-      </span>
+    <div className="flex h-8 shrink-0 items-center gap-2.5">
+      {profile.isAdmin && (
+        <span
+          title="Admin"
+          aria-label="Admin"
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-foreground text-[11px] font-bold leading-none"
+        >
+          A
+        </span>
+      )}
+      <span className="hidden sm:inline text-sm leading-none text-text-muted">{profile.displayName}</span>
       <form action={signOut}>
         <button
           type="submit"
-          className="cursor-pointer whitespace-nowrap rounded-lg border border-border bg-surface-raised px-3 py-1.5 text-sm font-medium text-text shadow-sm transition-all duration-150 hover:bg-surface hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+          className="cursor-pointer whitespace-nowrap text-xs font-normal text-accent underline underline-offset-2 hover:text-accent-hover transition-colors"
         >
           Sign out
         </button>

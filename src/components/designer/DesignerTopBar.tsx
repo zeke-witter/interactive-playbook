@@ -1,22 +1,13 @@
 'use client'
-import { FileSwitcher } from './FileSwitcher'
-import type { Play } from '@/types/play'
+import { PlaybookBreadcrumb } from './PlaybookBreadcrumb'
 
 type DesignerTopBarProps = {
-  currentFileName: string | null
-  draftNames: string[]
-  existingPlays: Play[]
-  publishedPlayId: string | null
-  signedIn: boolean
-  manageableTeams: { id: string; name: string }[]
-  onSave: (name: string) => void
-  onExport: (name: string) => void
-  onPublish: (name: string, destination: string) => void
-  onLoadDraft: (name: string) => void
-  onDeleteDraft: (name: string) => void
-  onLoadExistingPlay: (play: Play) => void
-  onNewPlay: () => void
-  onSignIn: () => void
+  activePlaybook: string
+  activePlaybookName: string
+  memberTeams: { id: string; name: string }[]
+  onSelectPlaybook: (id: string) => void
+  playName: string
+  onOpenFile: () => void
   canUndo: boolean
   canRedo: boolean
   onUndo: () => void
@@ -25,30 +16,27 @@ type DesignerTopBarProps = {
 }
 
 export function DesignerTopBar({
-  currentFileName, draftNames, existingPlays, publishedPlayId, onSave, onExport, onPublish,
-  onLoadDraft, onDeleteDraft, onLoadExistingPlay, onNewPlay,
-  signedIn, manageableTeams, onSignIn,
-  canUndo, canRedo, onUndo, onRedo, onPreview,
+  activePlaybook,
+  activePlaybookName,
+  memberTeams,
+  onSelectPlaybook,
+  playName,
+  onOpenFile,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onPreview,
 }: DesignerTopBarProps) {
   return (
     <div className="h-[50px] flex-none flex items-center gap-3 px-4 border-b border-border bg-surface-raised">
-      <span className="font-display text-[13px] font-semibold uppercase tracking-[.06em] text-text">MOUSETRAP</span>
-      <span className="text-text-muted">/</span>
-      <FileSwitcher
-        currentFileName={currentFileName}
-        draftNames={draftNames}
-        existingPlays={existingPlays}
-        publishedPlayId={publishedPlayId}
-        signedIn={signedIn}
-        manageableTeams={manageableTeams}
-        onSave={onSave}
-        onExport={onExport}
-        onPublish={onPublish}
-        onLoadDraft={onLoadDraft}
-        onDeleteDraft={onDeleteDraft}
-        onLoadExistingPlay={onLoadExistingPlay}
-        onNewPlay={onNewPlay}
-        onSignIn={onSignIn}
+      <PlaybookBreadcrumb
+        activePlaybook={activePlaybook}
+        activePlaybookName={activePlaybookName}
+        memberTeams={memberTeams}
+        onSelectPlaybook={onSelectPlaybook}
+        playName={playName}
+        onOpenFile={onOpenFile}
       />
       <div className="flex-1" />
       <button

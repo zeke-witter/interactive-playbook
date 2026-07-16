@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { getServerSupabase } from '@/lib/supabase/server'
 import { buildPlay } from '@/lib/playDesignerConvert'
 import { sanitizeSlug } from '@/lib/slug'
-import type { Play } from '@/types/play'
+import type { Play, PlayerState } from '@/types/play'
 import type { DesignerStep } from '@/types/designer'
 
 /**
@@ -177,6 +177,30 @@ export async function importTeamPlayToPersonal(teamPlaySlug: string): Promise<Re
   }
 }
 
+/**
+ * Save the current layout as the default formation for a set (admin only).
+ * Overrides the committed default; every future New Play / set-switch in that
+ * set starts from this layout. Existing plays are unaffected.
+ */
+export async function saveFormation(setId: Play['set'], players: PlayerState[]): Promise<Result> {
+  try {
+    const { supabase, user } = await requireUser()
+    const { data: prof } = await supabase.from('profile').select('is_admin').eq('user_id', user.id).maybeSingle()
+    if (!prof?.is_admin) return { error: 'Only an admin can edit formation templates.' }
+    if (!Array.isArray(players) || players.length === 0) return { error: 'Nothing to save.' }
+
+    const { error } = await supabase.from('formation').upsert(
+      { set_id: setId, data: players, updated_by: user.id, updated_at: new Date().toISOString() },
+      { onConflict: 'set_id' },
+    )
+    if (error) throw error
+    revalidatePath('/designer')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not save template.' }
+  }
+}
+
 // --- Named drafts (nested Designer tree), per user; replaces the file routes. ---
 
 export type DraftPayload = { category: Play['category']; set: Play['set']; description?: string; steps: DesignerStep[] }
@@ -191,13 +215,15 @@ export async function listDrafts(): Promise<string[]> {
   return (data ?? []).map((d: { name: string }) => d.name)
 }
 
-export async function saveDraft(name: string, payload: DraftPayload): Promise<Result> {
+export async function saveDraft(name: string, payload: DraftPayload, scope: string = 'personal'): Promise<Result> {
   try {
     const { supabase, user } = await requireUser()
     if (!name.trim()) return { error: 'Name the draft first.' }
     const row = {
       user_id: user.id,
-      team_id: null,
+      // The playbook a draft belongs to: null = personal, else the team id.
+      // Lets the Designer filter drafts by the active playbook.
+      team_id: scope === 'personal' ? null : scope,
       name: name.trim(),
       category: payload.category,
       set: payload.set,

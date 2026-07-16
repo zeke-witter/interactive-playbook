@@ -94,6 +94,39 @@ export async function removeMember(teamId: string, userId: string): Promise<Resu
   }
 }
 
+/** Hide or unhide a team play (captain/admin). Hidden plays drop out of the
+ *  public viewer but stay visible to captains for later unhide/edit. */
+export async function setTeamPlayHidden(teamId: string, slug: string, hidden: boolean): Promise<Result> {
+  try {
+    const { supabase } = await requireManage(teamId)
+    const { error } = await supabase
+      .from('play')
+      .update({ status: hidden ? 'hidden' : 'published' })
+      .eq('team_id', teamId)
+      .eq('slug', slug)
+    if (error) throw error
+    revalidatePath('/team')
+    revalidatePath('/')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not update play.' }
+  }
+}
+
+/** Permanently delete a team play (captain/admin). */
+export async function deleteTeamPlay(teamId: string, slug: string): Promise<Result> {
+  try {
+    const { supabase } = await requireManage(teamId)
+    const { error } = await supabase.from('play').delete().eq('team_id', teamId).eq('slug', slug)
+    if (error) throw error
+    revalidatePath('/team')
+    revalidatePath('/')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not delete play.' }
+  }
+}
+
 /** Create a new team (admin only). RLS also enforces admin-only insert. */
 export async function createTeam(nameRaw: string): Promise<Result & { teamId?: string }> {
   try {

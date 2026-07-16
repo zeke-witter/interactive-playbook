@@ -1,13 +1,23 @@
 import { getCurrentProfile } from '@/lib/supabase/server'
-import { getManageableTeams, getPersonalPlayBySlug, getPlayBySlug } from '@/lib/playsRepo'
+import {
+  getMemberTeams,
+  getPersonalPlays,
+  getTeamPlays,
+  getDrafts,
+  getPersonalPlayBySlug,
+  getPlayBySlug,
+  getFormations,
+} from '@/lib/playsRepo'
 import { DesignerApp } from './DesignerApp'
 import type { Play } from '@/types/play'
 
 /**
- * Server shell for the Play Designer. Reads the optional `play`/`scope` search
- * params to open an existing play into the editor, and fetches the signed-in
- * profile + the teams the caller may publish to. All interactive state lives in
- * the `'use client'` `DesignerApp` body (mirrors how the Viewer renders `PlayViewer`).
+ * Server shell for the Play Designer. Fetches everything the "active playbook"
+ * model needs — the signed-in profile, the teams the caller belongs to, and the
+ * plays + drafts for each playbook (personal + per team) — then hands it all to
+ * the `'use client'` `DesignerApp`. `?play`/`?scope` open an existing play into
+ * the editor (scope 'personal' → the caller's play, else a published team play).
+ * `router.refresh()` from the client re-runs this loader after save/publish/delete.
  */
 export default async function DesignerPage({
   searchParams,
@@ -15,12 +25,38 @@ export default async function DesignerPage({
   searchParams: Promise<{ play?: string; scope?: string }>
 }) {
   const { play, scope } = await searchParams
-  const [profile, manageableTeams] = await Promise.all([getCurrentProfile(), getManageableTeams()])
 
+  const [profile, memberTeams, personalPlays, draftList, formations] = await Promise.all([
+    getCurrentProfile(),
+    getMemberTeams(),
+    getPersonalPlays(),
+    getDrafts(),
+    getFormations(),
+  ])
+
+  // One published-play list per member team, keyed by team id.
+  const teamPlaysEntries = await Promise.all(
+    memberTeams.map(async (team) => [team.id, await getTeamPlays(team.id)] as const),
+  )
+  const teamPlays: Record<string, Play[]> = Object.fromEntries(teamPlaysEntries)
+
+  const initialScope = scope ?? 'personal'
   let initialPlay: Play | null = null
   if (play) {
-    initialPlay = scope === 'personal' ? await getPersonalPlayBySlug(play) : await getPlayBySlug(play)
+    initialPlay =
+      initialScope === 'personal' ? await getPersonalPlayBySlug(play) : await getPlayBySlug(play)
   }
 
-  return <DesignerApp profile={profile} manageableTeams={manageableTeams} initialPlay={initialPlay} />
+  return (
+    <DesignerApp
+      profile={profile}
+      memberTeams={memberTeams}
+      personalPlays={personalPlays}
+      teamPlays={teamPlays}
+      draftList={draftList}
+      initialPlay={initialPlay}
+      initialScope={initialScope}
+      formations={formations}
+    />
+  )
 }

@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState } from 'react'
 import type { DesignerStep, DesignerBranch, DesignerMode, StepPath } from '@/types/designer'
-import type { PlayerPath, Position, Play } from '@/types/play'
+import type { PlayerPath, Position, Play, PlayerState } from '@/types/play'
 import { getStepAtPath, getSequenceAtPath, replaceStepAtPath, replaceSequenceAtPath } from '@/lib/designerSteps'
 import { defaultFormationFor } from '@/lib/defaultFormations'
 import { playToDesignerSteps } from '@/lib/playDesignerConvert'
@@ -15,12 +15,6 @@ type HistorySnapshot = {
 }
 
 
-function defaultStep(set: Play['set']): DesignerStep {
-  return {
-    players: defaultFormationFor(set),
-    pathPreviews: [],
-  }
-}
 
 function freshStepFrom(step: DesignerStep): DesignerStep {
   return { players: step.players.map((p) => ({ ...p })), pathPreviews: [] }
@@ -32,8 +26,17 @@ function clamp01(v: number): number {
   return Math.min(1, Math.max(0, v))
 }
 
-export function useDesignerState() {
-  const [rootSteps, setRootSteps] = useState<DesignerStep[]>([defaultStep('ho-stack')])
+export function useDesignerState(formations?: Record<Play['set'], PlayerState[]>) {
+  // Starting layout for a set: an admin-saved DB override if present, else the
+  // committed default. Copied so edits never mutate the shared source.
+  function formationFor(s: Play['set']): PlayerState[] {
+    return (formations?.[s] ?? defaultFormationFor(s)).map((p) => ({ ...p }))
+  }
+  function makeDefaultStep(s: Play['set']): DesignerStep {
+    return { players: formationFor(s), pathPreviews: [] }
+  }
+
+  const [rootSteps, setRootSteps] = useState<DesignerStep[]>(() => [makeDefaultStep('ho-stack')])
   const [currentPath, setCurrentPath] = useState<StepPath>([0])
   const [modeState, setModeState] = useState<DesignerMode>('position')
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -124,7 +127,7 @@ export function useDesignerState() {
     // steps, and the step tree itself, are untouched.
     updateCurrentStep((step) => ({
       ...step,
-      players: defaultFormationFor(newSet),
+      players: formationFor(newSet),
       pathPreviews: [],
       throw: undefined,
     }))
@@ -369,7 +372,7 @@ export function useDesignerState() {
 
   function newPlay() {
     pushHistory()
-    setRootSteps([defaultStep('ho-stack')])
+    setRootSteps([makeDefaultStep('ho-stack')])
     setCurrentPath([0])
     setCategoryState('offense')
     setSetState('ho-stack')
