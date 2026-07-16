@@ -33,12 +33,17 @@ function rowToPlay(row: PlayRow): Play {
   }
 }
 
+// These represent the public TEAM catalog. Filter team_id explicitly: RLS lets
+// an admin read everyone's plays (incl. others' personal plays), so without the
+// `team_id not null` guard a personal play would leak into the public catalog /
+// Import list for admins.
 export async function getPublishedPlays(): Promise<Play[]> {
   const sb = await getServerSupabase()
   const { data, error } = await sb
     .from('play')
     .select(PLAY_COLUMNS)
     .eq('status', 'published')
+    .not('team_id', 'is', null)
     .order('name')
   if (error) throw error
   return (data ?? []).map(rowToPlay)
@@ -50,6 +55,7 @@ export async function getPlayBySlug(slug: string): Promise<Play | null> {
     .from('play')
     .select(PLAY_COLUMNS)
     .eq('status', 'published')
+    .not('team_id', 'is', null)
     .eq('slug', slug)
     .maybeSingle()
   if (error) throw error
