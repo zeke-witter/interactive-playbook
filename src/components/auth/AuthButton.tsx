@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link'
 import { getBrowserSupabase } from '@/lib/supabase/client'
 import { signOut } from '@/app/auth/actions'
 import type { CurrentProfile } from '@/lib/supabase/server'
@@ -20,9 +19,9 @@ function GoogleG() {
 }
 
 /**
- * Auth control for the home page. Signed out → a material "Sign in with Google"
- * button (starts the OAuth redirect). Signed in → display name (+ admin tag)
- * and a sign-out button. Phase 2 gates nothing else.
+ * Auth control (lives in SiteNav). Signed out → "Sign in with Google" (starts
+ * the OAuth redirect). Signed in → display name (+ admin tag) and sign out.
+ * The Designer/My-Playbook/Manage-team links are owned by SiteNav.
  */
 export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
   const [pending, setPending] = useState(false)
@@ -53,22 +52,14 @@ export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
 
   return (
     <div className="flex shrink-0 items-center gap-3">
-      <span className="text-sm text-text-muted">
+      <span className="hidden sm:inline text-sm text-text-muted">
         {profile.displayName}
         {profile.isAdmin && <span className="ml-1 font-medium text-accent">· admin</span>}
       </span>
-      {profile.canManage && (
-        <Link
-          href="/team"
-          className="whitespace-nowrap rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 hover:bg-surface hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-        >
-          Manage team
-        </Link>
-      )}
       <form action={signOut}>
         <button
           type="submit"
-          className="cursor-pointer whitespace-nowrap rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 hover:bg-surface hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+          className="cursor-pointer whitespace-nowrap rounded-lg border border-border bg-surface-raised px-3 py-1.5 text-sm font-medium text-text shadow-sm transition-all duration-150 hover:bg-surface hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
         >
           Sign out
         </button>

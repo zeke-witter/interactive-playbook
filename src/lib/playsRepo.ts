@@ -56,6 +56,61 @@ export async function getPlayBySlug(slug: string): Promise<Play | null> {
   return data ? rowToPlay(data as PlayRow) : null
 }
 
+// --- Personal playbooks + team management (RLS-enforced; server components) ---
+
+/** The signed-in user's personal plays (team_id null). RLS returns only theirs. */
+export async function getPersonalPlays(): Promise<Play[]> {
+  const sb = await getServerSupabase()
+  const { data, error } = await sb
+    .from('play')
+    .select(PLAY_COLUMNS)
+    .is('team_id', null)
+    .order('name')
+  if (error) throw error
+  return (data ?? []).map((r) => rowToPlay(r as PlayRow))
+}
+
+/** A single personal play by slug, owner-only (RLS). Null if not found/allowed. */
+export async function getPersonalPlayBySlug(slug: string): Promise<Play | null> {
+  const sb = await getServerSupabase()
+  const { data, error } = await sb
+    .from('play')
+    .select(PLAY_COLUMNS)
+    .is('team_id', null)
+    .eq('slug', slug)
+    .maybeSingle()
+  if (error) throw error
+  return data ? rowToPlay(data as PlayRow) : null
+}
+
+export type ManageableTeam = { id: string; name: string }
+
+/** Teams the caller may publish to directly: captain memberships, or all teams if admin. */
+export async function getManageableTeams(): Promise<ManageableTeam[]> {
+  const sb = await getServerSupabase()
+  const {
+    data: { user },
+  } = await sb.auth.getUser()
+  if (!user) return []
+
+  const { data: prof } = await sb.from('profile').select('is_admin').eq('user_id', user.id).maybeSingle()
+  if (prof?.is_admin) {
+    const { data } = await sb.from('team').select('id,name').order('name')
+    return (data ?? []) as ManageableTeam[]
+  }
+  const { data } = await sb
+    .from('membership')
+    .select('role, team:team_id(id,name)')
+    .eq('user_id', user.id)
+    .eq('role', 'captain')
+  return (data ?? [])
+    .map((m: { team: { id: string; name: string } | { id: string; name: string }[] | null }) =>
+      Array.isArray(m.team) ? m.team[0] : m.team,
+    )
+    .filter((t): t is ManageableTeam => !!t)
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
 // --- Pure grouping helpers (mirror data/plays/index.ts; operate on fetched data) ---
 
 export function categoriesWithPlays(plays: Play[]): Play['category'][] {

@@ -12,7 +12,7 @@ import type { Play, Position } from '@/types/play'
  * feeds the picker) are fetched on the server and passed in as props; all the
  * interactive hooks (step nav, roster, progress) live here.
  */
-export function PlayViewer({ play, plays }: { play: Play; plays: Play[] }) {
+export function PlayViewer({ play, plays, basePath }: { play: Play; plays: Play[]; basePath?: string }) {
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
   const { step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
   const { markComplete } = useProgress()
@@ -31,7 +31,7 @@ export function PlayViewer({ play, plays }: { play: Play; plays: Play[] }) {
   const quiz = step.quiz?.[selectedPosition]
 
   return (
-    <main className="flex flex-col md:flex-row h-screen overflow-hidden">
+    <main className="flex flex-col md:flex-row h-full overflow-hidden">
       <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto shrink-0 md:h-full p-4">
         <div className="relative w-full h-full rounded-xl border border-border bg-surface overflow-hidden">
           <FieldCanvas
@@ -48,6 +48,7 @@ export function PlayViewer({ play, plays }: { play: Play; plays: Play[] }) {
       <Sidebar
         play={play}
         plays={plays}
+        basePath={basePath}
         step={step}
         roster={roster}
         stepIndex={stepIndex}

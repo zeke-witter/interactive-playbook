@@ -1,30 +1,13 @@
-# src/app/api/ — Route handlers (dev-only writes)
+# src/app/api/ — (retired)
 
-These endpoints exist so the Designer and Viewer can mutate **source files on the local disk**. That model has hard rules:
+This directory previously held **dev-only, filesystem-mutating** route handlers (`designer/publish`, `designer/save`, `designer/drafts[/name]`, `plays/[playId]/narrative`) that wrote play/draft/narrative content to disk via `ts-morph`. They only worked under `npm run dev` (Vercel's FS is read-only) and required a commit + deploy to publish.
 
-- **Publish and narrative-edit are gated on `process.env.NODE_ENV === 'development'`** and return 403 otherwise. Vercel's production filesystem is read-only, and any write that did succeed would vanish on the next deploy. To change published content: run `npm run dev`, publish/edit locally, then **commit** the generated files.
-- All filename/id inputs are run through `sanitizeSlug` before hitting the filesystem.
-- Source-file edits use **`ts-morph`** (AST), not string concatenation, so generated code stays well-formed.
+**As of Phase 4 (accounts & auth), authoring is DB-backed and works in production.** Those routes were removed and replaced by role-gated **server actions** that write to Supabase under RLS:
 
-## Endpoints
+- **Play publish / delete / hide / import** — `src/app/designer/actions.ts` (`publishPersonalPlay`, `publishTeamPlay`, `deletePersonalPlay`, `importTeamPlayToPersonal`, and the named-draft CRUD `listDrafts`/`saveDraft`/`loadDraft`/`deleteDraft`). Drafts now live in the `draft` table (per user), not `designer-output/*.json`.
+- **Member/team management** — `src/app/team/actions.ts`.
+- **Narrative** is edited by re-publishing from the Designer (the former inline dev-only editor was removed). A dedicated in-place narrative action is a future addition.
 
-### `designer/publish/route.ts` — `POST` (dev only)
-The Designer → catalog step. Converts the nested Designer tree to a flat `Play` via `buildPlay` (`lib/playDesignerConvert`), then:
-- Writes `src/data/plays/<id>.ts` (a `JSON.stringify`'d `Play` assigned to a camelCase export).
-- If the play is new, registers it in `src/data/plays/index.ts` (adds the import + `ALL_PLAYS` element via ts-morph).
-- `id` comes from the request when overwriting an existing play (`publishedPlayId`), else from `sanitizeSlug(name)`. Returns `{ id, isNew }`.
+The committed `src/data/plays/*.ts` catalog is now purely the first-run **seed** (see `scripts/seedPlays.ts`), no longer a live write target.
 
-### `designer/save/route.ts` — `POST`
-Saves a named **draft** (the raw Designer JSON: `{category, set, steps}`) to `designer-output/<slug>.json`. Not gated to dev in code, but only useful locally. Drafts are the nested Designer shape, not the flat `Play` shape.
-
-### `designer/drafts/route.ts` — `GET`
-Lists draft names (the `.json` files in `designer-output/`, sorted). Returns `{ drafts: [] }` if the dir doesn't exist.
-
-### `designer/drafts/[name]/route.ts` — `GET` / `DELETE`
-Read or delete a single draft by name.
-
-### `plays/[playId]/narrative/route.ts` — `PATCH` (dev only)
-Inline narrative editing from the Viewer. Finds the step object by `id` in the play's `.ts` file (ts-morph), then sets/adds the `narrative[position]` property to the new text and saves. This is why the Viewer's `NarrativePanel` edit button is dev-only.
-
-## When extending
-Keep new write endpoints dev-gated and slug-sanitized, prefer ts-morph for `.ts` edits, and remember the two on-disk shapes differ: **drafts = nested Designer JSON**, **published plays = flat `Play` TypeScript**.
+If you add a new server-side mutation, prefer a **server action** that runs as the signed-in user under RLS (re-check role in code for defense in depth) — do **not** reintroduce a `service_role` client in app code.

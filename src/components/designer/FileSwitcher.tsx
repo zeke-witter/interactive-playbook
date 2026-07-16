@@ -2,29 +2,31 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Play } from '@/types/play'
 
-// Loading/editing/publishing an already-published play writes straight to
-// its source file on disk, same as the narrative editor — only meaningful
-// on a local checkout. Hidden on the deployed site until there's a real
-// backend (accounts, an admin role) to gate this properly.
-const CAN_MANAGE_PUBLISHED_PLAYS = process.env.NODE_ENV === 'development'
+// The starting-point catalog ("Load Existing Play") lists the plays that ship
+// with the app as scaffolding to author from. Kept dev-only, as before.
+const CAN_LOAD_STARTER_PLAYS = process.env.NODE_ENV === 'development'
 
 type FileSwitcherProps = {
   currentFileName: string | null
   draftNames: string[]
   existingPlays: Play[]
   publishedPlayId: string | null
+  signedIn: boolean
+  manageableTeams: { id: string; name: string }[]
   onSave: (name: string) => void
   onExport: (name: string) => void
-  onPublish: (name: string) => void
+  onPublish: (name: string, destination: string) => void
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
   onLoadExistingPlay: (play: Play) => void
   onNewPlay: () => void
+  onSignIn: () => void
 }
 
 function FileSwitcherFields({
   name, setName, onSave, onExport, onPublish, draftNames, currentFileName, onLoadDraft, onDeleteDraft,
   existingPlays, publishedPlayId, onLoadExistingPlay, onNewPlay,
+  signedIn, manageableTeams, destination, setDestination, onSignIn,
 }: {
   name: string
   setName: (v: string) => void
@@ -39,6 +41,11 @@ function FileSwitcherFields({
   publishedPlayId: string | null
   onLoadExistingPlay: (play: Play) => void
   onNewPlay: () => void
+  signedIn: boolean
+  manageableTeams: { id: string; name: string }[]
+  destination: string
+  setDestination: (v: string) => void
+  onSignIn: () => void
 }) {
   return (
     <>
@@ -50,20 +57,54 @@ function FileSwitcherFields({
             onChange={(e) => setName(e.target.value)}
             className="flex-1 min-w-0 min-h-11 md:min-h-0 px-2 py-1 rounded-md border border-border bg-bg text-text text-sm"
           />
+          {signedIn && (
+            <button
+              onClick={onSave}
+              title="Save a private draft you can reopen later"
+              className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-accent bg-accent text-accent-foreground text-sm font-medium"
+            >
+              Save draft
+            </button>
+          )}
+        </div>
+        {signedIn ? (
+          manageableTeams.length > 0 ? (
+            <div className="flex gap-2">
+              <select
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                className="flex-1 min-w-0 min-h-11 md:min-h-0 px-2 py-1 rounded-md border border-border bg-bg text-text text-sm"
+              >
+                <option value="personal">My playbook</option>
+                {manageableTeams.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={onPublish}
+                title="Add this play to the selected playbook"
+                className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm"
+              >
+                Add to playbook
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onPublish}
+              title="Add this play to your personal playbook"
+              className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm"
+            >
+              Add to playbook
+            </button>
+          )
+        ) : (
           <button
-            onClick={onSave}
+            onClick={onSignIn}
             className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-accent bg-accent text-accent-foreground text-sm font-medium"
           >
-            Save
-          </button>
-        </div>
-        {CAN_MANAGE_PUBLISHED_PLAYS && (
-          <button
-            onClick={onPublish}
-            title={publishedPlayId ? `Overwrites the published "${publishedPlayId}" play` : 'Creates a new published play'}
-            className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm"
-          >
-            {publishedPlayId ? 'Publish (Update)' : 'Publish (New)'}
+            Sign in to save
           </button>
         )}
         <button
@@ -74,7 +115,7 @@ function FileSwitcherFields({
         </button>
       </div>
 
-      {CAN_MANAGE_PUBLISHED_PLAYS && existingPlays.length > 0 && (
+      {CAN_LOAD_STARTER_PLAYS && existingPlays.length > 0 && (
         <>
           <div className="border-t border-border" />
           <div className="flex flex-col gap-1.5">
@@ -157,9 +198,11 @@ function FileSwitcherFields({
 export function FileSwitcher({
   currentFileName, draftNames, existingPlays, publishedPlayId, onSave, onExport, onPublish,
   onLoadDraft, onDeleteDraft, onLoadExistingPlay, onNewPlay,
+  signedIn, manageableTeams, onSignIn,
 }: FileSwitcherProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(currentFileName ?? '')
+  const [destination, setDestination] = useState('personal')
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -184,7 +227,7 @@ export function FileSwitcher({
   }
 
   function handlePublish() {
-    if (name.trim()) onPublish(name.trim())
+    if (name.trim()) onPublish(name.trim(), destination)
   }
 
   function handleLoadDraft(draft: string) {
@@ -230,6 +273,11 @@ export function FileSwitcher({
               publishedPlayId={publishedPlayId}
               onLoadExistingPlay={handleLoadExistingPlay}
               onNewPlay={handleNewPlay}
+              signedIn={signedIn}
+              manageableTeams={manageableTeams}
+              destination={destination}
+              setDestination={setDestination}
+              onSignIn={onSignIn}
             />
           </div>
 
@@ -254,6 +302,11 @@ export function FileSwitcher({
                 publishedPlayId={publishedPlayId}
                 onLoadExistingPlay={handleLoadExistingPlay}
                 onNewPlay={handleNewPlay}
+                signedIn={signedIn}
+                manageableTeams={manageableTeams}
+                destination={destination}
+                setDestination={setDestination}
+                onSignIn={onSignIn}
               />
             </div>
           </div>

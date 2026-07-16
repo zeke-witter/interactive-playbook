@@ -27,18 +27,21 @@ type SidebarProps = {
   onQuizAnswered: (correct: boolean) => void
   onHighlightZone: (zone: { x: number; y: number; width: number; height: number } | null) => void
   roster: Record<Position, string>
+  /** Route prefix for the embedded picker: '/plays' (public) or '/my-playbook' (personal). */
+  basePath?: string
 }
 
 export function Sidebar({
   play, plays, step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, selectedPosition, onPositionChange,
   isFirst, isLast, onPrev, onNext, onChooseBranch, quiz, quizPassed, onQuizAnswered, onHighlightZone, roster,
+  basePath,
 }: SidebarProps) {
   return (
     <aside className="w-full md:w-[35%] flex-1 min-h-0 md:flex-none md:h-full flex flex-col overflow-hidden border-t md:border-t-0 md:border-l border-border">
       <div className="flex-none p-4 flex flex-col gap-4">
         <div className="flex items-start justify-between gap-3">
           <PlayHeader name={play.name} stepLabel={step.label} stepIndex={stepperIndex} totalSteps={stepperTotal} roster={roster} />
-          <PickerDrawer plays={plays} currentPlay={play} />
+          <PickerDrawer plays={plays} currentPlay={play} basePath={basePath} />
         </div>
         <PositionSelector value={selectedPosition} onChange={onPositionChange} roster={roster} />
       </div>
@@ -48,9 +51,6 @@ export function Sidebar({
           text={step.narrative[selectedPosition]}
           onHighlightZone={onHighlightZone}
           roster={roster}
-          playId={play.id}
-          stepId={step.id}
-          position={selectedPosition}
         />
         {quiz && <QuizPanel quiz={quiz} onAnswered={onQuizAnswered} roster={roster} />}
       </div>
@@ -72,7 +72,7 @@ export function Sidebar({
       </div>
 
       <div className="hidden md:block flex-none max-h-60 overflow-y-auto border-t border-border p-4">
-        <PlayPicker plays={plays} currentPlay={play} />
+        <PlayPicker plays={plays} currentPlay={play} basePath={basePath} />
       </div>
     </aside>
   )
