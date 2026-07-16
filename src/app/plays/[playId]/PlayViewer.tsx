@@ -31,7 +31,7 @@ export function PlayViewer({ play, plays, basePath }: { play: Play; plays: Play[
   const quiz = step.quiz?.[selectedPosition]
 
   return (
-    <main className="flex flex-col md:flex-row h-screen overflow-hidden">
+    <main className="flex flex-col md:flex-row h-full overflow-hidden">
       <div className="w-full md:w-[65%] aspect-[5/6] md:aspect-auto shrink-0 md:h-full p-4">
         <div className="relative w-full h-full rounded-xl border border-border bg-surface overflow-hidden">
           <FieldCanvas

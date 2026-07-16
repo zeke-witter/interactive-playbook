@@ -14,7 +14,7 @@ export default async function MyPlaybookPage() {
   const toItem = (p: (typeof mine)[number]) => ({ slug: p.id, name: p.name, category: p.category, set: p.set })
 
   return (
-    <main className="min-h-screen bg-bg p-6 md:p-10">
+    <main className="min-h-full bg-bg p-6 md:p-10">
       <div className="mx-auto flex max-w-3xl flex-col gap-8">
         <header className="flex items-center justify-between">
           <h1 className="font-display text-2xl font-bold uppercase tracking-wide text-text">My playbook</h1>

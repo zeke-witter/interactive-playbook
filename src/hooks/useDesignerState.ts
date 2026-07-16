@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { DesignerStep, DesignerBranch, DesignerMode, StepPath } from '@/types/designer'
 import type { PlayerPath, Position, Play } from '@/types/play'
 import { getStepAtPath, getSequenceAtPath, replaceStepAtPath, replaceSequenceAtPath } from '@/lib/designerSteps'
@@ -14,7 +14,6 @@ type HistorySnapshot = {
   description: string
 }
 
-const AUTOSAVE_KEY = 'mousetrap-designer-autosave'
 
 function defaultStep(set: Play['set']): DesignerStep {
   return {
@@ -48,7 +47,6 @@ export function useDesignerState() {
   // so Publish knows to overwrite that play's file instead of creating a new
   // one. Cleared by New Play and Load Draft (a draft isn't a published play).
   const [publishedPlayId, setPublishedPlayId] = useState<string | null>(null)
-  const [hasHydrated, setHasHydrated] = useState(false)
   const [undoStack, setUndoStack] = useState<HistorySnapshot[]>([])
   const [redoStack, setRedoStack] = useState<HistorySnapshot[]>([])
   const dragSnapshotRef = useRef<HistorySnapshot | null>(null)
@@ -136,34 +134,11 @@ export function useDesignerState() {
     setDescriptionState(text)
   }
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(AUTOSAVE_KEY)
-      if (raw) {
-        const data = JSON.parse(raw) as {
-          category?: Play['category']; set?: Play['set']; description?: string; steps?: DesignerStep[]
-        }
-        if (Array.isArray(data.steps) && data.steps.length > 0) {
-          setRootSteps(data.steps)
-          if (data.category) setCategoryState(data.category)
-          if (data.set) setSetState(data.set)
-          if (data.description) setDescriptionState(data.description)
-          setCurrentPath([0])
-        }
-      }
-    } catch {
-      // malformed or absent autosave data — ignore and keep defaults
-    }
-    setHasHydrated(true)
-  }, [])
-
-  // Guarded by hasHydrated so this effect's first run (which fires on mount
-  // regardless of whether the restore effect above has applied its update yet)
-  // doesn't immediately overwrite a just-restored draft with default state.
-  useEffect(() => {
-    if (!hasHydrated) return
-    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ category, set, description, steps: rootSteps }))
-  }, [hasHydrated, rootSteps, category, set, description])
+  // The Designer always opens on a fresh play. Persistence is explicit now —
+  // "Save draft" and "Add to playbook" write to the DB. We deliberately do NOT
+  // restore a localStorage autosave (which previously made the last-loaded play
+  // reappear on every visit). An existing play to edit arrives via props
+  // (DesignerApp → loadExistingPlay), not from storage.
 
   function updateCurrentStep(updater: (step: DesignerStep) => DesignerStep) {
     setRootSteps((prev) => replaceStepAtPath(prev, currentPath, updater))

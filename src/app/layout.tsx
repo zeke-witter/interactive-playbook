@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
 import "./globals.css";
+import { SiteNav } from "@/components/nav/SiteNav";
+import { getCurrentProfile } from "@/lib/supabase/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,17 +25,21 @@ export const metadata: Metadata = {
   description: "Interactive playbook for the Mousetrap ultimate frisbee team",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const profile = await getCurrentProfile();
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${oswald.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="h-[100dvh] flex flex-col overflow-hidden">
+        <SiteNav profile={profile} />
+        <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
+      </body>
     </html>
   );
 }

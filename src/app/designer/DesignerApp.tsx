@@ -209,14 +209,14 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
 
   if (isPreviewing) {
     return (
-      <main className="flex flex-col h-screen bg-bg p-4">
+      <main className="flex flex-col h-full bg-bg p-4">
         <DesignerPreview steps={designer.steps} category={designer.category} set={designer.set} onExit={() => setIsPreviewing(false)} />
       </main>
     )
   }
 
   return (
-    <main className="h-screen overflow-hidden bg-bg">
+    <main className="h-full overflow-hidden bg-bg">
       {/* Mobile layout — bottom tab bar + swipe-up step sheet, mirroring the desktop shell */}
       <div className="md:hidden relative h-full">
         <div className="h-[46px] flex-none flex items-center gap-2 px-3 border-b border-border bg-surface-raised">

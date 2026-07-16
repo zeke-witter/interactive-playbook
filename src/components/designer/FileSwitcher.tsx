@@ -63,7 +63,7 @@ function FileSwitcherFields({
               title="Save a private draft you can reopen later"
               className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-accent bg-accent text-accent-foreground text-sm font-medium"
             >
-              Save
+              Save draft
             </button>
           )}
         </div>
@@ -84,19 +84,19 @@ function FileSwitcherFields({
               </select>
               <button
                 onClick={onPublish}
-                title="Publish to the selected playbook"
+                title="Add this play to the selected playbook"
                 className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm"
               >
-                Publish
+                Add to playbook
               </button>
             </div>
           ) : (
             <button
               onClick={onPublish}
-              title="Save to your personal playbook"
+              title="Add this play to your personal playbook"
               className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm"
             >
-              Save to my playbook
+              Add to playbook
             </button>
           )
         ) : (
