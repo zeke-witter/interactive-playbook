@@ -4,8 +4,9 @@ import { usePathname } from 'next/navigation'
 import { AuthButton } from '@/components/auth/AuthButton'
 import type { CurrentProfile } from '@/lib/supabase/server'
 
-/** Nav items render as lime text links (not bordered buttons). */
-const LINK = 'text-sm font-medium text-accent hover:text-accent-hover transition-colors'
+/** Nav items render as soft-background buttons with lime text (light weight). */
+const LINK =
+  'rounded-md bg-surface-raised px-3 py-1.5 text-sm font-normal text-accent hover:bg-surface hover:text-accent-hover transition-colors'
 
 /**
  * Global top nav. Brand (left) returns to the viewer/home. Right: lime text
@@ -18,7 +19,7 @@ export function SiteNav({ profile }: { profile: CurrentProfile | null }) {
   const inManagePlays = pathname.startsWith('/my-playbook')
 
   return (
-    <header className="flex-none flex items-center gap-4 border-b border-border bg-bg px-4 h-12">
+    <header className="flex-none flex items-center gap-3 border-b border-border bg-bg px-4 h-12">
       <Link
         href="/"
         className="font-display text-sm font-bold uppercase tracking-wide text-text hover:text-accent transition-colors"

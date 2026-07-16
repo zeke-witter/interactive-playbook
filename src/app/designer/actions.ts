@@ -191,13 +191,15 @@ export async function listDrafts(): Promise<string[]> {
   return (data ?? []).map((d: { name: string }) => d.name)
 }
 
-export async function saveDraft(name: string, payload: DraftPayload): Promise<Result> {
+export async function saveDraft(name: string, payload: DraftPayload, scope: string = 'personal'): Promise<Result> {
   try {
     const { supabase, user } = await requireUser()
     if (!name.trim()) return { error: 'Name the draft first.' }
     const row = {
       user_id: user.id,
-      team_id: null,
+      // The playbook a draft belongs to: null = personal, else the team id.
+      // Lets the Designer filter drafts by the active playbook.
+      team_id: scope === 'personal' ? null : scope,
       name: name.trim(),
       category: payload.category,
       set: payload.set,

@@ -83,6 +83,59 @@ export async function getPersonalPlayBySlug(slug: string): Promise<Play | null> 
   return data ? rowToPlay(data as PlayRow) : null
 }
 
+export type MemberTeam = { id: string; name: string; canPublish: boolean }
+
+/** Every team the caller belongs to (admin sees all), with whether they may
+ *  publish to it (captain/admin). Drives the Designer's playbook selector. */
+export async function getMemberTeams(): Promise<MemberTeam[]> {
+  const sb = await getServerSupabase()
+  const {
+    data: { user },
+  } = await sb.auth.getUser()
+  if (!user) return []
+
+  const { data: prof } = await sb.from('profile').select('is_admin').eq('user_id', user.id).maybeSingle()
+  if (prof?.is_admin) {
+    const { data } = await sb.from('team').select('id,name').order('name')
+    return (data ?? []).map((t: { id: string; name: string }) => ({ id: t.id, name: t.name, canPublish: true }))
+  }
+  const { data } = await sb.from('membership').select('role, team:team_id(id,name)').eq('user_id', user.id)
+  return (data ?? [])
+    .map((m: { role: string; team: { id: string; name: string } | { id: string; name: string }[] | null }) => {
+      const t = Array.isArray(m.team) ? m.team[0] : m.team
+      return t ? { id: t.id, name: t.name, canPublish: m.role === 'captain' } : null
+    })
+    .filter((t): t is MemberTeam => !!t)
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/** A team's published plays (any member may read these; RLS enforces). */
+export async function getTeamPlays(teamId: string): Promise<Play[]> {
+  const sb = await getServerSupabase()
+  const { data, error } = await sb
+    .from('play')
+    .select(PLAY_COLUMNS)
+    .eq('team_id', teamId)
+    .eq('status', 'published')
+    .order('name')
+  if (error) throw error
+  return (data ?? []).map((r) => rowToPlay(r as PlayRow))
+}
+
+/** The caller's draft names tagged with their playbook scope ('personal' or a team id). */
+export async function getDrafts(): Promise<{ name: string; scope: string }[]> {
+  const sb = await getServerSupabase()
+  const {
+    data: { user },
+  } = await sb.auth.getUser()
+  if (!user) return []
+  const { data } = await sb.from('draft').select('name, team_id').eq('user_id', user.id).order('name')
+  return (data ?? []).map((d: { name: string; team_id: string | null }) => ({
+    name: d.name,
+    scope: d.team_id ?? 'personal',
+  }))
+}
+
 export type ManageableTeam = { id: string; name: string }
 
 /** Teams the caller may publish to directly: captain memberships, or all teams if admin. */

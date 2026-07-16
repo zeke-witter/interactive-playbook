@@ -65,7 +65,7 @@ export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
       <form action={signOut}>
         <button
           type="submit"
-          className="cursor-pointer whitespace-nowrap text-sm font-medium text-accent hover:text-accent-hover transition-colors"
+          className="cursor-pointer whitespace-nowrap text-xs font-normal text-accent underline underline-offset-2 hover:text-accent-hover transition-colors"
         >
           Sign out
         </button>

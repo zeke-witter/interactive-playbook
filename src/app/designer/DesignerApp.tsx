@@ -1,44 +1,59 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useDesignerState } from '@/hooks/useDesignerState'
 import { DesignerCanvas } from '@/components/designer/DesignerCanvas'
 import { DesignerPreview } from '@/components/designer/DesignerPreview'
 import { DesignerTopBar } from '@/components/designer/DesignerTopBar'
 import { ToolRail } from '@/components/designer/ToolRail'
 import { DesignerSidePanel } from '@/components/designer/DesignerSidePanel'
-import { FileSwitcher } from '@/components/designer/FileSwitcher'
+import { FileModal } from '@/components/designer/FileModal'
+import { PlaybookBreadcrumb } from '@/components/designer/PlaybookBreadcrumb'
 import { MobileToolTabBar } from '@/components/designer/MobileToolTabBar'
 import { MobileStepSheet } from '@/components/designer/MobileStepSheet'
 import { CoachMark } from '@/components/designer/CoachMark'
 import type { Play } from '@/types/play'
 import type { CurrentProfile } from '@/lib/supabase/server'
+import type { MemberTeam } from '@/lib/playsRepo'
 import { getBrowserSupabase } from '@/lib/supabase/client'
 import { sanitizeSlug } from '@/lib/slug'
-import { ALL_PLAYS } from '@/data/plays'
-import {
-  listDrafts,
-  saveDraft,
-  loadDraft,
-  deleteDraft,
-  publishPersonalPlay,
-  publishTeamPlay,
-} from './actions'
+import { saveDraft, loadDraft, deleteDraft, publishPersonalPlay, publishTeamPlay } from './actions'
 
 const COACH_MARK_KEY = 'mousetrap-designer-coachmark-dismissed'
 
 type DesignerAppProps = {
   profile: CurrentProfile | null
-  manageableTeams: { id: string; name: string }[]
+  memberTeams: MemberTeam[]
+  personalPlays: Play[]
+  teamPlays: Record<string, Play[]>
+  starterPlays: Play[]
+  draftList: { name: string; scope: string }[]
   initialPlay: Play | null
+  initialScope: string
 }
 
-export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerAppProps) {
+export function DesignerApp({
+  profile,
+  memberTeams,
+  personalPlays,
+  teamPlays,
+  starterPlays,
+  draftList,
+  initialPlay,
+  initialScope,
+}: DesignerAppProps) {
   const designer = useDesignerState()
+  const router = useRouter()
   const signedIn = profile !== null
   const [status, setStatus] = useState<string | null>(null)
-  const [draftNames, setDraftNames] = useState<string[]>([])
   const [isPreviewing, setIsPreviewing] = useState(false)
+  const [fileModalOpen, setFileModalOpen] = useState(false)
+  // The editable play name (breadcrumb part 2 + modal input).
+  const [playName, setPlayName] = useState('')
+  // The identity of the last loaded/saved file, for the drafts "current" highlight.
   const [currentFileName, setCurrentFileName] = useState<string | null>(null)
+  // The active playbook context: 'personal' or a team id.
+  const [activePlaybook, setActivePlaybook] = useState<string>(initialScope)
   const [coachDismissed, setCoachDismissed] = useState(true)
   const loadedInitialRef = useRef(false)
 
@@ -51,30 +66,30 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
     if (loadedInitialRef.current || !initialPlay) return
     loadedInitialRef.current = true
     designer.loadExistingPlay(initialPlay)
+    setPlayName(initialPlay.name)
     setCurrentFileName(initialPlay.name)
   }, [initialPlay, designer])
+
+  // --- Active-playbook derivations ---
+  const activeTeam = memberTeams.find((t) => t.id === activePlaybook)
+  const loadablePlays = activePlaybook === 'personal' ? personalPlays : (teamPlays[activePlaybook] ?? [])
+  const activeDrafts = useMemo(
+    () => draftList.filter((d) => d.scope === activePlaybook),
+    [draftList, activePlaybook],
+  )
+  const canPublishHere = activePlaybook === 'personal' ? !!profile : !!activeTeam?.canPublish
+  const activePlaybookName = activePlaybook === 'personal' ? 'My Playbook' : (activeTeam?.name ?? 'Playbook')
 
   function dismissCoachMark() {
     localStorage.setItem(COACH_MARK_KEY, '1')
     setCoachDismissed(true)
   }
 
-  const showCoachMark = !coachDismissed && designer.mode === 'position'
-    && designer.steps.length === 1 && !designer.steps[0].branches
-
-  async function refreshDrafts() {
-    try {
-      const names = await listDrafts()
-      setDraftNames(names)
-    } catch {
-      setDraftNames([])
-    }
-  }
-
-  useEffect(() => {
-    refreshDrafts()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const showCoachMark =
+    !coachDismissed &&
+    designer.mode === 'position' &&
+    designer.steps.length === 1 &&
+    !designer.steps[0].branches
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -102,28 +117,38 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
     })
   }
 
-  async function handleSave(name: string) {
+  async function handleSave() {
+    const name = playName.trim()
+    if (!name) {
+      setStatus('Name the play first.')
+      return
+    }
     setStatus('Saving...')
     try {
-      const result = await saveDraft(name, {
-        category: designer.category,
-        set: designer.set,
-        description: designer.description,
-        steps: designer.steps,
-      })
+      const result = await saveDraft(
+        name,
+        {
+          category: designer.category,
+          set: designer.set,
+          description: designer.description,
+          steps: designer.steps,
+        },
+        activePlaybook,
+      )
       if (result.error) {
         setStatus(`Error: ${result.error}`)
         return
       }
       setStatus(`Saved draft "${name}"`)
-      refreshDrafts()
       setCurrentFileName(name)
+      router.refresh()
     } catch {
       setStatus('Error: failed to save')
     }
   }
 
-  function handleExport(name: string) {
+  function handleExport() {
+    const name = playName.trim() || 'untitled-play'
     const data = { name, category: designer.category, set: designer.set, steps: designer.steps }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -134,8 +159,14 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
     URL.revokeObjectURL(url)
   }
 
-  async function handlePublish(name: string, destination: string) {
-    const toPersonal = destination === 'personal'
+  async function handlePublish() {
+    if (!canPublishHere) return
+    const name = playName.trim()
+    if (!name) {
+      setStatus('Name the play first.')
+      return
+    }
+    const toPersonal = activePlaybook === 'personal'
     setStatus(toPersonal ? 'Saving...' : 'Publishing...')
     try {
       const session = {
@@ -148,19 +179,15 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
       }
       const result = toPersonal
         ? await publishPersonalPlay(session)
-        : await publishTeamPlay(destination, session)
+        : await publishTeamPlay(activePlaybook, session)
       if (result.error) {
         setStatus(`Error: ${result.error}`)
         return
       }
       if (result.slug) designer.markPublished(result.slug)
       setCurrentFileName(name)
-      if (toPersonal) {
-        setStatus('Saved to your playbook')
-      } else {
-        const team = manageableTeams.find((t) => t.id === destination)
-        setStatus(`Published to ${team?.name ?? 'team'}`)
-      }
+      setStatus(toPersonal ? 'Saved to your playbook' : `Published to ${activePlaybookName}`)
+      router.refresh()
     } catch {
       setStatus('Error: failed to publish')
     }
@@ -169,8 +196,10 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
   function handleLoadExistingPlay(play: Play) {
     if (!window.confirm(`Load "${play.name}"? This will replace your current in-progress work.`)) return
     designer.loadExistingPlay(play)
+    setPlayName(play.name)
     setCurrentFileName(play.name)
-    setStatus(`Loaded "${play.name}" from the published catalog`)
+    setStatus(`Loaded "${play.name}"`)
+    setFileModalOpen(false)
   }
 
   async function handleLoadDraft(name: string) {
@@ -182,8 +211,14 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
         return
       }
       const applied = designer.loadDraft(res.draft)
-      setStatus(applied ? `Loaded ${name}` : `Error: "${name}" is not a valid draft file`)
-      if (applied) setCurrentFileName(name)
+      if (applied) {
+        setPlayName(name)
+        setCurrentFileName(name)
+        setStatus(`Loaded ${name}`)
+        setFileModalOpen(false)
+      } else {
+        setStatus(`Error: "${name}" is not a valid draft file`)
+      }
     } catch {
       setStatus('Error: failed to load draft')
     }
@@ -194,23 +229,34 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
     try {
       const result = await deleteDraft(name)
       setStatus(result.error ? `Error: ${result.error}` : `Deleted ${name}`)
-      refreshDrafts()
+      router.refresh()
     } catch {
       setStatus('Error: failed to delete draft')
     }
   }
 
   function handleNewPlay() {
-    if (window.confirm('Start a new play? This clears everything on the canvas (Undo will bring it back if you change your mind).')) {
+    if (
+      window.confirm(
+        'Start a new play? This clears everything on the canvas (Undo will bring it back if you change your mind).',
+      )
+    ) {
       designer.newPlay()
+      setPlayName('')
       setCurrentFileName(null)
+      setFileModalOpen(false)
     }
   }
 
   if (isPreviewing) {
     return (
       <main className="flex flex-col h-full bg-bg p-4">
-        <DesignerPreview steps={designer.steps} category={designer.category} set={designer.set} onExit={() => setIsPreviewing(false)} />
+        <DesignerPreview
+          steps={designer.steps}
+          category={designer.category}
+          set={designer.set}
+          onExit={() => setIsPreviewing(false)}
+        />
       </main>
     )
   }
@@ -220,21 +266,13 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
       {/* Mobile layout — bottom tab bar + swipe-up step sheet, mirroring the desktop shell */}
       <div className="md:hidden relative h-full">
         <div className="h-[46px] flex-none flex items-center gap-2 px-3 border-b border-border bg-surface-raised">
-          <FileSwitcher
-            currentFileName={currentFileName}
-            draftNames={draftNames}
-            existingPlays={ALL_PLAYS}
-            publishedPlayId={designer.publishedPlayId}
-            signedIn={signedIn}
-            manageableTeams={manageableTeams}
-            onSave={handleSave}
-            onExport={handleExport}
-            onPublish={handlePublish}
-            onLoadDraft={handleLoadDraft}
-            onDeleteDraft={handleDeleteDraft}
-            onLoadExistingPlay={handleLoadExistingPlay}
-            onNewPlay={handleNewPlay}
-            onSignIn={handleSignIn}
+          <PlaybookBreadcrumb
+            activePlaybook={activePlaybook}
+            activePlaybookName={activePlaybookName}
+            memberTeams={memberTeams}
+            onSelectPlaybook={setActivePlaybook}
+            playName={playName}
+            onOpenFile={() => setFileModalOpen(true)}
           />
           <div className="flex-1" />
           <button
@@ -281,20 +319,12 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
       {/* Desktop layout — whiteboarding-tool structure: top bar, tool rail, canvas, formation/steps panel */}
       <div className="hidden md:flex flex-col h-full">
         <DesignerTopBar
-          currentFileName={currentFileName}
-          draftNames={draftNames}
-          existingPlays={ALL_PLAYS}
-          publishedPlayId={designer.publishedPlayId}
-          signedIn={signedIn}
-          manageableTeams={manageableTeams}
-          onSave={handleSave}
-          onExport={handleExport}
-          onPublish={handlePublish}
-          onLoadDraft={handleLoadDraft}
-          onDeleteDraft={handleDeleteDraft}
-          onLoadExistingPlay={handleLoadExistingPlay}
-          onNewPlay={handleNewPlay}
-          onSignIn={handleSignIn}
+          activePlaybook={activePlaybook}
+          activePlaybookName={activePlaybookName}
+          memberTeams={memberTeams}
+          onSelectPlaybook={setActivePlaybook}
+          playName={playName}
+          onOpenFile={() => setFileModalOpen(true)}
           canUndo={designer.canUndo}
           canRedo={designer.canRedo}
           onUndo={designer.undo}
@@ -311,8 +341,33 @@ export function DesignerApp({ profile, manageableTeams, initialPlay }: DesignerA
           <DesignerSidePanel designer={designer} />
           {showCoachMark && <CoachMark variant="desktop" />}
         </div>
-        {status && <p className="flex-none px-4 py-2 text-sm text-text-muted border-t border-border">{status}</p>}
+        {status && (
+          <p className="flex-none px-4 py-2 text-sm text-text-muted border-t border-border">{status}</p>
+        )}
       </div>
+
+      {/* File-management modal, opened from the breadcrumb play-name button (both layouts) */}
+      <FileModal
+        open={fileModalOpen}
+        onClose={() => setFileModalOpen(false)}
+        name={playName}
+        setName={setPlayName}
+        signedIn={signedIn}
+        canPublishHere={canPublishHere}
+        loadablePlays={loadablePlays}
+        starterPlays={starterPlays}
+        publishedPlayId={designer.publishedPlayId}
+        activeDrafts={activeDrafts}
+        currentFileName={currentFileName}
+        onSave={handleSave}
+        onExport={handleExport}
+        onPublish={handlePublish}
+        onLoadExistingPlay={handleLoadExistingPlay}
+        onLoadDraft={handleLoadDraft}
+        onDeleteDraft={handleDeleteDraft}
+        onNewPlay={handleNewPlay}
+        onSignIn={handleSignIn}
+      />
     </main>
   )
 }
