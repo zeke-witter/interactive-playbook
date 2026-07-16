@@ -20,7 +20,7 @@ type FieldCanvasProps = {
 export function FieldCanvas({ step, selectedPosition, playCategory, playSet, roster, onThrowComplete, highlightZone, onSelectPosition }: FieldCanvasProps) {
   const isEndzone = playSet === 'endzone'
   return (
-    <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} className="w-full h-full" role="img" aria-label={step.label}>
+    <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} preserveAspectRatio="xMidYMid slice" className="w-full h-full" role="img" aria-label={step.label}>
       <FieldBackground showEndzone={isEndzone} />
       <PathPreviews paths={step.pathPreviews} />
       <PlayerTokens players={step.players} selectedPosition={selectedPosition} playCategory={playCategory} roster={roster} pathPreviews={step.pathPreviews} onSelectPosition={onSelectPosition} />

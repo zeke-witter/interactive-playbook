@@ -89,7 +89,7 @@ export function DesignerPreview({ steps, category, set, onExit }: DesignerPrevie
       </div>
 
       <div className="relative flex-1 rounded-xl border border-border bg-surface overflow-hidden">
-        <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} className="w-full h-full">
+        <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} preserveAspectRatio="xMidYMid slice" className="w-full h-full">
           <FieldBackground showEndzone={showEndzone} />
           <PathPreviews paths={previewStep.pathPreviews} />
           {previewStep.players.map((player, i) => {

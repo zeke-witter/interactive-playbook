@@ -88,7 +88,7 @@ const DEFENSE_TOKENS: { label: string; initial: { x: number; y: number } }[] = [
 
 export function AmbientField() {
   return (
-    <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} className="w-full h-full">
+    <svg viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`} preserveAspectRatio="xMidYMid slice" className="w-full h-full">
       <FieldBackground showEndzone={false} />
       {OFFENSE_TOKENS.map((t) => (
         <WanderingToken key={t.label} label={t.label} color="#2563eb" initial={t.initial} />
