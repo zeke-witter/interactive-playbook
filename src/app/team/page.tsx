@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getServerSupabase, getCurrentProfile } from '@/lib/supabase/server'
 import { TeamPanel, type TeamData } from './TeamPanel'
+import { CreateTeamForm } from './CreateTeamForm'
 import type { Role } from './actions'
 
 /**
@@ -24,7 +25,7 @@ export default async function TeamPage() {
   const manageable = (teams ?? []).filter(
     (t: { id: string }) => profile.isAdmin || captainTeams.has(t.id),
   )
-  if (manageable.length === 0) notFound()
+  if (manageable.length === 0 && !profile.isAdmin) notFound()
 
   const panels: TeamData[] = await Promise.all(
     manageable.map(async (t: { id: string; name: string }) => {
@@ -60,6 +61,7 @@ export default async function TeamPage() {
             ← Back
           </Link>
         </header>
+        {profile.isAdmin && <CreateTeamForm />}
         {panels.map((p) => (
           <TeamPanel key={p.id} team={p} currentUserId={profile.userId} isAdmin={profile.isAdmin} />
         ))}

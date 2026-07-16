@@ -94,6 +94,29 @@ export async function removeMember(teamId: string, userId: string): Promise<Resu
   }
 }
 
+/** Create a new team (admin only). RLS also enforces admin-only insert. */
+export async function createTeam(nameRaw: string): Promise<Result & { teamId?: string }> {
+  try {
+    const supabase = await getServerSupabase()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return { error: 'Not signed in.' }
+    const { data: prof } = await supabase.from('profile').select('is_admin').eq('user_id', user.id).maybeSingle()
+    if (!prof?.is_admin) return { error: 'Only an admin can create teams.' }
+
+    const name = nameRaw.trim()
+    if (!name) return { error: 'Enter a team name.' }
+
+    const { data, error } = await supabase.from('team').insert({ name }).select('id').single()
+    if (error) return { error: error.code === '23505' ? 'A team with that name already exists.' : error.message }
+    revalidatePath('/team')
+    return { teamId: data.id }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not create team.' }
+  }
+}
+
 export async function cancelInvite(pendingId: string): Promise<Result> {
   try {
     const supabase = await getServerSupabase()
