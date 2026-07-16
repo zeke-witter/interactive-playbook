@@ -258,7 +258,6 @@ export function DesignerCanvas({ designer, onPositionDragComplete }: DesignerCan
       <svg
         ref={svgRef}
         viewBox={`0 0 ${FIELD_WIDTH} ${FIELD_HEIGHT}`}
-        preserveAspectRatio="xMidYMid slice"
         className="w-full h-full"
         style={{ touchAction: 'none' }}
         onPointerDown={handleBackgroundPointerDown}
