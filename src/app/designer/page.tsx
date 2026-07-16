@@ -7,7 +7,6 @@ import {
   getPersonalPlayBySlug,
   getPlayBySlug,
 } from '@/lib/playsRepo'
-import { ALL_PLAYS } from '@/data/plays'
 import { DesignerApp } from './DesignerApp'
 import type { Play } from '@/types/play'
 
@@ -52,7 +51,6 @@ export default async function DesignerPage({
       memberTeams={memberTeams}
       personalPlays={personalPlays}
       teamPlays={teamPlays}
-      starterPlays={ALL_PLAYS}
       draftList={draftList}
       initialPlay={initialPlay}
       initialScope={initialScope}

@@ -16,7 +16,6 @@ import type { Play } from '@/types/play'
 import type { CurrentProfile } from '@/lib/supabase/server'
 import type { MemberTeam } from '@/lib/playsRepo'
 import { getBrowserSupabase } from '@/lib/supabase/client'
-import { sanitizeSlug } from '@/lib/slug'
 import { saveDraft, loadDraft, deleteDraft, publishPersonalPlay, publishTeamPlay } from './actions'
 
 const COACH_MARK_KEY = 'mousetrap-designer-coachmark-dismissed'
@@ -26,7 +25,6 @@ type DesignerAppProps = {
   memberTeams: MemberTeam[]
   personalPlays: Play[]
   teamPlays: Record<string, Play[]>
-  starterPlays: Play[]
   draftList: { name: string; scope: string }[]
   initialPlay: Play | null
   initialScope: string
@@ -37,7 +35,6 @@ export function DesignerApp({
   memberTeams,
   personalPlays,
   teamPlays,
-  starterPlays,
   draftList,
   initialPlay,
   initialScope,
@@ -150,18 +147,6 @@ export function DesignerApp({
     } finally {
       setBusy(false)
     }
-  }
-
-  function handleExport() {
-    const name = playName.trim() || 'untitled-play'
-    const data = { name, category: designer.category, set: designer.set, steps: designer.steps }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${sanitizeSlug(name)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
   }
 
   async function handlePublish() {
@@ -365,12 +350,10 @@ export function DesignerApp({
         busy={busy}
         status={status}
         loadablePlays={loadablePlays}
-        starterPlays={starterPlays}
         publishedPlayId={designer.publishedPlayId}
         activeDrafts={activeDrafts}
         currentFileName={currentFileName}
         onSave={handleSave}
-        onExport={handleExport}
         onPublish={handlePublish}
         onLoadExistingPlay={handleLoadExistingPlay}
         onLoadDraft={handleLoadDraft}

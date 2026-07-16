@@ -11,12 +11,10 @@ type FileModalProps = {
   busy: boolean
   status: string | null
   loadablePlays: Play[]
-  starterPlays: Play[]
   publishedPlayId: string | null
   activeDrafts: { name: string; scope: string }[]
   currentFileName: string | null
   onSave: () => void
-  onExport: () => void
   onPublish: () => void
   onLoadExistingPlay: (play: Play) => void
   onLoadDraft: (name: string) => void
@@ -42,12 +40,10 @@ export function FileModal({
   busy,
   status,
   loadablePlays,
-  starterPlays,
   publishedPlayId,
   activeDrafts,
   currentFileName,
   onSave,
-  onExport,
   onPublish,
   onLoadExistingPlay,
   onLoadDraft,
@@ -129,12 +125,6 @@ export function FileModal({
               Sign in to save
             </button>
           )}
-          <button
-            onClick={onExport}
-            className="min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-border text-text text-sm"
-          >
-            Export to File
-          </button>
         </div>
 
         {/* Load existing play (active playbook) + starter templates */}
@@ -165,27 +155,6 @@ export function FileModal({
             </div>
           ) : (
             <span className="text-xs text-text-muted">No plays in this playbook yet.</span>
-          )}
-
-          {starterPlays.length > 0 && (
-            <>
-              <span className="mt-1 text-xs uppercase tracking-wide text-text-muted">Starter Templates</span>
-              <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
-                {starterPlays.map((play) => (
-                  <div
-                    key={`starter-${play.id}`}
-                    className="flex items-center gap-2 px-2 py-1.5 min-h-11 md:min-h-0 rounded-md border border-border text-sm"
-                  >
-                    <button
-                      onClick={() => onLoadExistingPlay(play)}
-                      className="flex-1 min-w-0 truncate text-left text-text hover:text-accent"
-                    >
-                      {play.name}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
           )}
         </div>
 
