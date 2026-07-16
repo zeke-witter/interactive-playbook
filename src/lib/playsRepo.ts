@@ -159,6 +159,82 @@ export async function getTeamPlays(teamId: string): Promise<Play[]> {
   return (data ?? []).map((r) => rowToPlay(r as PlayRow))
 }
 
+export type Submission = {
+  slug: string
+  name: string
+  teamId: string
+  teamName: string
+  status: string
+  reviewNote: string | null
+}
+
+/** The caller's outstanding submissions (pending or denied team plays they authored). */
+export async function getMySubmissions(): Promise<Submission[]> {
+  const sb = await getServerSupabase()
+  const {
+    data: { user },
+  } = await sb.auth.getUser()
+  if (!user) return []
+  const { data } = await sb
+    .from('play')
+    .select('slug,name,team_id,status,review_note, team:team_id(name)')
+    .eq('created_by', user.id)
+    .not('team_id', 'is', null)
+    .in('status', ['pending', 'denied'])
+    .order('name')
+  return (data ?? []).map(
+    (r: {
+      slug: string
+      name: string
+      team_id: string
+      status: string
+      review_note: string | null
+      team: { name: string } | { name: string }[] | null
+    }) => ({
+      slug: r.slug,
+      name: r.name,
+      teamId: r.team_id,
+      teamName: (Array.isArray(r.team) ? r.team[0]?.name : r.team?.name) ?? 'Team',
+      status: r.status,
+      reviewNote: r.review_note,
+    }),
+  )
+}
+
+export type PendingSubmission = {
+  slug: string
+  name: string
+  category: Play['category']
+  set: Play['set']
+  submittedBy: string
+}
+
+/** Pending submissions for a team's approval queue (captain/admin view). */
+export async function getPendingSubmissions(teamId: string): Promise<PendingSubmission[]> {
+  const sb = await getServerSupabase()
+  const { data } = await sb
+    .from('play')
+    .select('slug,name,category,set,created_by')
+    .eq('team_id', teamId)
+    .eq('status', 'pending')
+    .order('name')
+  const rows = data ?? []
+  const ids = Array.from(new Set(rows.map((r: { created_by: string | null }) => r.created_by).filter(Boolean)))
+  const { data: profs } = ids.length
+    ? await sb.from('profile').select('user_id,display_name').in('user_id', ids)
+    : { data: [] as { user_id: string; display_name: string }[] }
+  const byId = new Map((profs ?? []).map((p) => [p.user_id, p.display_name]))
+  return rows.map(
+    (r: { slug: string; name: string; category: Play['category']; set: Play['set']; created_by: string | null }) => ({
+      slug: r.slug,
+      name: r.name,
+      category: r.category,
+      set: r.set,
+      submittedBy: (r.created_by && byId.get(r.created_by)) || 'Unknown',
+    }),
+  )
+}
+
 export type ManagedTeamPlay = {
   slug: string
   name: string

@@ -94,6 +94,48 @@ export async function removeMember(teamId: string, userId: string): Promise<Resu
   }
 }
 
+/** Approve a pending submission → published (captain/admin). */
+export async function approveSubmission(teamId: string, slug: string): Promise<Result> {
+  try {
+    const { supabase, user } = await requireManage(teamId)
+    const { error } = await supabase
+      .from('play')
+      .update({ status: 'published', reviewed_by: user.id, reviewed_at: new Date().toISOString(), review_note: null })
+      .eq('team_id', teamId)
+      .eq('slug', slug)
+      .eq('status', 'pending')
+    if (error) throw error
+    revalidatePath('/team')
+    revalidatePath('/')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not approve.' }
+  }
+}
+
+/** Deny a pending submission → denied, with an optional note (captain/admin). */
+export async function denySubmission(teamId: string, slug: string, note: string): Promise<Result> {
+  try {
+    const { supabase, user } = await requireManage(teamId)
+    const { error } = await supabase
+      .from('play')
+      .update({
+        status: 'denied',
+        reviewed_by: user.id,
+        reviewed_at: new Date().toISOString(),
+        review_note: note.trim() || null,
+      })
+      .eq('team_id', teamId)
+      .eq('slug', slug)
+      .eq('status', 'pending')
+    if (error) throw error
+    revalidatePath('/team')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not deny.' }
+  }
+}
+
 /** Hide or unhide a team play (captain/admin). Hidden plays drop out of the
  *  public viewer but stay visible to captains for later unhide/edit. */
 export async function setTeamPlayHidden(teamId: string, slug: string, hidden: boolean): Promise<Result> {

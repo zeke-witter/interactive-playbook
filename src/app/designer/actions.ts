@@ -121,6 +121,79 @@ export async function publishTeamPlay(teamId: string, session: DesignerSession):
   }
 }
 
+async function assertMember(
+  supabase: Awaited<ReturnType<typeof requireUser>>['supabase'],
+  teamId: string,
+  userId: string,
+) {
+  const { data } = await supabase.from('membership').select('team_id').eq('team_id', teamId).eq('user_id', userId).maybeSingle()
+  return !!data
+}
+
+const SLUG_TAKEN = (name: string) =>
+  `A play named “${name}” already exists in this team. Rename it before submitting.`
+
+/** Submit the current design to a team as a pending submission (snapshot). */
+export async function submitDesignToTeam(teamId: string, session: DesignerSession): Promise<Result> {
+  try {
+    const { supabase, user } = await requireUser()
+    if (!session.name?.trim() || !Array.isArray(session.steps) || session.steps.length === 0)
+      return { error: 'Add a name and at least one step.' }
+    if (!(await assertMember(supabase, teamId, user.id))) return { error: 'You are not a member of this team.' }
+    const slug = session.slug?.trim() || sanitizeSlug(session.name)
+    const { error } = await supabase.from('play').insert({
+      team_id: teamId,
+      slug,
+      name: session.name.trim(),
+      category: session.category,
+      set: session.set,
+      description: session.description ?? '',
+      status: 'pending',
+      created_by: user.id,
+      data: flatSteps(session, slug),
+    })
+    if (error) return { error: error.code === '23505' ? SLUG_TAKEN(session.name.trim()) : error.message }
+    revalidatePath('/my-playbook')
+    revalidatePath('/team')
+    return { slug }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not submit play.' }
+  }
+}
+
+/** Submit an existing personal play to a team for approval (snapshot). */
+export async function submitPersonalPlayToTeam(teamId: string, personalSlug: string): Promise<Result> {
+  try {
+    const { supabase, user } = await requireUser()
+    if (!(await assertMember(supabase, teamId, user.id))) return { error: 'You are not a member of this team.' }
+    const { data: src } = await supabase
+      .from('play')
+      .select('name,category,set,description,data')
+      .is('team_id', null)
+      .eq('owner_id', user.id)
+      .eq('slug', personalSlug)
+      .maybeSingle()
+    if (!src) return { error: 'Play not found.' }
+    const { error } = await supabase.from('play').insert({
+      team_id: teamId,
+      slug: personalSlug,
+      name: src.name,
+      category: src.category,
+      set: src.set,
+      description: src.description ?? '',
+      status: 'pending',
+      created_by: user.id,
+      data: src.data,
+    })
+    if (error) return { error: error.code === '23505' ? SLUG_TAKEN(src.name) : error.message }
+    revalidatePath('/my-playbook')
+    revalidatePath('/team')
+    return { slug: personalSlug }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not submit play.' }
+  }
+}
+
 export async function deletePersonalPlay(slug: string): Promise<Result> {
   try {
     const { supabase, user } = await requireUser()

@@ -8,6 +8,7 @@ type FileModalProps = {
   setName: (v: string) => void
   signedIn: boolean
   canPublishHere: boolean
+  canSubmitHere: boolean
   busy: boolean
   status: string | null
   loadablePlays: Play[]
@@ -16,6 +17,7 @@ type FileModalProps = {
   currentFileName: string | null
   onSave: () => void
   onPublish: () => void
+  onSubmit: () => void
   onLoadExistingPlay: (play: Play) => void
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
@@ -40,6 +42,7 @@ export function FileModal({
   setName,
   signedIn,
   canPublishHere,
+  canSubmitHere,
   busy,
   status,
   loadablePlays,
@@ -48,6 +51,7 @@ export function FileModal({
   currentFileName,
   onSave,
   onPublish,
+  onSubmit,
   onLoadExistingPlay,
   onLoadDraft,
   onDeleteDraft,
@@ -110,16 +114,35 @@ export function FileModal({
                 >
                   Save draft
                 </button>
-                <button
-                  onClick={onPublish}
-                  disabled={!canPublishHere || busy}
-                  title={canPublishHere ? 'Add this play to the active playbook' : 'Captains can publish here'}
-                  className="flex-1 min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {busy ? 'Working…' : 'Add to playbook'}
-                </button>
+                {canPublishHere ? (
+                  <button
+                    onClick={onPublish}
+                    disabled={busy}
+                    title="Add this play to the active playbook"
+                    className="flex-1 min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {busy ? 'Working…' : 'Add to playbook'}
+                  </button>
+                ) : canSubmitHere ? (
+                  <button
+                    onClick={onSubmit}
+                    disabled={busy}
+                    title="Submit this play to the team for a captain to approve"
+                    className="flex-1 min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {busy ? 'Working…' : 'Submit for approval'}
+                  </button>
+                ) : (
+                  <button
+                    disabled
+                    title="Captains can publish here"
+                    className="flex-1 min-h-11 md:min-h-0 px-3 py-1 rounded-md border border-success-border text-success-border text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Add to playbook
+                  </button>
+                )}
               </div>
-              {!canPublishHere && (
+              {!canPublishHere && !canSubmitHere && (
                 <span className="text-xs text-text-muted">Captains can publish here.</span>
               )}
             </>

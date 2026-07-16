@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation'
 import { getServerSupabase, getCurrentProfile } from '@/lib/supabase/server'
 import { TeamPanel, type TeamData } from './TeamPanel'
 import { TeamPlaysPanel } from './TeamPlaysPanel'
+import { PendingApprovalsPanel } from './PendingApprovalsPanel'
 import { CreateTeamForm } from './CreateTeamForm'
-import { getManagedTeamPlays, type ManagedTeamPlay } from '@/lib/playsRepo'
+import { getManagedTeamPlays, getPendingSubmissions, type ManagedTeamPlay, type PendingSubmission } from '@/lib/playsRepo'
 import type { Role } from './actions'
 
 /**
@@ -29,12 +30,13 @@ export default async function TeamPage() {
   )
   if (manageable.length === 0 && !profile.isAdmin) notFound()
 
-  const panels: { team: TeamData; plays: ManagedTeamPlay[] }[] = await Promise.all(
+  const panels: { team: TeamData; plays: ManagedTeamPlay[]; submissions: PendingSubmission[] }[] = await Promise.all(
     manageable.map(async (t: { id: string; name: string }) => {
-      const [{ data: mems }, { data: pending }, plays] = await Promise.all([
+      const [{ data: mems }, { data: pending }, plays, submissions] = await Promise.all([
         supabase.from('membership').select('user_id,role').eq('team_id', t.id),
         supabase.from('pending_membership').select('id,email,role').eq('team_id', t.id).order('created_at'),
         getManagedTeamPlays(t.id),
+        getPendingSubmissions(t.id),
       ])
       const userIds = (mems ?? []).map((m: { user_id: string }) => m.user_id)
       const { data: profs } = userIds.length
@@ -54,6 +56,7 @@ export default async function TeamPage() {
       return {
         team: { id: t.id, name: t.name, members, pending: (pending ?? []) as TeamData['pending'] },
         plays,
+        submissions,
       }
     }),
   )
@@ -68,9 +71,14 @@ export default async function TeamPage() {
           </Link>
         </header>
         {profile.isAdmin && <CreateTeamForm />}
-        {panels.map(({ team, plays }) => (
+        {panels.map(({ team, plays, submissions }) => (
           <div key={team.id} className="flex flex-col gap-4">
             <TeamPanel team={team} currentUserId={profile.userId} isAdmin={profile.isAdmin} />
+            {submissions.length > 0 && (
+              <div className="rounded-xl border border-border bg-surface p-5">
+                <PendingApprovalsPanel teamId={team.id} pending={submissions} />
+              </div>
+            )}
             <div className="rounded-xl border border-border bg-surface p-5">
               <TeamPlaysPanel teamId={team.id} plays={plays} />
             </div>
