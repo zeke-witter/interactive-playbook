@@ -4,39 +4,41 @@ import { usePathname } from 'next/navigation'
 import { AuthButton } from '@/components/auth/AuthButton'
 import type { CurrentProfile } from '@/lib/supabase/server'
 
-const NAV_LINK =
-  'whitespace-nowrap rounded-lg border border-border bg-surface-raised px-3 py-1.5 text-sm font-medium text-text shadow-sm transition-all duration-150 hover:bg-surface hover:shadow-md active:scale-[0.98]'
+/** Nav items render as lime text links (not bordered buttons). */
+const LINK = 'text-sm font-medium text-accent hover:text-accent-hover transition-colors'
 
 /**
- * Global top nav. Left: brand/home. Right: a context-aware primary link
- * (Designer everywhere except inside the Designer, where it flips to My
- * Playbook), Manage team (captains/admin), and the auth control. Slim so it
- * sits above the full-screen viewer/designer shells without crowding them.
+ * Global top nav. Brand (left) returns to the viewer/home. Right: lime text
+ * links for Designer, Manage plays, Manage team (as permitted), and the auth
+ * control. The link for the section you're already in is hidden.
  */
 export function SiteNav({ profile }: { profile: CurrentProfile | null }) {
   const pathname = usePathname()
   const inDesigner = pathname.startsWith('/designer')
+  const inManagePlays = pathname.startsWith('/my-playbook')
 
   return (
-    <header className="flex-none flex items-center gap-3 border-b border-border bg-bg px-4 h-12">
-      <Link href="/" className="font-display text-sm font-bold uppercase tracking-wide text-text hover:text-accent transition-colors">
-        Mousetrap
+    <header className="flex-none flex items-center gap-4 border-b border-border bg-bg px-4 h-12">
+      <Link
+        href="/"
+        className="font-display text-sm font-bold uppercase tracking-wide text-text hover:text-accent transition-colors"
+      >
+        Ultimate Playbook
       </Link>
       <div className="flex-1" />
 
-      {inDesigner ? (
-        profile && (
-          <Link href="/my-playbook" className={NAV_LINK}>
-            My Playbook
-          </Link>
-        )
-      ) : (
-        <Link href="/designer" className={NAV_LINK}>
+      {!inDesigner && (
+        <Link href="/designer" className={LINK}>
           Designer
         </Link>
       )}
+      {profile && !inManagePlays && (
+        <Link href="/my-playbook" className={LINK}>
+          Manage plays
+        </Link>
+      )}
       {profile?.canManage && (
-        <Link href="/team" className={NAV_LINK}>
+        <Link href="/team" className={LINK}>
           Manage team
         </Link>
       )}
