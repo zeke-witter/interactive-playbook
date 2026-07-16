@@ -21,8 +21,8 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "Mousetrap Plays",
-  description: "Interactive playbook for the Mousetrap ultimate frisbee team",
+  title: "Ultimate Playbook",
+  description: "Interactive playbook and play builder for ultimate frisbee teams.",
 };
 
 export default async function RootLayout({
