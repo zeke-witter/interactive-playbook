@@ -12,7 +12,7 @@ import type { Play, Position } from '@/types/play'
  * feeds the picker) are fetched on the server and passed in as props; all the
  * interactive hooks (step nav, roster, progress) live here.
  */
-export function PlayViewer({ play, plays }: { play: Play; plays: Play[] }) {
+export function PlayViewer({ play, plays, basePath }: { play: Play; plays: Play[]; basePath?: string }) {
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
   const { step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
   const { markComplete } = useProgress()
@@ -48,6 +48,7 @@ export function PlayViewer({ play, plays }: { play: Play; plays: Play[] }) {
       <Sidebar
         play={play}
         plays={plays}
+        basePath={basePath}
         step={step}
         roster={roster}
         stepIndex={stepIndex}

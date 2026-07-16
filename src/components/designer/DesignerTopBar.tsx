@@ -7,13 +7,16 @@ type DesignerTopBarProps = {
   draftNames: string[]
   existingPlays: Play[]
   publishedPlayId: string | null
+  signedIn: boolean
+  manageableTeams: { id: string; name: string }[]
   onSave: (name: string) => void
   onExport: (name: string) => void
-  onPublish: (name: string) => void
+  onPublish: (name: string, destination: string) => void
   onLoadDraft: (name: string) => void
   onDeleteDraft: (name: string) => void
   onLoadExistingPlay: (play: Play) => void
   onNewPlay: () => void
+  onSignIn: () => void
   canUndo: boolean
   canRedo: boolean
   onUndo: () => void
@@ -24,6 +27,7 @@ type DesignerTopBarProps = {
 export function DesignerTopBar({
   currentFileName, draftNames, existingPlays, publishedPlayId, onSave, onExport, onPublish,
   onLoadDraft, onDeleteDraft, onLoadExistingPlay, onNewPlay,
+  signedIn, manageableTeams, onSignIn,
   canUndo, canRedo, onUndo, onRedo, onPreview,
 }: DesignerTopBarProps) {
   return (
@@ -35,6 +39,8 @@ export function DesignerTopBar({
         draftNames={draftNames}
         existingPlays={existingPlays}
         publishedPlayId={publishedPlayId}
+        signedIn={signedIn}
+        manageableTeams={manageableTeams}
         onSave={onSave}
         onExport={onExport}
         onPublish={onPublish}
@@ -42,6 +48,7 @@ export function DesignerTopBar({
         onDeleteDraft={onDeleteDraft}
         onLoadExistingPlay={onLoadExistingPlay}
         onNewPlay={onNewPlay}
+        onSignIn={onSignIn}
       />
       <div className="flex-1" />
       <button

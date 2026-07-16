@@ -3,7 +3,15 @@ import { useState } from 'react'
 import { PlayPicker } from './PlayPicker'
 import type { Play } from '@/types/play'
 
-export function PickerDrawer({ plays, currentPlay }: { plays: Play[]; currentPlay: Play }) {
+export function PickerDrawer({
+  plays,
+  currentPlay,
+  basePath = '/plays',
+}: {
+  plays: Play[]
+  currentPlay: Play
+  basePath?: string
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -23,7 +31,7 @@ export function PickerDrawer({ plays, currentPlay }: { plays: Play[]; currentPla
             <button onClick={() => setOpen(false)} className="mb-4 text-text-muted hover:text-text">
               ✕ Close
             </button>
-            <PlayPicker plays={plays} currentPlay={currentPlay} />
+            <PlayPicker plays={plays} currentPlay={currentPlay} basePath={basePath} />
           </div>
         </div>
       )}

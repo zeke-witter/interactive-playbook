@@ -14,7 +14,15 @@ const ROW_CLASS = 'text-left rounded-md border px-3 py-2 border-border bg-surfac
 // Grouping is computed inline from the passed-in `plays` (mirrors the pure
 // helpers in lib/playsRepo). PlayPicker is a client component, so it must not
 // import from playsRepo — that module pulls in the server-only Supabase client.
-export function PlayPicker({ plays, currentPlay }: { plays: Play[]; currentPlay?: Play }) {
+export function PlayPicker({
+  plays,
+  currentPlay,
+  basePath = '/plays',
+}: {
+  plays: Play[]
+  currentPlay?: Play
+  basePath?: string
+}) {
   const router = useRouter()
   const [level, setLevel] = useState<PickerLevel>(
     currentPlay
@@ -69,7 +77,7 @@ export function PlayPicker({ plays, currentPlay }: { plays: Play[]; currentPlay?
           playsInSet(level.category, level.set).map((play) => (
             <button
               key={play.id}
-              onClick={() => router.push(`/plays/${play.id}`)}
+              onClick={() => router.push(`${basePath}/${play.id}`)}
               className={
                 play.id === currentPlay?.id
                   ? 'text-left rounded-md border px-3 py-2 border-accent bg-surface-raised text-accent'

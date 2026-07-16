@@ -24,6 +24,9 @@ function GoogleG() {
  * button (starts the OAuth redirect). Signed in → display name (+ admin tag)
  * and a sign-out button. Phase 2 gates nothing else.
  */
+const NAV_LINK =
+  'whitespace-nowrap rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 hover:bg-surface hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2 focus-visible:ring-offset-bg'
+
 export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
   const [pending, setPending] = useState(false)
 
@@ -57,11 +60,14 @@ export function AuthButton({ profile }: { profile: CurrentProfile | null }) {
         {profile.displayName}
         {profile.isAdmin && <span className="ml-1 font-medium text-accent">· admin</span>}
       </span>
+      <Link href="/my-playbook" className={NAV_LINK}>
+        My Playbook
+      </Link>
+      <Link href="/designer" className={NAV_LINK}>
+        Designer
+      </Link>
       {profile.canManage && (
-        <Link
-          href="/team"
-          className="whitespace-nowrap rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm font-medium text-text shadow-sm transition-all duration-150 hover:bg-surface hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-        >
+        <Link href="/team" className={NAV_LINK}>
           Manage team
         </Link>
       )}

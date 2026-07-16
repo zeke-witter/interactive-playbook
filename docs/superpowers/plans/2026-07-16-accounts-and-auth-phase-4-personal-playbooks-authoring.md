@@ -143,3 +143,17 @@ grant all on play, draft to service_role;
 - **`.ts` catalog is now purely a seed** (retired write path). Editing seeded content long-term = edit in the app; the committed files stay as history/first-run seed.
 - **Deferred:** player submit→approve + captain approval queue (Phase 5); a proper in-place narrative-edit action (removed dev-only button this phase); progress sync (Phase 6); multi-team switcher / dynamic categories (Phase 7).
 - **Big phase** — consider reviewing/merging as two PRs if it gets unwieldy: (4a) schema + personal publish + My Playbook + retire routes; (4b) captain team publish/hide + import + DB drafts. Default is one PR; split only if review benefits.
+
+---
+
+## Execution notes (2026-07-16)
+
+Built on branch `feat/personal-playbooks-phase-4`. Shipped as **one PR** (full scope: personal + captain-direct team publish + import + DB drafts).
+
+- **Migrations applied:** `0007_play_status_values` (add `pending`/`hidden`/`denied`), `0008_personal_playbooks` (play `owner_id` + nullable `team_id` + partial unique indexes + scope check; full RLS rewrite; draft RLS + nullable team_id + `(user_id,name)` key; grants).
+- **Foundation:** `playsRepo` gained `getPersonalPlays`/`getPersonalPlayBySlug`/`getManageableTeams`; new `src/app/designer/actions.ts` (publish personal/team, delete, import, draft CRUD). **Upsert gotcha:** supabase-js can't target a *partial* unique index, so publish/draft use explicit select-then-insert/update. No `service_role` in app code.
+- **Designer** split into a server `page.tsx` (reads `?play&scope`, fetches profile + manageable teams + initial play) + `DesignerApp.tsx` client; fetches → server actions; publish gained a destination selector (My playbook / each managed team); signed-out shows "Sign in to save". `onPublish` is now `(name, destination)`.
+- **My Playbook** (`/my-playbook`) + owner-only `/my-playbook/[slug]` viewer; the viewer picker gained an optional `basePath` (`'/plays'` default, `'/my-playbook'` for personal) threaded PlayViewer→Sidebar→PlayPicker/PickerDrawer.
+- **Retired:** all four `/api/designer/*` routes + `/api/plays/[playId]/narrative` (+ its dev-only inline editor); `api/CLAUDE.md` rewritten. `.ts` catalog is now purely the seed.
+- **Verified:** `tsc` clean; production build OK (route list shows no `/api/*`, plus `/my-playbook`, `/my-playbook/[slug]`, server-rendered `/designer`). **RLS proven via role-simulated SQL:** a personal play is visible to its owner (1) but not to anon (0) or a non-owner (0); anon still sees the 7 public team plays. Dev-server smoke: home/play/designer 200, `/my-playbook` 307 signed-out, retired publish route 404.
+- **Remaining (manual, human-only):** in-app multi-account run — sign in → Designer → save to My Playbook → View/Edit/Delete; captain "Publish to team" shows in the public Viewer + hide; import a team play; named drafts persist. Then commit gate.
