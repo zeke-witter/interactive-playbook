@@ -28,7 +28,7 @@ For product/UX context, audience, and the design-token reference, see **`docs/de
 | Animation | Framer Motion (`motion.g` / `motion.circle`) |
 | Codegen | `ts-morph` (publish route writes/edits play `.ts` files) |
 | Fonts | Oswald (`--font-display`, headers/labels), Geist Sans (body) |
-| Persistence | Files on disk + `localStorage` (autosave, progress, coach-mark) |
+| Persistence | Supabase Postgres (plays, teams, members, drafts) + `localStorage` (coach-mark) |
 
 ## Architecture
 
@@ -46,7 +46,7 @@ For product/UX context, audience, and the design-token reference, see **`docs/de
       │     │                                               │ useDesignerState()    │
       │     │ usePlayStep()  ← history stack                │  (rootSteps tree,     │
       │     │ useRoster()    ← random names                 │   currentPath,        │
-      │     │ useProgress()  ← localStorage                 │   undo/redo, mode)    │
+      │     │                                               │   undo/redo, mode)    │
       │     ▼                                               ▼                       │
       │  components/field/   ◄───── SHARED SVG ENGINE ─────►  components/designer/  │
       │  (FieldCanvas, PlayerTokens,                        (DesignerCanvas,        │
@@ -98,7 +98,6 @@ Positions are stored **normalized 0–1**: `x` 0 = left sideline → 1 = right s
 | What | Where | How |
 |---|---|---|
 | Designer autosave | `localStorage["mousetrap-designer-autosave"]` | on every edit; restored on mount |
-| Viewer progress | `localStorage["mousetrap-progress"]` | positions completed per play |
 | Coach-mark dismissal | `localStorage["mousetrap-designer-coachmark-dismissed"]` | |
 | Named drafts | `designer-output/*.json` | `POST /api/designer/save`, `GET/DELETE /api/designer/drafts` |
 | Published plays | `src/data/plays/<id>.ts` + `index.ts` | `POST /api/designer/publish` — **dev only**, `ts-morph` |
@@ -115,7 +114,7 @@ The publish/save/narrative flows are gated on `NODE_ENV === 'development'` and m
 | `src/components/field/` | Shared SVG field-rendering engine | ✅ |
 | `src/components/sidebar/` | Play Viewer UI (narrative, controls, picker) | ✅ |
 | `src/components/designer/` | Play Designer editor UI | ✅ |
-| `src/hooks/` | `useDesignerState`, `usePlayStep`, `useProgress`, `useRoster` | ✅ |
+| `src/hooks/` | `useDesignerState`, `usePlayStep`, `useRoster` | ✅ |
 | `src/lib/` | Pure helpers (tree ops, conversion, field math, slugs, sound) | ✅ |
 | `src/data/` | Play content (`plays/*.ts`), glossary, roster names | ✅ |
 | `src/types/` | The two step models | ✅ |

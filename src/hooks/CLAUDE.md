@@ -19,5 +19,4 @@ When adding a Designer capability, add an action here and go through the tree he
 
 ## Viewer hooks
 - **`usePlayStep.ts`** — step navigation over the **flat** `Play`. Keeps a `history` stack of visited step ids (so Prev works across branch choices). `next()` is disabled at a branch point (you advance by choosing a branch → `goToStep(nextStepId)`). Computes `isLast` (via `isEnding` or end-of-array), and stepper progress (`stepperIndex`/`stepperTotal`/`showMoreIndicator`) by scanning forward to the next fork — relies on the branch-contiguity convention.
-- **`useProgress.ts`** — records which positions a viewer has completed per play in `localStorage["mousetrap-progress"]`.
 - **`useRoster.ts`** — generates a **random** roster (`Record<Position, string>`) from `src/data/names.ts` on each load, mixing gender ratios. Display names are intentionally not stable between sessions.
