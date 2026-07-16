@@ -2,8 +2,9 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { deletePersonalPlay, importTeamPlayToPersonal } from '@/app/designer/actions'
+import { deletePersonalPlay, importTeamPlayToPersonal, submitPersonalPlayToTeam } from '@/app/designer/actions'
 import { CATEGORY_LABELS, SET_LABELS } from '@/lib/playLabels'
+import type { MemberTeam, Submission } from '@/lib/playsRepo'
 import type { Play } from '@/types/play'
 
 type Item = { slug: string; name: string; category: Play['category']; set: Play['set'] }
@@ -11,10 +12,25 @@ type Item = { slug: string; name: string; category: Play['category']; set: Play[
 const BTN =
   'cursor-pointer whitespace-nowrap rounded-md border border-border bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-text shadow-sm transition-all hover:bg-surface hover:shadow-md active:scale-[0.98] disabled:cursor-wait disabled:opacity-60'
 
-export function MyPlaybookList({ plays, importable }: { plays: Item[]; importable: Item[] }) {
+const SELECT =
+  'cursor-pointer whitespace-nowrap rounded-md border border-border bg-surface-raised px-2 py-1.5 text-xs font-medium text-text shadow-sm'
+
+export function MyPlaybookList({
+  plays,
+  importable,
+  memberTeams,
+  submissions,
+}: {
+  plays: Item[]
+  importable: Item[]
+  memberTeams: MemberTeam[]
+  submissions: Submission[]
+}) {
   const router = useRouter()
   const [busy, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  // The team each personal play would be submitted to (defaults to the first).
+  const [submitTeam, setSubmitTeam] = useState<Record<string, string>>({})
 
   function run(fn: () => Promise<{ error?: string }>) {
     setError(null)
@@ -52,7 +68,34 @@ export function MyPlaybookList({ plays, importable }: { plays: Item[]; importabl
                     {CATEGORY_LABELS[p.category]} · {SET_LABELS[p.set]}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
+                <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                  {memberTeams.length > 0 && (
+                    <>
+                      <select
+                        value={submitTeam[p.slug] ?? memberTeams[0].id}
+                        onChange={(e) => setSubmitTeam((prev) => ({ ...prev, [p.slug]: e.target.value }))}
+                        disabled={busy}
+                        aria-label="Team to submit to"
+                        className={SELECT}
+                      >
+                        {memberTeams.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          run(() => submitPersonalPlayToTeam(submitTeam[p.slug] ?? memberTeams[0].id, p.slug))
+                        }
+                        className={BTN}
+                      >
+                        Submit
+                      </button>
+                    </>
+                  )}
                   <Link href={`/my-playbook/${p.slug}`} className={BTN}>
                     View
                   </Link>
@@ -76,6 +119,40 @@ export function MyPlaybookList({ plays, importable }: { plays: Item[]; importabl
           </ul>
         )}
       </section>
+
+      {submissions.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="font-display text-lg font-bold uppercase tracking-wide text-text">Submissions</h2>
+          <p className="text-xs text-text-muted">Plays you&apos;ve sent to a team, awaiting a captain&apos;s review.</p>
+          <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
+            {submissions.map((s) => {
+              const denied = s.status === 'denied'
+              return (
+                <li key={`${s.teamId}-${s.slug}`} className="flex flex-col gap-1 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-text">{s.name}</p>
+                      <p className="text-xs text-text-muted">{s.teamName}</p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium ${
+                        denied
+                          ? 'border-danger-border bg-danger-bg text-text'
+                          : 'border-accent text-accent'
+                      }`}
+                    >
+                      {denied ? 'Denied' : 'Pending'}
+                    </span>
+                  </div>
+                  {denied && s.reviewNote && (
+                    <p className="text-xs text-text-muted">{s.reviewNote}</p>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
 
       {importable.length > 0 && (
         <section className="flex flex-col gap-2">

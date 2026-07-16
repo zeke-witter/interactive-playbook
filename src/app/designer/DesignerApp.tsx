@@ -18,7 +18,7 @@ import type { MemberTeam } from '@/lib/playsRepo'
 import { getBrowserSupabase } from '@/lib/supabase/client'
 import { getStepAtPath } from '@/lib/designerSteps'
 import { SET_LABELS } from '@/lib/playLabels'
-import { saveDraft, loadDraft, deleteDraft, publishPersonalPlay, publishTeamPlay, saveFormation } from './actions'
+import { saveDraft, loadDraft, deleteDraft, publishPersonalPlay, publishTeamPlay, submitDesignToTeam, saveFormation } from './actions'
 
 const COACH_MARK_KEY = 'mousetrap-designer-coachmark-dismissed'
 
@@ -80,6 +80,8 @@ export function DesignerApp({
     [draftList, activePlaybook],
   )
   const canPublishHere = activePlaybook === 'personal' ? !!profile : !!activeTeam?.canPublish
+  // A team member who can't publish directly may submit the design for approval.
+  const canSubmitHere = activePlaybook !== 'personal' && !canPublishHere && !!activeTeam
   const activePlaybookName = activePlaybook === 'personal' ? 'My Playbook' : (activeTeam?.name ?? 'Playbook')
 
   function dismissCoachMark() {
@@ -185,6 +187,38 @@ export function DesignerApp({
       router.refresh()
     } catch {
       setStatus('Error: failed to publish')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleSubmit() {
+    if (!canSubmitHere || busy) return
+    const name = playName.trim()
+    if (!name) {
+      setStatus('Name the play first.')
+      return
+    }
+    setBusy(true)
+    setStatus('Submitting…')
+    try {
+      const result = await submitDesignToTeam(activePlaybook, {
+        name,
+        category: designer.category,
+        set: designer.set,
+        description: designer.description,
+        steps: designer.steps,
+        slug: designer.publishedPlayId ?? undefined,
+      })
+      if (result.error) {
+        setStatus(`Error: ${result.error}`)
+        return
+      }
+      setCurrentFileName(name)
+      setStatus(`Submitted to ${activePlaybookName} for approval`)
+      router.refresh()
+    } catch {
+      setStatus('Error: failed to submit')
     } finally {
       setBusy(false)
     }
@@ -368,6 +402,7 @@ export function DesignerApp({
         setName={setPlayName}
         signedIn={signedIn}
         canPublishHere={canPublishHere}
+        canSubmitHere={canSubmitHere}
         busy={busy}
         status={status}
         loadablePlays={loadablePlays}
@@ -376,6 +411,7 @@ export function DesignerApp({
         currentFileName={currentFileName}
         onSave={handleSave}
         onPublish={handlePublish}
+        onSubmit={handleSubmit}
         onLoadExistingPlay={handleLoadExistingPlay}
         onLoadDraft={handleLoadDraft}
         onDeleteDraft={handleDeleteDraft}

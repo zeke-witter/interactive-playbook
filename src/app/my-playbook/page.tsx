@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { getPersonalPlays, getPublishedPlays } from '@/lib/playsRepo'
+import { getPersonalPlays, getPublishedPlays, getMemberTeams, getMySubmissions } from '@/lib/playsRepo'
 import { getCurrentProfile } from '@/lib/supabase/server'
 import { MyPlaybookList } from './MyPlaybookList'
 
@@ -9,7 +9,12 @@ export default async function MyPlaybookPage() {
   const profile = await getCurrentProfile()
   if (!profile) redirect('/')
 
-  const [mine, teamPlays] = await Promise.all([getPersonalPlays(), getPublishedPlays()])
+  const [mine, teamPlays, memberTeams, submissions] = await Promise.all([
+    getPersonalPlays(),
+    getPublishedPlays(),
+    getMemberTeams(),
+    getMySubmissions(),
+  ])
   const mineSlugs = new Set(mine.map((p) => p.id))
   const toItem = (p: (typeof mine)[number]) => ({ slug: p.id, name: p.name, category: p.category, set: p.set })
 
@@ -25,6 +30,8 @@ export default async function MyPlaybookPage() {
         <MyPlaybookList
           plays={mine.map(toItem)}
           importable={teamPlays.filter((p) => !mineSlugs.has(p.id)).map(toItem)}
+          memberTeams={memberTeams}
+          submissions={submissions}
         />
       </div>
     </main>
