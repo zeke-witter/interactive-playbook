@@ -176,16 +176,27 @@ Grants: `authenticated` gains INSERT/UPDATE/DELETE on `play` (+ needed grants on
   - **Team console** (captain/admin): approval queue (approve/deny + note), team plays (edit/hide/delete), members (add by email, set role, remove).
   - **Admin** (admin only): create teams, list/manage users & roles.
 
-## Phasing (MVP-first — toward "invite users soon")
+## Phasing — status as of 2026-07-16
 
-2. **Auth & identity** — Google sign-in, `profile` + trigger, seed admin. Sign-in works; nothing gated beyond it. Viewer still public.
-3. **Membership & RLS** — rename→`captain`, helpers + membership-scoped policies (public-read retained for published), `pending_membership` + claim-on-signin, "add member by email" + minimal member management.
-4. **Personal playbooks + production authoring** — `play` owner/personal columns + partial uniques, drafts→DB, Designer publishes to personal playbook via server actions (retire dev-only routes), import team→personal, **My Playbook** UI.
-5. **Submission & approval** — `pending`/`denied` + review columns, submit action, captain approval queue.
-6. **Progress sync** — `progress` per user (localStorage fallback for signed-out).
-7. **Team creation / global user admin / dynamic categories** — admin console; `category`/`set` become team-configurable (today fixed in `lib/playLabels.ts`).
+Phases 2–5 are **shipped and live in production**; the app is being **piloted as-is** (single admin-provisioned team, Mousetrap).
 
-After **Phase 4**, first testers can sign in, be added to Mousetrap, and create/edit/publish to their own playbooks; **Phase 5** adds the team-approval loop.
+2. **Auth & identity** — ✅ SHIPPED. Google sign-in, `profile` + sign-in trigger, sole admin seeded.
+3. **Membership & RLS** — ✅ SHIPPED. `captain` role, `private` RLS helpers, membership-scoped policies (public read retained for published team plays), `pending_membership` invite-by-email with dual claim triggers, `/team` member management. **Admin team creation was brought forward here** (migration `0006`).
+4. **Personal playbooks + production authoring** — ✅ SHIPPED. `play` owner/personal scope, DB drafts, DB-backed authoring via server actions (dev-only ts-morph routes retired), import team→personal, **My Playbook**, the **active-playbook** model (Designer breadcrumb + file modal, viewer "Playbook" selector), captain team-play management (edit/hide/delete), global nav, and **admin-editable formation templates** (migration `0009`).
+5. **Submission & approval** — ✅ SHIPPED. `pending`/`denied` + review columns (`0010`), member submit (from Designer + My Playbook), captain approval queue on `/team`.
+6. **Progress sync** — ❌ DROPPED. Study-progress tracking was removed entirely (never surfaced in the UI); the `progress` table was dropped (`0011`).
+7. **"Open it up" (multi-tenant self-service)** — ⏸️ PARKED. See below.
+
+### Phase 7 (parked) — remaining work to let *other* teams run themselves
+
+The app is already multi-tenant in the data model (`team_id`-scoped) and supports admin-provisioned teams, invites, per-team playbooks, and per-team viewer/designer selectors. What's **not** built — and is only needed to open the app beyond the single Mousetrap pilot to the public internet:
+
+- **Self-serve team creation** — today only the global admin can create teams (`team` insert is admin-only RLS). Would need: non-admin team creation that auto-makes the creator a `captain`, surfaced in the normal UI.
+- **Team lifecycle & self-management** — rename team, delete/archive team (RLS allows delete; no UI), a member leaving a team, last-captain guards.
+- **New-user onboarding** — a "create a team or join one" flow so a signed-in user with no team isn't stranded on the public viewer.
+- **Dynamic categories & sets** — `category` (offense/defense) and `set` (ho-stack/vert-stack/flow/zone/endzone) are hardcoded in `lib/playLabels.ts` and drive the formations; making them team-configurable is the largest chunk. *Separable:* worth doing on its own if Mousetrap wants custom categories, independent of going multi-team.
+
+**Decision gate:** revisit only if the app is opened to teams beyond Mousetrap. Until then, the admin-provisioned model is sufficient.
 
 ## Out-of-band setup (blocks Phase 2)
 
@@ -202,10 +213,10 @@ Per phase, by hand + a production build, using **two Google accounts** to exerci
 - public (signed-out) still sees published team plays, and sees nothing personal/pending/hidden/denied;
 - invite-by-email activates a membership on first sign-in.
 
-## Open questions
+## Open questions / resolutions
 
-- **Slug collisions**: importing a team play to a personal playbook where the owner already has that slug → auto-suffix (`-2`) or prompt.
-- **Re-submitting an existing team play**: with the copy model, approving a submission whose slug matches an already-`published` team play conflicts on `play_team_slug_uq`. Decide: approval *replaces* (updates data of) the existing published row, or requires a new slug, or introduces light versioning. (Deferred to Phase 5.)
-- **Guards**: prevent removing the last captain / self-demotion / altering the admin — enforce in server actions.
-- **Dynamic categories** (Phase 7): move `category`/`set` from fixed `playLabels.ts` constants to per-team config.
+- **Slug collisions (import)**: RESOLVED — importing a team play to a personal playbook auto-suffixes (`-2`, `-3`, …) when the owner already has that slug.
+- **Slug collisions (submit)**: RESOLVED (Phase 5) — submitting to a team where the slug is already taken is **rejected** with a "rename it before submitting" message (no silent suffix in a shared playbook). Re-submitting/replacing a published team play (light versioning) remains a possible future enhancement, not built.
+- **Guards**: DONE for last-captain removal/demotion and protecting the admin (enforced in `team/actions.ts`); broader self-demotion nuances can harden later.
+- **Dynamic categories**: still open, parked under Phase 7 — move `category`/`set` from fixed `playLabels.ts` constants to per-team config.
 ```
