@@ -3,30 +3,35 @@ import { useEffect, useState } from 'react'
 import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 import { usePlayStep } from '@/hooks/usePlayStep'
-import { useProgress } from '@/hooks/useProgress'
 import { useRoster } from '@/hooks/useRoster'
 import type { Play, Position } from '@/types/play'
+import type { RosterPool } from '@/types/roster'
 
 /**
  * Client shell for the Play Viewer. The play (and the published-play list that
- * feeds the picker) are fetched on the server and passed in as props; all the
- * interactive hooks (step nav, roster, progress) live here.
+ * feeds the picker) are fetched on the server and passed in as props; the
+ * interactive hooks (step nav, roster) live here.
  */
-export function PlayViewer({ play, plays, basePath }: { play: Play; plays: Play[]; basePath?: string }) {
+export function PlayViewer({
+  play,
+  plays,
+  basePath,
+  rosterPool,
+}: {
+  play: Play
+  plays: Play[]
+  basePath?: string
+  rosterPool?: RosterPool | null
+}) {
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
   const { step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
-  const { markComplete } = useProgress()
-  const roster = useRoster()
+  const roster = useRoster(rosterPool)
   const [quizPassed, setQuizPassed] = useState(false)
   const [highlightZone, setHighlightZone] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
 
   useEffect(() => {
     setQuizPassed(false)
   }, [stepIndex, selectedPosition])
-
-  useEffect(() => {
-    if (isLast) markComplete(play.id, selectedPosition)
-  }, [isLast, play.id, selectedPosition, markComplete])
 
   const quiz = step.quiz?.[selectedPosition]
 

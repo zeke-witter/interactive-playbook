@@ -4,8 +4,17 @@ import { getServerSupabase, getCurrentProfile } from '@/lib/supabase/server'
 import { TeamPanel, type TeamData } from './TeamPanel'
 import { TeamPlaysPanel } from './TeamPlaysPanel'
 import { PendingApprovalsPanel } from './PendingApprovalsPanel'
+import { RosterPanel } from './RosterPanel'
 import { CreateTeamForm } from './CreateTeamForm'
-import { getManagedTeamPlays, getPendingSubmissions, type ManagedTeamPlay, type PendingSubmission } from '@/lib/playsRepo'
+import {
+  getManagedTeamPlays,
+  getPendingSubmissions,
+  getTeamRosterNames,
+  type ManagedTeamPlay,
+  type PendingSubmission,
+  type RosterName,
+} from '@/lib/playsRepo'
+import type { Division } from '@/types/roster'
 import type { Role } from './actions'
 
 /**
@@ -19,7 +28,7 @@ export default async function TeamPage() {
 
   const supabase = await getServerSupabase()
   const [{ data: teams }, { data: myMems }] = await Promise.all([
-    supabase.from('team').select('id,name').order('name'),
+    supabase.from('team').select('id,name,division').order('name'),
     supabase.from('membership').select('team_id,role').eq('user_id', profile.userId),
   ])
   const captainTeams = new Set(
@@ -30,11 +39,18 @@ export default async function TeamPage() {
   )
   if (manageable.length === 0 && !profile.isAdmin) notFound()
 
-  const panels: { team: TeamData; plays: ManagedTeamPlay[]; submissions: PendingSubmission[] }[] = await Promise.all(
-    manageable.map(async (t: { id: string; name: string }) => {
-      const [{ data: mems }, { data: pending }, plays, submissions] = await Promise.all([
+  const panels: {
+    team: TeamData
+    division: Division
+    roster: RosterName[]
+    plays: ManagedTeamPlay[]
+    submissions: PendingSubmission[]
+  }[] = await Promise.all(
+    manageable.map(async (t: { id: string; name: string; division: Division }) => {
+      const [{ data: mems }, { data: pending }, roster, plays, submissions] = await Promise.all([
         supabase.from('membership').select('user_id,role').eq('team_id', t.id),
         supabase.from('pending_membership').select('id,email,role').eq('team_id', t.id).order('created_at'),
+        getTeamRosterNames(t.id),
         getManagedTeamPlays(t.id),
         getPendingSubmissions(t.id),
       ])
@@ -55,6 +71,8 @@ export default async function TeamPage() {
 
       return {
         team: { id: t.id, name: t.name, members, pending: (pending ?? []) as TeamData['pending'] },
+        division: t.division,
+        roster,
         plays,
         submissions,
       }
@@ -71,9 +89,10 @@ export default async function TeamPage() {
           </Link>
         </header>
         {profile.isAdmin && <CreateTeamForm />}
-        {panels.map(({ team, plays, submissions }) => (
+        {panels.map(({ team, division, roster, plays, submissions }) => (
           <div key={team.id} className="flex flex-col gap-4">
             <TeamPanel team={team} currentUserId={profile.userId} isAdmin={profile.isAdmin} />
+            <RosterPanel teamId={team.id} division={division} names={roster} />
             {submissions.length > 0 && (
               <div className="rounded-xl border border-border bg-surface p-5">
                 <PendingApprovalsPanel teamId={team.id} pending={submissions} />

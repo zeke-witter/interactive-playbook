@@ -19,5 +19,4 @@ When adding a Designer capability, add an action here and go through the tree he
 
 ## Viewer hooks
 - **`usePlayStep.ts`** — step navigation over the **flat** `Play`. Keeps a `history` stack of visited step ids (so Prev works across branch choices). `next()` is disabled at a branch point (you advance by choosing a branch → `goToStep(nextStepId)`). Computes `isLast` (via `isEnding` or end-of-array), and stepper progress (`stepperIndex`/`stepperTotal`/`showMoreIndicator`) by scanning forward to the next fork — relies on the branch-contiguity convention.
-- **`useProgress.ts`** — records which positions a viewer has completed per play in `localStorage["mousetrap-progress"]`.
-- **`useRoster.ts`** — generates a **random** roster (`Record<Position, string>`) from `src/data/names.ts` on each load, mixing gender ratios. Display names are intentionally not stable between sessions.
+- **`useRoster.ts`** — `useRoster(pool?)` generates a **random** roster (`Record<Position, string>`) from the play's team `RosterPool` (fetched server-side via `getRosterPoolForPlay`, passed through `PlayViewer`). Mixed-division teams keep a gendered 4:3 line; open/women draw from one pool per role. With no pool (personal play, or a team with no names) it returns the raw tokens. Display names are intentionally not stable between sessions.
