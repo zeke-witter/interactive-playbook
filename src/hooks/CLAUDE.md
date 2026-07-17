@@ -1,6 +1,6 @@
 # src/hooks/ — React hooks
 
-Four client hooks. `useDesignerState` is the big one; the other three serve the Viewer.
+Three client hooks. `useDesignerState` is the big one; the other two serve the Viewer.
 
 ## `useDesignerState.ts` — the Designer's entire state engine
 The single source of truth for the editor. `app/designer/page.tsx` calls it once and threads the returned object into `DesignerCanvas`, `DesignerSidePanel`/`MobileStepSheet`, etc.

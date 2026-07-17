@@ -16,13 +16,13 @@ Mousetrap Playbook is a two-tool app for an ultimate frisbee team:
 - **Play Designer** (`/designer`) — a drag-and-drop field editor for authoring plays: player positions, cutting paths, throws, and branching "what happens if the read is covered" alternatives, step by step.
 - **Play Viewer** (`/plays/[playId]`) — the teaching tool players actually use: pick a play, pick your position, animate through it step by step with narrative text explaining your job at each moment.
 
-Drafts built in the Designer get promoted (currently by hand, with Claude's help) into real, published plays the Viewer can show.
+Drafts built in the Designer get published to the database — to a coach's personal playbook, or submitted to a team where a captain/admin approves them into the shared catalog the Viewer shows.
 
 ## Audiences & contexts
 
 **Play Designer:**
-- Today: just the one coach (the person reading this), and it's fine for the UX to be a little rough while that's true.
-- Where this is going: eventually anyone — other coaches, captains, or players on other ultimate teams — should be able to pick this up and build a play without hand-holding. That's the real target to design toward, even though the current single-user phase tolerates some sharp edges.
+- Now: multiple teams and accounts. Coaches/captains sign in (Google), manage their team, and author plays; players see their team's catalog. Still small, so some UX roughness is tolerable — but it's no longer a single-user tool.
+- Where this is going: anyone — other coaches, captains, or players on other ultimate teams — should be able to pick this up and build a play without hand-holding. The account/team foundation is in place; keep designing toward broad self-serve use.
 - Device: primarily desktop/laptop today. No stated requirement to support touch yet, but see "mobile-first mindset" below — that's a design lens, not a device requirement.
 
 **Play Viewer:**
@@ -89,7 +89,7 @@ These already exist and work — new proposals should build on them intentionall
 
 - Hobby project: no dedicated design team or budget, one developer (with Claude's help) implementing.
 - Must be buildable in the current stack: Next.js App Router, Tailwind v4, Framer Motion, inline SVG (no canvas/WebGL).
-- No backend/database — content is file-based (drafts and plays are JSON/TypeScript files on disk), authored locally and deployed as a static-ish Vercel site. Any UI that implies live multi-user editing or persistence beyond "the person running it locally" is out of scope for now.
+- Backend is **Supabase** (Postgres + Auth); plays, drafts, teams, memberships, and roster names live in the database, authored via server actions under RLS and deployed on Vercel — production is fully interactive. Multi-user, multi-team editing with accounts **is** in scope. What's still out of scope: live real-time collaboration (no simultaneous co-editing of one play, no presence) — design for per-user/per-team persistence, not Google-Docs-style co-presence.
 - No automated tests (explicit project policy) — UI changes get verified by hand/live browser check, not a test suite.
 
 ## Design principles for this round
@@ -256,20 +256,19 @@ Audience: players reviewing a play on their own time (phone, tablet,
 or desktop), not in a live game context.
 ```
 
-### 7. Does the file-based model constrain the UI? (open question)
+### 7. Does the account/team model constrain the UI? (open question)
 
 ```
-Given the Play Designer and Viewer are single-user and file-based
-today (no accounts, no sharing, no backend — plays and drafts are
-files on one person's machine), sanity-check whether any of the UI
-directions from the other prompts assume something that isn't true
-yet (e.g. multi-user editing, cloud save, sharing a draft with a
-teammate).
+The app is now multi-user and multi-team on Supabase (Google
+accounts, per-team catalogs, submit→approve publishing, per-user
+drafts, RLS). Sanity-check whether any UI direction from the other
+prompts assumes capabilities that still don't exist — e.g. real-time
+co-editing of one play, live presence, sharing a single draft between
+users, or cross-team play sharing.
 
 Goal: flag anywhere a proposed design implies functionality the app
-doesn't have, and note whether that's a reason to simplify the design
-now or a reason to flag it as a near-term follow-up feature — this
-project's audience is explicitly expected to widen beyond one person
-eventually, so "share this play" and "who else can edit this" are
-fair things to raise even if they're not being designed yet.
+doesn't have yet, and note whether that's a reason to simplify now or
+to flag as a near-term follow-up. Persistence, accounts, roles, and
+team catalogs are fair to assume; simultaneous co-editing / presence
+is not.
 ```

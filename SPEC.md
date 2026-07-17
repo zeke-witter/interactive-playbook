@@ -1,5 +1,7 @@
 # Mousetrap Interactive Playbook — Spec & Implementation Plan
 
+> **Historical document.** This is the original spec, kept for reference. It predates the accounts/teams work and the Supabase data layer, so anything here about a file-based / single-user / dev-only model is superseded. For the current architecture see `CLAUDE.md` (root) and `docs/design/design-standards.md`.
+
 ## Problem
 
 Static PDF field diagrams don't convey motion or player-relative perspective. Many players struggle to understand their role from abstract diagrams. This app puts the learner in a specific position and lets them experience each play from that vantage point through animated, step-by-step flows.

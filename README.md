@@ -9,7 +9,7 @@ Two tools, one shared field-rendering engine:
 
 ## Tech stack
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Framer Motion · inline SVG · `ts-morph` (for the publish/narrative codegen). No database — all content lives in files on disk. No test suite (project policy — changes are verified by hand in the browser).
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Framer Motion · inline SVG · **Supabase** (Postgres + Auth). Content lives in the database; authoring goes through server actions that run as the signed-in user under row-level security (RLS). No test suite (project policy — changes are verified by hand in the browser).
 
 > **Note for contributors / AI agents:** this repo pins a Next.js version with breaking changes vs. older docs. See `AGENTS.md` and read `node_modules/next/dist/docs/` before writing framework code. Deeper architecture notes live in `CLAUDE.md` and per-directory `CLAUDE.md` files under `src/`.
 
@@ -19,10 +19,13 @@ Requirements: Node.js 20+ and npm.
 
 ```bash
 npm install
+# .env.local needs your Supabase project creds:
+#   NEXT_PUBLIC_SUPABASE_URL=...
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 npm run dev
 ```
 
-Open http://localhost:3000 — the play browser. The Designer is at http://localhost:3000/designer.
+Open http://localhost:3000 — the play browser. The Designer is at http://localhost:3000/designer. Sign in with Google to author (publish, save drafts, manage a team).
 
 ## Scripts
 
@@ -35,29 +38,34 @@ Open http://localhost:3000 — the play browser. The Designer is at http://local
 
 ## Authoring & publishing plays
 
-Publishing and narrative editing **only work under `npm run dev`** — they write to the local filesystem and are disabled in production (Vercel's filesystem is read-only). The workflow:
+Authoring is **DB-backed and works in production** (dev and Vercel alike). Every write is a server action that runs as the signed-in user under Supabase RLS — no files to commit. The workflow:
 
-1. Run `npm run dev` and open `/designer`.
-2. Build a play (place players, draw paths, mark throws, add steps/branches). Work autosaves to `localStorage`; you can also **Save** named drafts to `designer-output/*.json`.
+1. Sign in with Google, open `/designer`.
+2. Build a play (place players, draw paths, mark throws, add steps/branches). Work autosaves to `localStorage`; you can also **Save** named drafts (stored per-user in the `draft` table).
 3. **Preview** to walk it through with animation.
-4. **Publish** — writes `src/data/plays/<id>.ts` and registers it in `src/data/plays/index.ts`.
-5. **Commit** the generated files to make the new/updated play part of the deployed catalog.
+4. **Publish** to your personal playbook, or **submit** to a team — a captain/admin then approves it into the team catalog (submit → approve). Captains can publish to their team directly.
 
-Per-position narrative can also be edited inline in the Viewer (dev only), which patches the play's source `.ts` file — commit the change afterward.
+Team captains/admin also manage members, roster names, and the team division at `/team`. To edit a play's narrative, re-publish it from the Designer.
+
+The committed `src/data/plays/*.ts` files are only the first-run **seed** (`scripts/seedPlays.ts`); the live catalog is the database.
 
 ## Project layout
 
 ```
 src/
-  app/            Routes: / (browse), /plays/[playId] (viewer), /designer, + api/
+  app/            Routes: / (browse), /plays/[playId] (viewer), /designer,
+                  /my-playbook, /team, /auth + server actions (**/actions.ts)
   components/
     field/        Shared SVG field-rendering engine (used by viewer, designer, preview)
     sidebar/      Play Viewer UI (narrative, controls, play picker)
     designer/     Play Designer editor UI
-  hooks/          useDesignerState, usePlayStep, useProgress, useRoster
-  lib/            Pure helpers (tree ops, tree⇄flat conversion, field math, slugs, sound)
-  data/           Play content (plays/*.ts), glossary, roster names
-  types/          The two step models (play.ts = published/flat, designer.ts = authoring/nested)
+  hooks/          useDesignerState, usePlayStep, useRoster
+  lib/            playsRepo (DB reads) + pure helpers (tree ops, tree⇄flat, field math, slugs, sound)
+    supabase/     Browser + server Supabase clients, getCurrentProfile
+  data/           Seed play content (plays/*.ts) + glossary
+  types/          Step models (play.ts flat, designer.ts nested) + roster.ts
+supabase/
+  migrations/     Database schema (SQL)
 docs/
   design/         Product/UX briefing + screenshots
   superpowers/    Dated spec→plan trail for every shipped feature
@@ -67,4 +75,4 @@ See `CLAUDE.md` at the repo root for the full architecture overview and conventi
 
 ## Deployment
 
-Deploys as a static-ish Next.js app on Vercel. Play content is baked in at build time from `src/data/plays/`; the dev-only write endpoints are inert in production by design.
+Deploys to Vercel via its Git integration (auto-deploy on merge to `main`; PRs get a preview + CI gate). The app reads and writes **Supabase** at runtime, so production is fully interactive — authoring works there, gated by auth + RLS. Supabase env vars are configured in the Vercel project. Schema changes are SQL migrations under `supabase/migrations/`.

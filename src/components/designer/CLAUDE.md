@@ -20,7 +20,7 @@ Every step/branch operation is addressed by a `StepPath` — an alternating `[st
 - **`BranchForms.tsx`** — `AddBranchForm` (two labels → `designer.addBranch`, forking the remaining steps onto branch 1) and `AddAnotherBranchForm` (one label → `addAnotherBranch` at an existing fork).
 - **`DesignerPreview.tsx`** — read-only playback that walks the tree (`previewPath`) with Prev/Next/branch-choice; `goPrev` pops two path entries to exit a branch. Reuses the shared `components/field/` renderers with viewer-matching keys so tokens tween. Shows a "via A → B" branch trail and cumulative step number.
 - **`DesignerTopBar.tsx`** (desktop) — wraps `FileSwitcher` + undo/redo + Preview.
-- **`FileSwitcher.tsx`** — name/save/export/publish/load-draft/load-existing/delete/new. Publish and "Load Existing Play" are **dev-gated** (`NODE_ENV === 'development'`). Renders as a desktop popover or a mobile drawer (same inner fields).
+- **`FileSwitcher.tsx`** — name/save/export/publish/load-draft/load-existing/delete/new, wired to the Designer **server actions** (`app/designer/actions.ts`). These are **auth-gated and work in production** (no longer `NODE_ENV`-gated); the publish/submit target follows the active playbook (personal vs a team). Renders as a desktop popover or a mobile drawer (same inner fields).
 - **`ToolRail.tsx`** (desktop, left) / **`MobileToolTabBar.tsx`** (mobile, bottom) — the mode switcher; both use **`ModeIcon.tsx`** for the per-mode glyphs.
 - **`CoachMark.tsx`** — first-run overlay (arrow + hint). Dismissal driven externally by the page after the first position drag.
 
