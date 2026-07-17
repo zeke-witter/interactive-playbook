@@ -1,4 +1,5 @@
 import type { Play, PlayStep, PlayerState } from '@/types/play'
+import type { Division, RosterPool } from '@/types/roster'
 import { getServerSupabase } from './supabase/server'
 import { defaultFormationFor } from './defaultFormations'
 import { ALL_SETS } from './playLabels'
@@ -62,6 +63,48 @@ export async function getPlayBySlug(slug: string): Promise<Play | null> {
     .maybeSingle()
   if (error) throw error
   return data ? rowToPlay(data as PlayRow) : null
+}
+
+type RosterNameRow = { role: string; gender: string; name: string }
+
+function emptyGenderedPool() {
+  return { mmp: [] as string[], fmp: [] as string[] }
+}
+
+/**
+ * The roster pool the Viewer should use for a published play: that play's team's
+ * names, grouped by role and gender, plus the team's division. Returns `null`
+ * for personal plays (no team) or a team with no names — the Viewer then falls
+ * back to the raw position tokens (C1…H3). Public read (works for anon): both
+ * `team.division` and `roster_name` are exposed for teams with published plays.
+ */
+export async function getRosterPoolForPlay(slug: string): Promise<RosterPool | null> {
+  const sb = await getServerSupabase()
+  const { data: play } = await sb
+    .from('play')
+    .select('team_id, team:team_id(division)')
+    .eq('status', 'published')
+    .not('team_id', 'is', null)
+    .eq('slug', slug)
+    .maybeSingle()
+  if (!play?.team_id) return null
+
+  const teamRel = play.team as { division: Division } | { division: Division }[] | null
+  const division = (Array.isArray(teamRel) ? teamRel[0]?.division : teamRel?.division) ?? 'mixed'
+
+  const { data: names } = await sb
+    .from('roster_name')
+    .select('role, gender, name')
+    .eq('team_id', play.team_id)
+  if (!names || names.length === 0) return null
+
+  const pool: RosterPool = { division, cutters: emptyGenderedPool(), handlers: emptyGenderedPool() }
+  for (const r of names as RosterNameRow[]) {
+    const bucket = r.role === 'handler' ? pool.handlers : pool.cutters
+    if (r.gender === 'fmp') bucket.fmp.push(r.name)
+    else bucket.mmp.push(r.name)
+  }
+  return pool
 }
 
 // --- Personal playbooks + team management (RLS-enforced; server components) ---
@@ -254,6 +297,20 @@ export async function getManagedTeamPlays(teamId: string): Promise<ManagedTeamPl
     .order('name')
   if (error) throw error
   return (data ?? []) as ManagedTeamPlay[]
+}
+
+export type RosterName = { id: string; role: 'cutter' | 'handler'; gender: 'mmp' | 'fmp'; name: string }
+
+/** A team's roster names for the management UI (captain/admin; public read RLS). */
+export async function getTeamRosterNames(teamId: string): Promise<RosterName[]> {
+  const sb = await getServerSupabase()
+  const { data, error } = await sb
+    .from('roster_name')
+    .select('id, role, gender, name')
+    .eq('team_id', teamId)
+    .order('name')
+  if (error) throw error
+  return (data ?? []) as RosterName[]
 }
 
 /** The caller's draft names tagged with their playbook scope ('personal' or a team id). */

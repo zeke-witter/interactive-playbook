@@ -1,6 +1,7 @@
 'use server'
 import { revalidatePath } from 'next/cache'
 import { getServerSupabase } from '@/lib/supabase/server'
+import type { Division } from '@/types/roster'
 
 export type Role = 'player' | 'captain'
 type Result = { error?: string }
@@ -189,6 +190,64 @@ export async function createTeam(nameRaw: string): Promise<Result & { teamId?: s
     return { teamId: data.id }
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Could not create team.' }
+  }
+}
+
+// --- Roster names (captain/admin) -----------------------------------------
+
+const DIVISIONS: Division[] = ['open', 'women', 'mixed']
+
+/** Set a team's division (drives whether the Viewer builds a gendered line). */
+export async function setTeamDivision(teamId: string, division: Division): Promise<Result> {
+  try {
+    if (!DIVISIONS.includes(division)) return { error: 'Invalid division.' }
+    const { supabase } = await requireManage(teamId)
+    const { error } = await supabase.from('team').update({ division }).eq('id', teamId)
+    if (error) throw error
+    revalidatePath('/team')
+    revalidatePath('/')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not update division.' }
+  }
+}
+
+/** Add a player name to a team's roster. `gender` only matters for mixed teams;
+ *  callers pass the division-implied value for open/women. */
+export async function addRosterName(
+  teamId: string,
+  role: 'cutter' | 'handler',
+  gender: 'mmp' | 'fmp',
+  nameRaw: string,
+): Promise<Result> {
+  try {
+    if (role !== 'cutter' && role !== 'handler') return { error: 'Invalid role.' }
+    if (gender !== 'mmp' && gender !== 'fmp') return { error: 'Invalid gender.' }
+    const { supabase } = await requireManage(teamId)
+    const name = nameRaw.trim()
+    if (!name) return { error: 'Enter a name.' }
+
+    const { error } = await supabase.from('roster_name').insert({ team_id: teamId, role, gender, name })
+    if (error) throw error
+    revalidatePath('/team')
+    revalidatePath('/')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not add name.' }
+  }
+}
+
+/** Remove a roster name (scoped to the team for defense in depth). */
+export async function removeRosterName(teamId: string, id: string): Promise<Result> {
+  try {
+    const { supabase } = await requireManage(teamId)
+    const { error } = await supabase.from('roster_name').delete().eq('id', id).eq('team_id', teamId)
+    if (error) throw error
+    revalidatePath('/team')
+    revalidatePath('/')
+    return {}
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Could not remove name.' }
   }
 }
 

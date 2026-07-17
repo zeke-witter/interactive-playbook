@@ -103,7 +103,7 @@ Positions are stored **normalized 0–1**: `x` 0 = left sideline → 1 = right s
 | Published plays | `src/data/plays/<id>.ts` + `index.ts` | `POST /api/designer/publish` — **dev only**, `ts-morph` |
 | Narrative edits | the play's `.ts` file | `PATCH /api/plays/[playId]/narrative` — **dev only**, `ts-morph` |
 
-The publish/save/narrative flows are gated on `NODE_ENV === 'development'` and mutate real source files. To change published content you run locally, publish/edit, then commit the generated `.ts`. Rosters are **randomized on every viewer load** (`useRoster` + `src/data/names.ts`) — display names are not stable.
+The publish/save/narrative flows are gated on `NODE_ENV === 'development'` and mutate real source files. To change published content you run locally, publish/edit, then commit the generated `.ts`. Rosters are **randomized on every viewer load** (`useRoster` samples the play's team `roster_name` pool via `getRosterPoolForPlay`) — display names are not stable, and fall back to raw tokens (`C1`…`H3`) when a team has no names.
 
 ## Directory map
 

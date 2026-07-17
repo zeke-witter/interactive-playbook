@@ -5,16 +5,27 @@ import { Sidebar } from '@/components/sidebar/Sidebar'
 import { usePlayStep } from '@/hooks/usePlayStep'
 import { useRoster } from '@/hooks/useRoster'
 import type { Play, Position } from '@/types/play'
+import type { RosterPool } from '@/types/roster'
 
 /**
  * Client shell for the Play Viewer. The play (and the published-play list that
  * feeds the picker) are fetched on the server and passed in as props; the
  * interactive hooks (step nav, roster) live here.
  */
-export function PlayViewer({ play, plays, basePath }: { play: Play; plays: Play[]; basePath?: string }) {
+export function PlayViewer({
+  play,
+  plays,
+  basePath,
+  rosterPool,
+}: {
+  play: Play
+  plays: Play[]
+  basePath?: string
+  rosterPool?: RosterPool | null
+}) {
   const [selectedPosition, setSelectedPosition] = useState<Position>('H1')
   const { step, stepIndex, stepperIndex, stepperTotal, showMoreIndicator, isFirst, isLast, next, prev, goToStep } = usePlayStep(play)
-  const roster = useRoster()
+  const roster = useRoster(rosterPool)
   const [quizPassed, setQuizPassed] = useState(false)
   const [highlightZone, setHighlightZone] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
 
